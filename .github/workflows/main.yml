@@ -1,0 +1,38 @@
+name: Documentation
+
+on:
+  push:
+    branches: [ main ]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  generate_DocC:
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: swift-actions/setup-swift@v1
+        with:
+          swift-version: "5.6"
+      
+      - name: Merge changes from main into gh-pages
+        run: |
+          git fetch --unshallow
+          git checkout gh-pages
+          git pull
+          git merge --no-ff main -m "Auto-merge main into gh-pages"
+      
+      - name: generate DocC
+        run: swift package --allow-writing-to-directory ./docs/ generate-documentation --target DiscordAPI --disable-indexing --transform-for-static-hosting --hosting-base-path DiscordKit --output-path ./docs/
+        
+      - name: commit updated DocC
+        run: |
+          git add ./docs/
+          git commit -m "Update Documentation Site"
+      
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with: 
+         github_token: ${{ secrets.GITHUB_TOKEN }}
+         branch: gh-pages
