@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-	name: "DiscordAPI",
+	name: "DiscordKit",
 	platforms: [
 		.macOS(.v12)
 	],
@@ -14,12 +14,14 @@ let package = Package(
 	],
 	dependencies: [
 		.package(url: "https://github.com/ashleymills/Reachability.swift", from: "5.1.0"),
+        .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
 	],
 	targets: [
 		.target(
 			name: "DiscordAPI",
 			dependencies: [
 				.product(name: "Reachability", package: "Reachability.swift"),
+                .target(name: "DiscordKitCommon")
 			],
 			exclude: [
 				"REST/README.md",
