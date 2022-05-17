@@ -21,6 +21,7 @@ let package = Package(
 			name: "DiscordAPI",
 			dependencies: [
 				.product(name: "Reachability", package: "Reachability.swift"),
+                .target(name: "DiscordKitCommon")
 			],
 			exclude: [
 				"REST/README.md",
