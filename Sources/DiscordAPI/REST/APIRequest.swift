@@ -8,8 +8,9 @@
 import Foundation
 import DiscordKitCommon
 
+/// Utility wrappers for easy request-making
 public extension DiscordAPI {
-    /// Utility wrappers for easy request making
+    /// The few supported request methods
     enum RequestMethod: String {
         case get = "GET"
         case post = "POST"
@@ -17,7 +18,23 @@ public extension DiscordAPI {
         case patch = "PATCH"
     }
     
-    // Low level Discord API request, meant to be as generic as possible
+    /// Make a Discord REST API request
+    ///
+    /// Low level method for Discord API requests, meant to be as generic
+    /// as possible. You should call other wrapper methods like `getReq()`,
+    /// `postReq()`, `deleteReq()`, etc. where possible instead.
+    ///
+    /// - Parameters:
+    ///   - path: API endpoint path relative to `GatewayConfig.restBase`
+    ///   - query: Array of URL query items
+    ///   - attachments: URL of file attachments, for messages with attachments.
+    ///   Sends a request of type `multipart/form-data` if there are attachments,
+    ///   otherwise a `application/json` request.
+    ///   - body: Request body, should be a JSON string
+    ///   - method: Method for the request
+    ///   (currently `.get`, `.post`, `.delete` or `.patch`)
+    ///
+    /// - Returns: Raw `Data` of response, or nil if the request failed
     static func makeRequest(
         path: String,
         query: [URLQueryItem] = [],
@@ -81,7 +98,17 @@ public extension DiscordAPI {
         return data
     }
     
-    // Make a get request, and decode body with JSONDecoder
+    /// Make a GET request to the Discord REST API
+    ///
+    /// Wrapper method for `makeRequest()` to make a GET request.
+    ///
+    /// - Parameters:
+    ///   - path: API endpoint path relative to `GatewayConfig.restBase`
+    ///  (passed canonically to `makeRequest()`)
+    ///   - query: Array of URL query items (passed canonically to `makeRequest()`)
+    ///
+    /// - Returns: Struct of response conforming to Decodable, or nil
+    /// if the request failed or the response couldn't be JSON-decoded.
     static func getReq<T: Decodable>(
         path: String,
         query: [URLQueryItem] = []
@@ -109,6 +136,7 @@ public extension DiscordAPI {
         return nil
     }
     
+    /// Make a POST request to the Discord REST API
     static func postReq<D: Decodable, B: Encodable>(
         path: String,
         body: B? = nil,

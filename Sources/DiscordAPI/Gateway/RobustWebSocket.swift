@@ -14,10 +14,25 @@ import Combine
 /// with the Discord Gateway, inspired by robust-websocket
 
 public class RobustWebSocket: NSObject, ObservableObject {
-    public let onEvent = EventDispatch<(GatewayEvent, GatewayData?)>(),
-               onAuthFailure = EventDispatch<Void>(),
-               onConnStateChange = EventDispatch<(Bool, Bool)>(), // session open, reachable
-               onSessionInvalid = EventDispatch<Void>() // When the session cannot be resumed
+    /// An `EventDispatch` that is notified when an event dispatch
+    /// is received from the Gateway
+    public let onEvent = EventDispatch<(GatewayEvent, GatewayData?)>()
+    
+    /// An `EventDispatch` that is notified when the gateway closes
+    /// with an auth failure, or when the token is not present
+    /// in the keychain
+    public let onAuthFailure = EventDispatch<Void>()
+
+    /// An `EventDispatch` that is notified when the session opens/closes
+    /// or reachability status changes. Event is notified with
+    /// a (sessionOpen: Bool, reachable: Bool) tuple.
+    public let onConnStateChange = EventDispatch<(Bool, Bool)>()
+    
+    /// An `EventDispatch` that is notified when the session cannot be
+    /// resumed, most likely when the socket has been disconnected for too
+    /// long and the session is invalidated. A fresh reconnection will
+    /// be attempted if/when this happens.
+    public let onSessionInvalid = EventDispatch<Void>()
     
     private var session: URLSession!, socket: URLSessionWebSocketTask!,
                 decompressor: DecompressionEngine!
@@ -31,15 +46,20 @@ public class RobustWebSocket: NSObject, ObservableObject {
                 reconnectWhenOnlineAgain = false, explicitlyClosed = false,
                 seq: Int? = nil, canResume = false, sessionID: String? = nil,
                 pendingReconnect: Timer? = nil, connTimeout: Timer? = nil
-    public var connected = false {
+    
+    /// If the Gateway socket is connected
+    private(set) var connected = false {
         didSet { if !connected { sessionOpen = false }}
     }
+    /// If the network is reachable (has network connectivity)
     public var reachable = false {
         didSet { onConnStateChange.notify(event: (connected, reachable)) }
     }
+    /// If a session with the Gateway is established
     public var sessionOpen = false {
         didSet { onConnStateChange.notify(event: (connected, reachable)) }
     }
+    
     fileprivate var hbCancellable: AnyCancellable? = nil
     
     private func clearPendingReconnectIfNeeded() {
@@ -250,6 +270,17 @@ public class RobustWebSocket: NSObject, ObservableObject {
     
     
     // MARK: - Initializers
+    
+    /// Inits an instance of `RobustWebSocket` with provided parameters
+    ///
+    /// A convenience init is also provided that uses reasonable defaults instead.
+    ///
+    /// - Parameters:
+    ///   - timeout: The timeout before the connection attempt is terminated. The
+    ///   socket will attempt to reconnect if connection times out.
+    ///   - maxMessageSize: The maximum outgoing and incoming payload size for the socket.
+    ///   - reconnectIntClosure: A closure called with `(closecode, reconnectionTimes)`
+    ///   used to determine the reconnection delay.
     init(timeout: TimeInterval, maxMessageSize: Int, reconnectIntClosure: @escaping (URLSessionWebSocketTask.CloseCode?, Int) -> TimeInterval?) {
         self.timeout = timeout
         queue = OperationQueue()
@@ -261,6 +292,13 @@ public class RobustWebSocket: NSObject, ObservableObject {
         connect()
     }
     
+    /// Inits an instance of `RobustWebSocket` with all parameters set
+    /// to reasonable defaults.
+    ///
+    /// The following are the default parameters:
+    /// - Connection timeout: 4s
+    /// - Maximum socket payload size: 10MiB
+    /// - Reconnection delay: `1.4^reconnectionTimes * 5 - 5`
     override convenience init() {
         self.init(timeout: TimeInterval(4), maxMessageSize: 1024*1024*10) { code, times in
             guard code != .policyViolation, code != .internalServerError, times < 10
@@ -274,11 +312,11 @@ public class RobustWebSocket: NSObject, ObservableObject {
 
 // MARK: - WebSocketTask delegate functions
 extension RobustWebSocket: URLSessionWebSocketDelegate {
-	public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
+    public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
         log.info("Socket connection opened")
     }
     
-	public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
+    public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
         reconnect(code: closeCode)
         connected = false
         // didCloseConnection?()
@@ -295,12 +333,9 @@ public extension RobustWebSocket {
         reachability.whenReachable = { [weak self] _ in
             self?.reachable = true
             self?.log.info("Connection reachable")
-            //if let reconnect = self?.reconnectWhenOnlineAgain, reconnect {
-            // Temporarily ignore reconnectWhenOnlineAgain since that was causing issues
             self?.clearPendingReconnectIfNeeded()
             self?.attempts = 0
             self?.reconnect(code: nil)
-            //}
         }
         reachability.whenUnreachable = { [weak self] _ in
             self?.reachable = false
@@ -353,6 +388,16 @@ public extension RobustWebSocket {
 
 // MARK: - Extension with public exposed methods
 public extension RobustWebSocket {
+    /// Forcefully close the Gateway socket connection
+    ///
+    /// This method should only be called as a last resort, for example
+    /// when the connection has gone offline and the socket isn't responding.
+    /// It immediately cancels the underlying URLSession, closing the socket.
+    ///
+    /// - Parameters:
+    ///   - code: A custom code to close the socket with (defaults to `.abnormalClosure`)
+    ///   - shouldReconnect: If reconnection should be attempted after the connection
+    ///   is closed. Defaults to `true`
     func forceClose(
         code: URLSessionWebSocketTask.CloseCode = .abnormalClosure,
         shouldReconnect: Bool = true
@@ -362,6 +407,14 @@ public extension RobustWebSocket {
         connected = false
         if shouldReconnect { self.reconnect(code: nil) }
     }
+    
+    /// Explicitly close the Gateway socket connection
+    ///
+    /// When this method is called, the Gateway socket will gracefully close
+    /// and will not reconnect. This can be used when the user signs out, for example.
+    ///
+    /// - Parameters:
+    ///   - code: The close code to close the socket with.
     func close(code: URLSessionWebSocketTask.CloseCode) {
         clearPendingReconnectIfNeeded()
         reconnectWhenOnlineAgain = false
@@ -373,6 +426,13 @@ public extension RobustWebSocket {
         socket.cancel(with: code, reason: nil)
     }
     
+    /// Initiates a Gateway socket connection
+    ///
+    /// This will open a socket connection to the Gateway, and identify with it
+    /// after the connection has been opened. This method is already called in
+    /// the init method, and can be used to explicitly open the connection after
+    /// it has been closed with `close()`. This method has no effect if the socket
+    /// is already opened.
     func open() {
         guard socket.state != .running else { return }
         clearPendingReconnectIfNeeded()
@@ -382,6 +442,15 @@ public extension RobustWebSocket {
         connect()
     }
     
+    /// Send a outgoing payload to the Gateway
+    ///
+    /// This method has no effect if the Gateway socket is not connected
+    ///
+    /// - Parameters:
+    ///   - op: The opcode of the outgoing payload
+    ///   - data: A outgoing data struct that conforms to OutgoingGatewayData
+    ///   - completionHandler: Called when the send completes, with an error if any.
+    ///   Not called if set to `nil` (defaults to `nil`)
     func send<T: OutgoingGatewayData>(
         op: GatewayOutgoingOpcodes,
         data: T,

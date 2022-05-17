@@ -9,6 +9,7 @@ import Foundation
 import Compression
 import OSLog
 
+
 public class DecompressionEngine {
     private static let ZLIB_SUFFIX = Data([0x00, 0x00, 0xff, 0xff]), BUFFER_SIZE = 32_768
     
