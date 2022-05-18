@@ -12,4 +12,4 @@ me to continue developing it**
 
 ### Join the Swiftcord Discord server [here](https://discord.gg/he7n6MGDXS)!
 
-### WIP Developer Documentation is available [here](https://swiftcordapp.github.io/DiscordKit/documentation/discordapi/).
+### WIP Developer Documentation is available [here](https://swiftcordapp.github.io/DiscordKit/documentation/discordkit/).
