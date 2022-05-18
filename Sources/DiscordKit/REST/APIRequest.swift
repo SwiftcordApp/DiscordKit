@@ -98,7 +98,7 @@ public extension DiscordAPI {
         return data
     }
     
-    /// Make a GET request to the Discord REST API
+    /// Make a `GET` request to the Discord REST API
     ///
     /// Wrapper method for `makeRequest()` to make a GET request.
     ///
@@ -136,7 +136,7 @@ public extension DiscordAPI {
         return nil
     }
     
-    /// Make a POST request to the Discord REST API
+    /// Make a `POST` request to the Discord REST API
     static func postReq<D: Decodable, B: Encodable>(
         path: String,
         body: B? = nil,
@@ -154,7 +154,8 @@ public extension DiscordAPI {
         return try? JSONDecoder().decode(D.self, from: d)
     }
     
-    // For those weird endpoints that expect an empty post request and returns nothing
+    /// Make a `POST` request to the Discord REST API, for endpoints
+    /// that both require no payload and returns a 204 empty response
     static func emptyPostReq(path: String) async -> Bool {
         guard (try? await makeRequest(
             path: path,
@@ -165,6 +166,7 @@ public extension DiscordAPI {
         return true
     }
     
+    /// Make a `DELETE` request to the Discord REST API
     static func deleteReq(path: String) async -> Bool {
         return (try? await makeRequest(path: path, method: .delete)) != nil
     }

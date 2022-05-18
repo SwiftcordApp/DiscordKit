@@ -8,6 +8,8 @@
 import Foundation
 import os
 
+/// A struct with only static methods/properties for making requests
+/// to Discord's REST API endpoints
 public struct DiscordAPI {
 	static let subsystem = "com.cryptoalgo.discordapi"
 
