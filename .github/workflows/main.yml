@@ -28,7 +28,7 @@ jobs:
           git merge --no-ff main -m "Auto-merge main into gh-pages"
       
       - name: generate DocC
-        run: swift package --allow-writing-to-directory ./docs/ generate-documentation --target DiscordAPI --disable-indexing --transform-for-static-hosting --hosting-base-path DiscordKit --output-path ./docs/
+        run: swift package --allow-writing-to-directory ./docs/ generate-documentation --target DiscordKit --disable-indexing --transform-for-static-hosting --hosting-base-path DiscordKit --output-path ./docs/
         
       - name: commit updated DocC
         run: |
