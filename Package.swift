@@ -9,7 +9,7 @@ let package = Package(
 		.macOS(.v12)
 	],
 	products: [
-		.library(name: "DiscordAPI", targets: ["DiscordAPI"]),
+		.library(name: "DiscordKit", targets: ["DiscordKit"]),
 		.library(name: "DiscordKitCommon", targets: ["DiscordKitCommon"])
 	],
 	dependencies: [
@@ -18,7 +18,7 @@ let package = Package(
 	],
 	targets: [
 		.target(
-			name: "DiscordAPI",
+			name: "DiscordKit",
 			dependencies: [
 				.product(name: "Reachability", package: "Reachability.swift"),
                 .target(name: "DiscordKitCommon")
