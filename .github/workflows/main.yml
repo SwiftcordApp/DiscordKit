@@ -27,10 +27,13 @@ jobs:
           git pull
           git merge --no-ff main -m "Auto-merge main into gh-pages"
       
-      - name: generate DocC
+      - name: Generate DocC
         run: swift package --allow-writing-to-directory ./docs/ generate-documentation --target DiscordKit --disable-indexing --transform-for-static-hosting --hosting-base-path DiscordKit --output-path ./docs/
         
-      - name: commit updated DocC
+      - name: Add .nojekyll file
+        run: touch ./docs/.nojekyll
+        
+      - name: Commit updated DocC
         run: |
           git add ./docs/
           git commit -m "Update Documentation Site"
