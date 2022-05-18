@@ -7,6 +7,9 @@
 
 import Foundation
 
+/// A struct for storing cached data from the Gateway
+///
+/// See ``DiscordGateway/cache`` for more details.
 public struct CachedState {
 	public var guilds: [Guild]?
 	public var dms: [Channel]?

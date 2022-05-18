@@ -9,7 +9,17 @@ import Foundation
 import Compression
 import OSLog
 
-
+/// Decompresses `zlib-stream`-compressed payloads received
+/// from the Gateway
+///
+/// The Gateway sends compressed packets when the `compression` option is
+/// set to `zlib-stream`. The packets needs to be run through a shared
+/// decompression context for proper decompression. This class decompresses
+/// these packets with the built-in `Compression` framework.
+///
+/// > A shared (de)compression stream is allocated for the lifetime
+/// > of this class. Destroy and recreate an instance of ``DecompressionEngine``
+/// > to start with a fresh decompression stream.
 public class DecompressionEngine {
     private static let ZLIB_SUFFIX = Data([0x00, 0x00, 0xff, 0xff]), BUFFER_SIZE = 32_768
     
@@ -17,6 +27,10 @@ public class DecompressionEngine {
     private var buf = Data(), stream: compression_stream, status: compression_status,
                 decompressing = false
     
+    /// Inits an instance of ``DecompressionEngine``
+    ///
+    /// A compression stream is created and initialised, which is destroyed
+    /// in `deinit`. All data is run though this compression stream for decompression.
     public init() {
         stream = UnsafeMutablePointer<compression_stream>.allocate(capacity: 1).pointee
         status = compression_stream_init(&stream, COMPRESSION_STREAM_DECODE, COMPRESSION_ZLIB)
@@ -31,6 +45,15 @@ public class DecompressionEngine {
         compression_stream_destroy(&stream)
     }
     
+    /// Push compressed data into the decompression `Data` buffer
+    ///
+    /// Appends compressed data into a buffer until the `ZLIB_SUFFIX` is
+    /// reached. The whole buffer is then decompressed.
+    ///
+    /// - Parameter data: The data to push into the decompression buffer
+    ///
+    /// - Returns: `String` of decompressed data, or nil if the compressed
+    /// data is not yet complete
     public func push_data(_ data: Data) -> String? {
         buf.append(data)
         
@@ -39,7 +62,6 @@ public class DecompressionEngine {
             return nil
         }
         
-        // Figure out how to make a shared zlib decompression context
         let output = decompress(buf)
         
         buf.removeAll()

@@ -3,11 +3,16 @@
 
 import Foundation
 
-/// Adapted from: https://github.com/gongzhang/swift-event-dispatch
+/// `EventDispatch` is a helper class that can be used to implement
+/// event publishing/subscribing in Swift.
 ///
-/// Unfortunately the code isn't exactly fully compatible with Swift 5
-/// Changes were made to improve style and to remove all warnings/errors
-/// Adds optimisations to reduce
+/// Allows multiple handlers to subscribe to an event, and for event
+/// data to be notified to all handlers at once. Makes subscribing to
+/// events extremely convenient.
+///
+/// Changes were made to improve style, support Swift 5,
+/// as well as optimise some portions. Adapted from:
+/// [swift-event-dispatch](https://github.com/gongzhang/)
 public class EventDispatch<Event>: EventDispatchProtocol {
     public typealias HandlerIdentifier = Int
     
@@ -18,6 +23,24 @@ public class EventDispatch<Event>: EventDispatchProtocol {
     
     private let evtQueue: DispatchQueue
     
+    /// Inits an instance of ``EventDispatch``
+    ///
+    /// Set the event type by using generics, for example:
+    ///
+    /// ```swift
+    /// let dispatch = EventDispatch<Bool>() // Any type is supported...
+    /// dispatch.addHandler { data in
+    ///     print("Event data: \(data)")
+    /// }
+    /// dispatch.notify(true)
+    ///
+    /// let anotherDispatch = EventDispatch<(Int, Bool)>() // ...including tuples
+    /// anotherDispatch.notify((10, false))
+    /// ```
+    ///
+    /// All handlers are run asynchronously on an unique `DispatchQueue`
+    /// per instance of ``EventDispatch``, with a randomly generated UUID
+    /// string for the label.
     public init() {
         evtQueue = DispatchQueue(label: UUID().uuidString, qos: .userInteractive, attributes: .concurrent, target: .main)
     }
@@ -41,7 +64,7 @@ public class EventDispatch<Event>: EventDispatchProtocol {
     ///
     /// - Parameters:
     ///   - handler: A closure that is called with the event when this `EventDispatch`
-    ///   is notified. This closure will only be called _once_
+    ///   is notified. This closure will only be called _once_.
     public func handleOnce(handler: @escaping (Event) -> ()) {
         var id: HandlerIdentifier!
         id = addHandler { [weak self] event in
@@ -53,7 +76,7 @@ public class EventDispatch<Event>: EventDispatchProtocol {
     /// Removes a handler with a given identifier
     ///
     /// - Parameters:
-    ///   - handler: THe identifier of the handler, returned from `addHandler()`
+    ///   - handler: The identifier of the handler, returned from `addHandler()`
     ///
     /// - Returns: `True` if the handler exists and was removed
     public func removeHandler(handler: HandlerIdentifier) -> Bool {

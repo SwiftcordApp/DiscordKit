@@ -10,27 +10,56 @@ import os
 import SwiftUI
 import DiscordKitCommon
 
+/// Higher-level Gateway manager, mainly for handling and dispatching
+/// Gateway events
+///
+/// Uses a ``RobustWebSocket`` for the socket connection with the Gateway
+/// internally. You should use this class instead of ``RobustWebSocket``
+/// since it hides away even more implementation details.
+///
+/// Conforms to `ObservableObject` for use in SwiftUI projects.
 public class DiscordGateway: ObservableObject {
     // Events
+    /// An ``EventDispatch`` that is notified when an event is dispatched
+    /// from the Gateway
 	public let onEvent = EventDispatch<(GatewayEvent, GatewayData?)>()
+    
+    /// Proxies ``RobustWebSocket/onAuthFailure``
 	public let onAuthFailure = EventDispatch<Void>()
     
     // WebSocket object
     @Published public var socket: RobustWebSocket!
     
-    // State cache
+    /// A cache for some data received from the Gateway
+    ///
+    /// Data from the `READY` event is stored in this cache. The data
+    /// within this cache is updated with received events, and should
+    /// remain fresh.
+    ///
+    /// > In the future, presence updates and REST API requests will
+    /// > also be stored and kept fresh in this cache.
     @Published public var cache: CachedState = CachedState()
     
     private var evtListenerID: EventDispatch.HandlerIdentifier? = nil,
                 authFailureListenerID: EventDispatch.HandlerIdentifier? = nil,
                 connStateChangeListenerID: EventDispatch.HandlerIdentifier? = nil
     
+    /// If the Gateway socket is connected
+    ///
+    /// `@Published` proxy of ``RobustWebSocket/sessionOpen``
     @Published public var connected = false
+    /// If the network is reachable (has network connectivity)
+    ///
+    /// `@Published` proxy of ``RobustWebSocket/reachable``
     @Published public var reachable = false
     
     // Logger
 	private let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? DiscordAPI.subsystem, category: "DiscordGateway")
     
+    /// Log out the current user, closing the Gateway socket connection
+    ///
+    /// This method removes the Discord token from the keychain and
+    /// closes the Gateway socket. The socket will _not_ reconnect.
     public func logout() {
         log.debug("Logging out on request")
         
@@ -47,6 +76,13 @@ public class DiscordGateway: ObservableObject {
         onAuthFailure.notify()
     }
     
+    /// Opens the socket connection with the Gateway
+    ///
+    /// Calls ``RobustWebSocket/open()``
+    ///
+    /// > The socket will be automatically opened when an instance of
+    /// > ``DiscordGateway`` is created, so there is no need to call
+    /// > this method right after initing an instance.
     public func connect() {
         socket.open()
     }
@@ -86,6 +122,16 @@ public class DiscordGateway: ObservableObject {
         log.info("Dispatched event <\(type.rawValue, privacy: .public)>")
     }
     
+    /// Inits an instance of ``DiscordGateway``
+    ///
+    /// Refer to ``RobustWebSocket/init()`` for more details about parameters
+    ///
+    /// - Parameters:
+    ///   - connectionTimeout: The timeout before the connection attempt
+    ///   is aborted. The socket will attempt to reconnect if connection times out.
+    ///   - maxMissedACK: Does not have any effect, included for backward
+    ///   compatibility. The current implementation follows the official
+    ///   Discord client for the missed heartbeat ACK tolerance.
 	public init(connectionTimeout: Double = 5, maxMissedACK: Int = 3) {
         socket = RobustWebSocket()
         evtListenerID = socket.onEvent.addHandler { [weak self] (t, d) in

@@ -11,19 +11,30 @@ import OSLog
 import Combine
 
 /// A robust WebSocket that handles resuming, reconnection and heartbeats
-/// with the Discord Gateway, inspired by robust-websocket
-
+/// with the Discord Gateway
+///
+/// ``RobustWebSocket`` is more than just a WebSocket wrapper; It handles
+/// everything from identifying with the Gateway to resuming a broken
+/// connection. Reconnection is _very_ reliable, and is one of the main
+/// considerations when writing this class.
+///
+/// The reconnection logic is inspired by
+/// [robust-websocket](https://github.com/appuri/robust-websocket),
+/// a very robust WebSocket wrapper for JavaScript.
+///
+/// > Use ``DiscordGateway`` instead of this class - it uses ``RobustWebSocket``
+/// > underlyingly and is higher-level for more ease of use.
 public class RobustWebSocket: NSObject, ObservableObject {
-    /// An `EventDispatch` that is notified when an event dispatch
+    /// An ``EventDispatch`` that is notified when an event dispatch
     /// is received from the Gateway
     public let onEvent = EventDispatch<(GatewayEvent, GatewayData?)>()
     
-    /// An `EventDispatch` that is notified when the gateway closes
+    /// An ``EventDispatch`` that is notified when the gateway closes
     /// with an auth failure, or when the token is not present
     /// in the keychain
     public let onAuthFailure = EventDispatch<Void>()
 
-    /// An `EventDispatch` that is notified when the session opens/closes
+    /// An ``EventDispatch`` that is notified when the session opens/closes
     /// or reachability status changes. Event is notified with
     /// a (sessionOpen: Bool, reachable: Bool) tuple.
     public let onConnStateChange = EventDispatch<(Bool, Bool)>()
@@ -48,16 +59,27 @@ public class RobustWebSocket: NSObject, ObservableObject {
                 pendingReconnect: Timer? = nil, connTimeout: Timer? = nil
     
     /// If the Gateway socket is connected
+    ///
+    /// This is set to `true` immediately after the socket connection
+    /// is established, but the connection is most likely not ready.
+    /// No events will be received until ``reachable`` is `true`.
     private(set) var connected = false {
         didSet { if !connected { sessionOpen = false }}
     }
     /// If the network is reachable (has network connectivity)
+    ///
+    /// ``onConnStateChange`` is notified when this changes.
     public var reachable = false {
-        didSet { onConnStateChange.notify(event: (connected, reachable)) }
+        didSet { onConnStateChange.notify(event: (sessionOpen, reachable)) }
     }
     /// If a session with the Gateway is established
+    ///
+    /// Set to `true` when the `READY` or `RESUMED` event is received.
+    /// The socket is then considered "fully opened" once this is `true`.
+    ///
+    /// ``onConnStateChange`` is notified when this changes.
     public var sessionOpen = false {
-        didSet { onConnStateChange.notify(event: (connected, reachable)) }
+        didSet { onConnStateChange.notify(event: (sessionOpen, reachable)) }
     }
     
     fileprivate var hbCancellable: AnyCancellable? = nil
@@ -271,17 +293,17 @@ public class RobustWebSocket: NSObject, ObservableObject {
     
     // MARK: - Initializers
     
-    /// Inits an instance of `RobustWebSocket` with provided parameters
+    /// Inits an instance of ``RobustWebSocket`` with provided parameters
     ///
     /// A convenience init is also provided that uses reasonable defaults instead.
     ///
     /// - Parameters:
-    ///   - timeout: The timeout before the connection attempt is terminated. The
+    ///   - timeout: The timeout before the connection attempt is aborted. The
     ///   socket will attempt to reconnect if connection times out.
     ///   - maxMessageSize: The maximum outgoing and incoming payload size for the socket.
     ///   - reconnectIntClosure: A closure called with `(closecode, reconnectionTimes)`
     ///   used to determine the reconnection delay.
-    init(timeout: TimeInterval, maxMessageSize: Int, reconnectIntClosure: @escaping (URLSessionWebSocketTask.CloseCode?, Int) -> TimeInterval?) {
+    public init(timeout: TimeInterval, maxMessageSize: Int, reconnectIntClosure: @escaping (URLSessionWebSocketTask.CloseCode?, Int) -> TimeInterval?) {
         self.timeout = timeout
         queue = OperationQueue()
         queue.qualityOfService = .utility
@@ -292,14 +314,14 @@ public class RobustWebSocket: NSObject, ObservableObject {
         connect()
     }
     
-    /// Inits an instance of `RobustWebSocket` with all parameters set
+    /// Inits an instance of ``RobustWebSocket`` with all parameters set
     /// to reasonable defaults.
     ///
     /// The following are the default parameters:
     /// - Connection timeout: 4s
     /// - Maximum socket payload size: 10MiB
     /// - Reconnection delay: `1.4^reconnectionTimes * 5 - 5`
-    override convenience init() {
+    public override convenience init() {
         self.init(timeout: TimeInterval(4), maxMessageSize: 1024*1024*10) { code, times in
             guard code != .policyViolation, code != .internalServerError, times < 10
             else { return nil }
@@ -413,8 +435,7 @@ public extension RobustWebSocket {
     /// When this method is called, the Gateway socket will gracefully close
     /// and will not reconnect. This can be used when the user signs out, for example.
     ///
-    /// - Parameters:
-    ///   - code: The close code to close the socket with.
+    /// - Parameter code: The close code to close the socket with.
     func close(code: URLSessionWebSocketTask.CloseCode) {
         clearPendingReconnectIfNeeded()
         reconnectWhenOnlineAgain = false
@@ -463,7 +484,7 @@ public extension RobustWebSocket {
         else { return }
         
         log.debug("Outgoing Payload: <\(String(describing: op), privacy: .public)> \(String(describing: data), privacy: .sensitive(mask: .hash)) [seq: \(String(describing: self.seq), privacy: .public)]")
-        // socket.write(string: String(data: encoded, encoding: .utf8)!)
+
         socket.send(.data(encoded), completionHandler: completionHandler ?? { [weak self] err in
             if let err = err { self?.log.error("Socket send error: \(err.localizedDescription, privacy: .public)") }
         })
