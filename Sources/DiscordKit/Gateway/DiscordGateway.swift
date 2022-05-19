@@ -71,6 +71,7 @@ public class DiscordGateway: ObservableObject {
         }
         // Clear cache
         cache = CachedState()
+        objectWillChange.send()
         
         socket.close(code: .normalClosure)
         onAuthFailure.notify()
@@ -100,17 +101,21 @@ public class DiscordGateway: ObservableObject {
             self.cache.dms = d.private_channels
             self.cache.user = d.user
             self.cache.users = d.users
+            objectWillChange.send()
             
             log.info("Gateway ready")
         case .guildCreate:
             guard let d = data as? Guild else { return }
             self.cache.guilds?.insert(d, at: 0) // As per official Discord implementation
+            objectWillChange.send()
         case .guildDelete:
             guard let d = data as? GuildUnavailable else { return }
             self.cache.guilds?.removeAll { g in g.id == d.id }
+            objectWillChange.send()
         case .userUpdate:
             guard let updatedUser = data as? User else { return }
             self.cache.user = updatedUser
+            objectWillChange.send()
         case .presenceUpdate:
             break
             // guard let p = data as? PresenceUpdate else { return }
