@@ -38,7 +38,7 @@ public class DiscordGateway: ObservableObject {
     ///
     /// > In the future, presence updates and REST API requests will
     /// > also be stored and kept fresh in this cache.
-    @Published public var cache: CachedState = CachedState()
+    public var cache: CachedState = CachedState()
     
     private var evtListenerID: EventDispatch.HandlerIdentifier? = nil,
                 authFailureListenerID: EventDispatch.HandlerIdentifier? = nil,
