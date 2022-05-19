@@ -8,6 +8,10 @@
 import Foundation
 
 public extension DiscordAPI {
+    /// Populate a ``GatewayConnProperties`` struct with some constant
+    /// values + some dynamic versions
+    ///
+    /// - Returns: Populated ``GatewayConnProperties``
 	static func getSuperProperties() -> GatewayConnProperties {
 		var systemInfo = utsname()
 		uname(&systemInfo)
@@ -38,6 +42,9 @@ public extension DiscordAPI {
 		)
 	}
 
+    /// User agent to be sent along with all requests
+    ///
+    /// This is mainly to emulate the official clients to evade bans.
 	static var userAgent: String {
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) discord/\(GatewayConfig.default.parity.version) Chrome/91.0.4472.164 Electron/\(GatewayConfig.default.parity.electronVersion) Safari/537.36"
 	}

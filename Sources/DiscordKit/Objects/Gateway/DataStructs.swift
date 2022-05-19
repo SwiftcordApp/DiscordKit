@@ -10,21 +10,64 @@ import Foundation
 public protocol GatewayData: Decodable {}
 public protocol OutgoingGatewayData: Encodable {}
 
+/// Connection properties used to construct client info that is sent
+/// in the ``GatewayIdentify`` payload
 public struct GatewayConnProperties: OutgoingGatewayData {
+    /// OS the client is running on
+    ///
+    /// Always `Mac OS X`
     public let os: String
+    
+    /// Browser name
+    ///
+    /// Observed values were `Chrome` when running on Google Chrome and
+    /// `Discord Client` when running in the desktop client.
+    ///
+    /// > For now, this value is hardcoded to `Discord Client` in the
+    /// > ``DiscordAPI/getSuperProperties()`` method. Customisability
+    /// > might be added in a future release.
     public let browser: String
+    
+    /// Release channel of target official client
+    ///
+    /// Refer to ``GatewayConfig/clientParity`` for more details.
     public let release_channel: String?
+    
+    /// Version of target official client
+    ///
+    /// Refer to ``GatewayConfig/clientParity`` for more details.
     public let client_version: String?
+    
+    /// OS Version
+    ///
+    /// The version of the OS the client is running on. This is dynamically
+    /// retrieved in ``DiscordAPI/getSuperProperties()`` by calling `uname()`.
+    /// For macOS, it is the version of the Darwin Kernel, which is `21.4.0`
+    /// as of macOS `12.3`.
     public let os_version: String?
+    
+    /// Machine Arch
+    ///
+    /// The arch of the machine the client is running on. This is dynamically
+    /// retrieved in ``DiscordAPI/getSuperProperties()`` by calling `uname()`.
+    /// For macOS, it could be either `x86_64` (Intel) or `arm64` (Apple Silicon).
     public let os_arch: String?
+    
+    /// System Locale
+    ///
+    /// The locale (language) of the system. This is hardcoded to be `en-US` for now.
     public let system_locale: String?
+    
+    /// Build number of target official client
+    ///
+    /// Refer to ``GatewayConfig/clientParity`` for more details.
     public let client_build_number: Int?
 }
 
-// MARK: Opcode 1 (Heartbeat)
+/// Opcode 1 - **Heartbeat**
 public struct GatewayHeartbeat: OutgoingGatewayData {}
 
-// MARK: Opcode 2 (Identify)
+/// Opcode 2 - **Identify**
 public struct GatewayIdentify: OutgoingGatewayData {
     public let token: String
     public let properties: GatewayConnProperties
@@ -35,7 +78,7 @@ public struct GatewayIdentify: OutgoingGatewayData {
     public let capabilities: Int // Hardcode this to 253
 }
 
-// MARK: Opcode 3 (Presence Update)
+/// Opcode 3 - **Presence Update**
 public struct GatewayPresenceUpdate: OutgoingGatewayData {
     public let since: Int // Unix time (in milliseconds) of when the client went idle, or null if the client is not idle
     public let activities: [ActivityOutgoing]
@@ -43,7 +86,7 @@ public struct GatewayPresenceUpdate: OutgoingGatewayData {
     public let afk: Bool
 }
 
-// MARK: Opcode 4 (Voice State Update)
+// Opcode 4 - **Voice State Update**
 public struct GatewayVoiceStateUpdate: OutgoingGatewayData, GatewayData {
     public let guild_id: Snowflake?
     public let channel_id: Snowflake? // ID of the voice channel client wants to join (null if disconnecting)
@@ -70,14 +113,14 @@ public struct GatewayVoiceStateUpdate: OutgoingGatewayData, GatewayData {
     }
 }
 
-// MARK: Opcode 6 (Resume)
+/// Opcode 6 - **Resume**
 public struct GatewayResume: OutgoingGatewayData {
     public let token: String
     public let session_id: String
     public let seq: Int // Last sequence number received
 }
 
-// MARK: Opcode 8 (Guild Request Members)
+/// Opcode 8 - **Guild Request Members**
 public struct GatewayGuildRequestMembers: GatewayData {
     public let guild_id: Snowflake
     public let query: String?
@@ -87,12 +130,12 @@ public struct GatewayGuildRequestMembers: GatewayData {
     public let nonce: String? // Nonce to identify the Guild Members Chunk response
 }
 
-// MARK: Opcode 10 (Hello)
+/// Opcode 10 - **Hello**
 public struct GatewayHello: GatewayData {
     public let heartbeat_interval: Int
 }
 
-// MARK: Opcode 14 (Subscribe Guild Events)
+/// Opcode 14 - **Subscribe Guild Events**
 public struct SubscribeGuildEvts: OutgoingGatewayData {
     public let guild_id: Snowflake
     public let typing: Bool

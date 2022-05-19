@@ -67,6 +67,7 @@ public struct GatewayConfig {
         restBase = "\(self.baseURL)api/v\(version)/"
     }
 
+    /// Target official client version to emulate
 	public static let clientParity = ClientParityVersion(
         version: "0.0.283",
         buildNumber: 115689,
