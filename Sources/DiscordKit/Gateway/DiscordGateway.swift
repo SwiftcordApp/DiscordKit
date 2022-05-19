@@ -131,6 +131,7 @@ public class DiscordGateway: ObservableObject {
             d.stage_instances = oldGuild.stage_instances
             d.guild_scheduled_events = oldGuild.guild_scheduled_events
             self.cache.guilds![idx] = d
+            objectWillChange.send()
         case .userUpdate:
             guard let updatedUser = data as? User else { return }
             self.cache.user = updatedUser
