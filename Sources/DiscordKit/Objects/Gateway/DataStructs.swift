@@ -38,7 +38,7 @@ public struct GatewayConnProperties: OutgoingGatewayData {
     /// Refer to ``GatewayConfig/clientParity`` for more details.
     public let client_version: String?
     
-    /// OS Version
+    /// OS version
     ///
     /// The version of the OS the client is running on. This is dynamically
     /// retrieved in ``DiscordAPI/getSuperProperties()`` by calling `uname()`.
@@ -46,14 +46,14 @@ public struct GatewayConnProperties: OutgoingGatewayData {
     /// as of macOS `12.3`.
     public let os_version: String?
     
-    /// Machine Arch
+    /// Machine arch
     ///
     /// The arch of the machine the client is running on. This is dynamically
     /// retrieved in ``DiscordAPI/getSuperProperties()`` by calling `uname()`.
     /// For macOS, it could be either `x86_64` (Intel) or `arm64` (Apple Silicon).
     public let os_arch: String?
     
-    /// System Locale
+    /// System locale
     ///
     /// The locale (language) of the system. This is hardcoded to be `en-US` for now.
     public let system_locale: String?
@@ -64,10 +64,10 @@ public struct GatewayConnProperties: OutgoingGatewayData {
     public let client_build_number: Int?
 }
 
-/// Opcode 1 - **Heartbeat**
+/// Opcode 1 - _Heartbeat_
 public struct GatewayHeartbeat: OutgoingGatewayData {}
 
-/// Opcode 2 - **Identify**
+/// Opcode 2 - _Identify_
 public struct GatewayIdentify: OutgoingGatewayData {
     public let token: String
     public let properties: GatewayConnProperties
@@ -78,7 +78,7 @@ public struct GatewayIdentify: OutgoingGatewayData {
     public let capabilities: Int // Hardcode this to 253
 }
 
-/// Opcode 3 - **Presence Update**
+/// Opcode 3 - _Presence Update_
 public struct GatewayPresenceUpdate: OutgoingGatewayData {
     public let since: Int // Unix time (in milliseconds) of when the client went idle, or null if the client is not idle
     public let activities: [ActivityOutgoing]
@@ -86,7 +86,7 @@ public struct GatewayPresenceUpdate: OutgoingGatewayData {
     public let afk: Bool
 }
 
-// Opcode 4 - **Voice State Update**
+// Opcode 4 - _Voice State Update_
 public struct GatewayVoiceStateUpdate: OutgoingGatewayData, GatewayData {
     public let guild_id: Snowflake?
     public let channel_id: Snowflake? // ID of the voice channel client wants to join (null if disconnecting)
@@ -113,14 +113,14 @@ public struct GatewayVoiceStateUpdate: OutgoingGatewayData, GatewayData {
     }
 }
 
-/// Opcode 6 - **Resume**
+/// Opcode 6 - _Resume_
 public struct GatewayResume: OutgoingGatewayData {
     public let token: String
     public let session_id: String
     public let seq: Int // Last sequence number received
 }
 
-/// Opcode 8 - **Guild Request Members**
+/// Opcode 8 - _Guild Request Members_
 public struct GatewayGuildRequestMembers: GatewayData {
     public let guild_id: Snowflake
     public let query: String?
@@ -130,12 +130,12 @@ public struct GatewayGuildRequestMembers: GatewayData {
     public let nonce: String? // Nonce to identify the Guild Members Chunk response
 }
 
-/// Opcode 10 - **Hello**
+/// Opcode 10 - _Hello_
 public struct GatewayHello: GatewayData {
     public let heartbeat_interval: Int
 }
 
-/// Opcode 14 - **Subscribe Guild Events**
+/// Opcode 14 - _Subscribe Guild Events_
 public struct SubscribeGuildEvts: OutgoingGatewayData {
     public let guild_id: Snowflake
     public let typing: Bool
