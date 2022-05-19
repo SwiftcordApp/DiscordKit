@@ -112,6 +112,25 @@ public class DiscordGateway: ObservableObject {
             guard let d = data as? GuildUnavailable else { return }
             self.cache.guilds?.removeAll { g in g.id == d.id }
             objectWillChange.send()
+        case .guildUpdate:
+            guard var d = data as? Guild else { return }
+            guard let idx = self.cache.guilds?.firstIndex(where: { g in g.id == d.id })
+            else { return }
+            
+            // Fuse the old guild with the updated guild
+            let oldGuild = self.cache.guilds![idx]
+            d.joined_at = oldGuild.joined_at
+            d.large = oldGuild.large
+            d.unavailable = oldGuild.unavailable
+            d.member_count = oldGuild.member_count
+            d.voice_states = oldGuild.voice_states
+            d.members = oldGuild.members
+            d.channels = oldGuild.channels
+            d.threads = oldGuild.threads
+            d.presences = oldGuild.presences
+            d.stage_instances = oldGuild.stage_instances
+            d.guild_scheduled_events = oldGuild.guild_scheduled_events
+            self.cache.guilds![idx] = d
         case .userUpdate:
             guard let updatedUser = data as? User else { return }
             self.cache.user = updatedUser
