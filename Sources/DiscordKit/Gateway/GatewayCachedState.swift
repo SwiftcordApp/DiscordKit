@@ -9,10 +9,27 @@ import Foundation
 
 /// A struct for storing cached data from the Gateway
 ///
-/// See ``DiscordGateway/cache`` for more details.
+/// Used in ``DiscordGateway/cache``.
 public struct CachedState {
-	public var guilds: [Guild]?
-	public var dms: [Channel]?
+    /// Dictionary of guilds the user is in
+    ///
+    /// > The guild's ID is its key
+    public var guilds: [Snowflake: Guild] = [:]
+    
+    /// Sequence of guild IDs
+    ///
+    /// The IDs of ordered guilds are in this array. If the guild
+    /// is not ordered (i.e. never dragged from its initial position at
+    /// the top of the server list), its id will not be in this array.
+    public var guildSequence: [Snowflake] = []
+    
+    /// DM channels the user is in
+	public var dms: [Channel] = []
+    
+    /// Cached object of current user
 	public var user: User?
-	public var users: [User]? // Cached users, grows over time
+    
+    /// Cached users, initially populated from `READY` event and might
+    /// grow over time
+	public var users: [User] = []
 }

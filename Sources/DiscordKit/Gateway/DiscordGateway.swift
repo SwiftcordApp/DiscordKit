@@ -36,6 +36,9 @@ public class DiscordGateway: ObservableObject {
     /// within this cache is updated with received events, and should
     /// remain fresh.
     ///
+    /// Refer to ``CachedState`` for more details about the data in
+    /// this cache.
+    ///
     /// > In the future, presence updates and REST API requests will
     /// > also be stored and kept fresh in this cache.
     public var cache: CachedState = CachedState()
@@ -94,31 +97,32 @@ public class DiscordGateway: ObservableObject {
             guard let d = data as? ReadyEvt else { return }
             
             // Populate cache with data sent in ready event
-            self.cache.guilds = (d.guilds
+            for guild in d.guilds { self.cache.guilds[guild.id] = guild }
+            /*self.cache.guilds = (d.guilds
                 .filter({ g in !d.user_settings.guild_positions.contains(g.id) })
                 .sorted(by: { lhs, rhs in lhs.joined_at! > rhs.joined_at! }))
-            + d.user_settings.guild_positions.compactMap({ id in d.guilds.first { g in g.id == id } })
+            + d.user_settings.guild_positions.compactMap({ id in d.guilds.first { g in g.id == id } })*/
             self.cache.dms = d.private_channels
             self.cache.user = d.user
             self.cache.users = d.users
+            self.cache.guildSequence = d.user_settings.guild_positions
             objectWillChange.send()
             
             log.info("Gateway ready")
         case .guildCreate:
             guard let d = data as? Guild else { return }
-            self.cache.guilds?.insert(d, at: 0) // As per official Discord implementation
+            cache.guilds[d.id] = d
             objectWillChange.send()
         case .guildDelete:
             guard let d = data as? GuildUnavailable else { return }
-            self.cache.guilds?.removeAll { g in g.id == d.id }
+            cache.guilds.removeValue(forKey: d.id)
             objectWillChange.send()
         case .guildUpdate:
             guard var d = data as? Guild else { return }
-            guard let idx = self.cache.guilds?.firstIndex(where: { g in g.id == d.id })
+            guard let oldGuild = cache.guilds[d.id]
             else { return }
             
             // Fuse the old guild with the updated guild
-            let oldGuild = self.cache.guilds![idx]
             d.joined_at = oldGuild.joined_at
             d.large = oldGuild.large
             d.unavailable = oldGuild.unavailable
@@ -130,11 +134,15 @@ public class DiscordGateway: ObservableObject {
             d.presences = oldGuild.presences
             d.stage_instances = oldGuild.stage_instances
             d.guild_scheduled_events = oldGuild.guild_scheduled_events
-            self.cache.guilds![idx] = d
+            self.cache.guilds[d.id] = d
             objectWillChange.send()
         case .userUpdate:
             guard let updatedUser = data as? User else { return }
             self.cache.user = updatedUser
+            objectWillChange.send()
+        case .userSettingsUpdate:
+            guard let newSettings = data as? UserSettings else { break }
+            cache.guildSequence = newSettings.guild_positions
             objectWillChange.send()
         case .presenceUpdate:
             break
