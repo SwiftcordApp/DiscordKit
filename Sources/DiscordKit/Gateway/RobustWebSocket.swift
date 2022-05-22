@@ -428,6 +428,10 @@ public extension RobustWebSocket {
         self.socket.cancel(with: code, reason: nil)
         connected = false
         if shouldReconnect { self.reconnect(code: nil) }
+        else {
+            sessionID = nil
+            seq = nil
+        }
     }
     
     /// Explicitly close the Gateway socket connection
@@ -442,6 +446,7 @@ public extension RobustWebSocket {
         explicitlyClosed = true
         connected = false
         sessionID = nil
+        seq = nil
         reachability.stopNotifier()
         
         socket.cancel(with: code, reason: nil)

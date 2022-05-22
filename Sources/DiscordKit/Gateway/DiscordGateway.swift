@@ -141,16 +141,21 @@ public class DiscordGateway: ObservableObject {
             guard let newSettings = data as? UserSettings else { break }
             cache.guildSequence = newSettings.guild_positions
         // Channel events
-        // guild_id should always be present for channels sent here
         case .channelCreate:
             guard let newCh = data as? Channel else { break }
-            cache.guilds[newCh.guild_id!]?.channels?.append(newCh)
+            if let guildID = newCh.guild_id {
+                cache.guilds[guildID]?.channels?.append(newCh)
+            }
         case .channelDelete:
             guard let delCh = data as? Channel else { break }
-            cache.guilds[delCh.guild_id!]?.channels?.removeAll { delCh.id == $0.id }
+            if let guildID = delCh.guild_id {
+                cache.guilds[guildID]?.channels?.removeAll { delCh.id == $0.id }
+            }
         case .channelUpdate:
             guard let updatedCh = data as? Channel else { break }
-            if let chIdx = cache.guilds[updatedCh.guild_id!]?.channels?
+            if let guildID = updatedCh.guild_id,
+               let chIdx = cache.guilds[guildID]?
+                .channels?
                 .firstIndex(where: { updatedCh.id == $0.id }) {
                 cache.guilds[updatedCh.guild_id!]?.channels?[chIdx] = updatedCh
             }
