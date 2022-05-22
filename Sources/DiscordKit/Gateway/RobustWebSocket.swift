@@ -39,7 +39,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
     /// a (sessionOpen: Bool, reachable: Bool) tuple.
     public let onConnStateChange = EventDispatch<(Bool, Bool)>()
     
-    /// An `EventDispatch` that is notified when the session cannot be
+    /// An ``EventDispatch`` that is notified when the session cannot be
     /// resumed, most likely when the socket has been disconnected for too
     /// long and the session is invalidated. A fresh reconnection will
     /// be attempted if/when this happens.

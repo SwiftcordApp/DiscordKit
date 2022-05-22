@@ -117,6 +117,7 @@ public struct GatewayIncoming: Decodable {
                 
                 // User-specific events
             case .channelUnreadUpdate: d = try values.decode(ChannelUnreadUpdate.self, forKey: .d)
+            case .userSettingsUpdate: d = try values.decode(UserSettings.self, forKey: .d)
             default: d = nil
             }
         default:

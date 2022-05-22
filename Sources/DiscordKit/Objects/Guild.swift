@@ -122,15 +122,15 @@ public struct Guild: GatewayData, Equatable, Identifiable {
     public let system_channel_id: Snowflake? // ID of channel for system-created messages
     public let system_channel_flags: Int
     public let rules_channel_id: Snowflake?
-    public let joined_at: ISOTimestamp?
-    public let large: Bool?
-    public let unavailable: Bool? // If guild is unavailable due to an outage
-    public let member_count: Int?
-    public let voice_states: [VoiceState]?
-    public let members: [Member]?
-    public let channels: [Channel]?
-    public let threads: [Channel]?
-    public let presences: [PresenceUpdate]?
+    public var joined_at: ISOTimestamp?
+    public var large: Bool?
+    public var unavailable: Bool? // If guild is unavailable due to an outage
+    public var member_count: Int?
+    public var voice_states: [VoiceState]?
+    public var members: [Member]?
+    public var channels: [Channel]?
+    public var threads: [Channel]?
+    public var presences: [PresenceUpdate]?
     public let max_presences: Int? // null is always returned, apart from the largest of guilds
     public let max_members: Int?
     public let vanity_url_code: String?
@@ -145,9 +145,9 @@ public struct Guild: GatewayData, Equatable, Identifiable {
     public let approximate_presence_count: Int? // Approximate number of non-offline members in this guild, returned from the GET /guilds/<id> endpoint when with_counts is true
     public let welcome_screen: GuildWelcomeScreen?
     public let nsfw_level: NSFWLevel
-    public let stage_instances: [StageInstance]?
+    public var stage_instances: [StageInstance]?
     public let stickers: [Sticker]?
-    public let guild_scheduled_events: [GuildScheduledEvent]?
+    public var guild_scheduled_events: [GuildScheduledEvent]?
     public let premium_progress_bar_enabled: Bool
 }
 

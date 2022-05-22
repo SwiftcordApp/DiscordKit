@@ -36,9 +36,12 @@ public class DiscordGateway: ObservableObject {
     /// within this cache is updated with received events, and should
     /// remain fresh.
     ///
+    /// Refer to ``CachedState`` for more details about the data in
+    /// this cache.
+    ///
     /// > In the future, presence updates and REST API requests will
     /// > also be stored and kept fresh in this cache.
-    @Published public var cache: CachedState = CachedState()
+    public var cache: CachedState = CachedState()
     
     private var evtListenerID: EventDispatch.HandlerIdentifier? = nil,
                 authFailureListenerID: EventDispatch.HandlerIdentifier? = nil,
@@ -71,6 +74,7 @@ public class DiscordGateway: ObservableObject {
         }
         // Clear cache
         cache = CachedState()
+        objectWillChange.send()
         
         socket.close(code: .normalClosure)
         onAuthFailure.notify()
@@ -90,27 +94,66 @@ public class DiscordGateway: ObservableObject {
     private func handleEvt(type: GatewayEvent, data: GatewayData?) {
         switch (type) {
         case .ready:
-            guard let d = data as? ReadyEvt else { return }
+            guard let d = data as? ReadyEvt else { break }
             
             // Populate cache with data sent in ready event
-            self.cache.guilds = (d.guilds
+            for guild in d.guilds { cache.guilds.updateValue(guild, forKey: guild.id) }
+            /*self.cache.guilds = (d.guilds
                 .filter({ g in !d.user_settings.guild_positions.contains(g.id) })
                 .sorted(by: { lhs, rhs in lhs.joined_at! > rhs.joined_at! }))
-            + d.user_settings.guild_positions.compactMap({ id in d.guilds.first { g in g.id == id } })
-            self.cache.dms = d.private_channels
-            self.cache.user = d.user
-            self.cache.users = d.users
+            + d.user_settings.guild_positions.compactMap({ id in d.guilds.first { g in g.id == id } })*/
+            cache.dms = d.private_channels
+            cache.user = d.user
+            cache.users = d.users
+            cache.guildSequence = d.user_settings.guild_positions
             
             log.info("Gateway ready")
+        // Guild events
         case .guildCreate:
-            guard let d = data as? Guild else { return }
-            self.cache.guilds?.insert(d, at: 0) // As per official Discord implementation
+            guard let d = data as? Guild else { break }
+            cache.guilds.updateValue(d, forKey: d.id)
         case .guildDelete:
-            guard let d = data as? GuildUnavailable else { return }
-            self.cache.guilds?.removeAll { g in g.id == d.id }
+            guard let d = data as? GuildUnavailable else { break }
+            cache.guilds.removeValue(forKey: d.id)
+        case .guildUpdate:
+            guard var d = data as? Guild else { break }
+            guard let oldGuild = cache.guilds[d.id]
+            else { return }
+            
+            // Fuse the old guild with the updated guild
+            d.joined_at = oldGuild.joined_at
+            d.large = oldGuild.large
+            d.unavailable = oldGuild.unavailable
+            d.member_count = oldGuild.member_count
+            d.voice_states = oldGuild.voice_states
+            d.members = oldGuild.members
+            d.channels = oldGuild.channels
+            d.threads = oldGuild.threads
+            d.presences = oldGuild.presences
+            d.stage_instances = oldGuild.stage_instances
+            d.guild_scheduled_events = oldGuild.guild_scheduled_events
+            cache.guilds[d.id] = d
+        // User updates
         case .userUpdate:
-            guard let updatedUser = data as? User else { return }
-            self.cache.user = updatedUser
+            guard let updatedUser = data as? User else { break }
+            cache.user = updatedUser
+        case .userSettingsUpdate:
+            guard let newSettings = data as? UserSettings else { break }
+            cache.guildSequence = newSettings.guild_positions
+        // Channel events
+        // guild_id should always be present for channels sent here
+        case .channelCreate:
+            guard let newCh = data as? Channel else { break }
+            cache.guilds[newCh.guild_id!]?.channels?.append(newCh)
+        case .channelDelete:
+            guard let delCh = data as? Channel else { break }
+            cache.guilds[delCh.guild_id!]?.channels?.removeAll { delCh.id == $0.id }
+        case .channelUpdate:
+            guard let updatedCh = data as? Channel else { break }
+            if let chIdx = cache.guilds[updatedCh.guild_id!]?.channels?
+                .firstIndex(where: { updatedCh.id == $0.id }) {
+                cache.guilds[updatedCh.guild_id!]?.channels?[chIdx] = updatedCh
+            }
         case .presenceUpdate:
             break
             // guard let p = data as? PresenceUpdate else { return }
@@ -118,6 +161,7 @@ public class DiscordGateway: ObservableObject {
             //print(p)
         default: break
         }
+        objectWillChange.send()
         onEvent.notify(event: (type, data))
         log.info("Dispatched event <\(type.rawValue, privacy: .public)>")
     }
