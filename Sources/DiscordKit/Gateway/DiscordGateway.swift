@@ -94,31 +94,29 @@ public class DiscordGateway: ObservableObject {
     private func handleEvt(type: GatewayEvent, data: GatewayData?) {
         switch (type) {
         case .ready:
-            guard let d = data as? ReadyEvt else { return }
+            guard let d = data as? ReadyEvt else { break }
             
             // Populate cache with data sent in ready event
-            for guild in d.guilds { self.cache.guilds[guild.id] = guild }
+            for guild in d.guilds { cache.guilds.updateValue(guild, forKey: guild.id) }
             /*self.cache.guilds = (d.guilds
                 .filter({ g in !d.user_settings.guild_positions.contains(g.id) })
                 .sorted(by: { lhs, rhs in lhs.joined_at! > rhs.joined_at! }))
             + d.user_settings.guild_positions.compactMap({ id in d.guilds.first { g in g.id == id } })*/
-            self.cache.dms = d.private_channels
-            self.cache.user = d.user
-            self.cache.users = d.users
-            self.cache.guildSequence = d.user_settings.guild_positions
-            objectWillChange.send()
+            cache.dms = d.private_channels
+            cache.user = d.user
+            cache.users = d.users
+            cache.guildSequence = d.user_settings.guild_positions
             
             log.info("Gateway ready")
+        // Guild events
         case .guildCreate:
-            guard let d = data as? Guild else { return }
-            cache.guilds[d.id] = d
-            objectWillChange.send()
+            guard let d = data as? Guild else { break }
+            cache.guilds.updateValue(d, forKey: d.id)
         case .guildDelete:
-            guard let d = data as? GuildUnavailable else { return }
+            guard let d = data as? GuildUnavailable else { break }
             cache.guilds.removeValue(forKey: d.id)
-            objectWillChange.send()
         case .guildUpdate:
-            guard var d = data as? Guild else { return }
+            guard var d = data as? Guild else { break }
             guard let oldGuild = cache.guilds[d.id]
             else { return }
             
@@ -134,16 +132,28 @@ public class DiscordGateway: ObservableObject {
             d.presences = oldGuild.presences
             d.stage_instances = oldGuild.stage_instances
             d.guild_scheduled_events = oldGuild.guild_scheduled_events
-            self.cache.guilds[d.id] = d
-            objectWillChange.send()
+            cache.guilds[d.id] = d
+        // User updates
         case .userUpdate:
-            guard let updatedUser = data as? User else { return }
-            self.cache.user = updatedUser
-            objectWillChange.send()
+            guard let updatedUser = data as? User else { break }
+            cache.user = updatedUser
         case .userSettingsUpdate:
             guard let newSettings = data as? UserSettings else { break }
             cache.guildSequence = newSettings.guild_positions
-            objectWillChange.send()
+        // Channel events
+        // guild_id should always be present for channels sent here
+        case .channelCreate:
+            guard let newCh = data as? Channel else { break }
+            cache.guilds[newCh.guild_id!]?.channels?.append(newCh)
+        case .channelDelete:
+            guard let delCh = data as? Channel else { break }
+            cache.guilds[delCh.guild_id!]?.channels?.removeAll { delCh.id == $0.id }
+        case .channelUpdate:
+            guard let updatedCh = data as? Channel else { break }
+            if let chIdx = cache.guilds[updatedCh.guild_id!]?.channels?
+                .firstIndex(where: { updatedCh.id == $0.id }) {
+                cache.guilds[updatedCh.guild_id!]?.channels?[chIdx] = updatedCh
+            }
         case .presenceUpdate:
             break
             // guard let p = data as? PresenceUpdate else { return }
@@ -151,6 +161,7 @@ public class DiscordGateway: ObservableObject {
             //print(p)
         default: break
         }
+        objectWillChange.send()
         onEvent.notify(event: (type, data))
         log.info("Dispatched event <\(type.rawValue, privacy: .public)>")
     }
