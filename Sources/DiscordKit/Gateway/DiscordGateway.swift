@@ -104,7 +104,7 @@ public class DiscordGateway: ObservableObject {
             + d.user_settings.guild_positions.compactMap({ id in d.guilds.first { g in g.id == id } })*/
             cache.dms = d.private_channels
             cache.user = d.user
-            cache.users = d.users
+            for user in d.users { cache.users.updateValue(user, forKey: user.id) }
             cache.guildSequence = d.user_settings.guild_positions
             
             log.info("Gateway ready")
