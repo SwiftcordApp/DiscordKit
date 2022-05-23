@@ -46,6 +46,7 @@ public struct Channel: Identifiable, Codable, GatewayData, Equatable {
     public let user_limit: Int?
     public let rate_limit_per_user: Int?
     public let recipients: [User]?
+    public let recipient_ids: [Snowflake]?
     public let icon: String? // Icon hash of group DM
     public let owner_id: Snowflake?
     public let application_id: Snowflake?
