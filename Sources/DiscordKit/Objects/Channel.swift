@@ -41,7 +41,7 @@ public struct Channel: Identifiable, Codable, GatewayData, Equatable {
     public let name: String?
     public let topic: String?
     public let nsfw: Bool?
-    public let last_message_id: Snowflake? // The id of the last message sent in this channel (may not point to an existing or valid message)
+    public var last_message_id: Snowflake? // The id of the last message sent in this channel (may not point to an existing or valid message)
     public let bitrate: Int?
     public let user_limit: Int?
     public let rate_limit_per_user: Int?

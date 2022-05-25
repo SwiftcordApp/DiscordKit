@@ -159,11 +159,20 @@ public class DiscordGateway: ObservableObject {
                 .firstIndex(where: { updatedCh.id == $0.id }) {
                 cache.guilds[updatedCh.guild_id!]?.channels?[chIdx] = updatedCh
             }
+        case .messageCreate:
+            guard let msg = data as? Message else { break }
+            if let guild = msg.guild_id,
+               let idx = cache.guilds[guild]?
+                .channels?
+                .firstIndex(where: { $0.id == msg.channel_id }) {
+                    cache.guilds[guild]?.channels?[idx].last_message_id = msg.id
+            } else if let idx = cache.dms.firstIndex(where: { $0.id == msg.channel_id }) {
+                cache.dms[idx].last_message_id = msg.id
+            }
         case .presenceUpdate:
-            break
-            // guard let p = data as? PresenceUpdate else { return }
-            //print("Presence update!")
-            //print(p)
+            guard let p = data as? PresenceUpdate else { return }
+            print("Presence update!")
+            print(p)
         default: break
         }
         objectWillChange.send()
