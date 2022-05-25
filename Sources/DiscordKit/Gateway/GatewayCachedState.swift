@@ -31,5 +31,5 @@ public struct CachedState {
     
     /// Cached users, initially populated from `READY` event and might
     /// grow over time
-	public var users: [User] = []
+    public var users: [Snowflake: User] = [:]
 }
