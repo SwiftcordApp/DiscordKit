@@ -92,6 +92,8 @@ public class DiscordGateway: ObservableObject {
     }
     
     private func handleEvt(type: GatewayEvent, data: GatewayData?) {
+        var eventWasHandled = true
+        
         switch (type) {
         case .ready:
             guard let d = data as? ReadyEvt else { break }
@@ -173,9 +175,9 @@ public class DiscordGateway: ObservableObject {
             guard let p = data as? PresenceUpdate else { return }
             print("Presence update!")
             print(p)
-        default: break
+        default: eventWasHandled = false
         }
-        objectWillChange.send()
+        if eventWasHandled { objectWillChange.send() }
         onEvent.notify(event: (type, data))
         log.info("Dispatched event <\(type.rawValue, privacy: .public)>")
     }
