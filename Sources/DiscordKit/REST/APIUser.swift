@@ -27,10 +27,11 @@ public extension DiscordAPI {
         mutualGuilds: Bool = false,
         guildID: Snowflake? = nil
     ) async -> UserProfile? {
-        return await getReq(path: "users/\(user)/profile", query: [
-            URLQueryItem(name: "with_mutual_guilds", value: String(mutualGuilds)),
-			URLQueryItem(name: "guild_id", value: guildID?.description)
-        ])
+        var query = [URLQueryItem(name: "with_mutual_guilds", value: String(mutualGuilds))]
+        if let guildID = guildID {
+            query.append(URLQueryItem(name: "guild_id", value: guildID))
+        }
+        return await getReq(path: "users/\(user)/profile", query: query)
     }
     
     // MARK: Modify Current User
