@@ -212,6 +212,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
 			decoded = try JSONDecoder().decode(GatewayIncoming.self, from: message.data(using: .utf8) ?? Data())
 		} catch {
 			print(error)
+            print(message)
 			return
 		}
         
