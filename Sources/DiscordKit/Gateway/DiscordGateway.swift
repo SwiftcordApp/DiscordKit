@@ -141,7 +141,7 @@ public class DiscordGateway: ObservableObject {
             cache.user = updatedUser
         case .userSettingsUpdate:
             guard let newSettings = data as? UserSettings else { break }
-            cache.userSettings = newSettings
+            cache.userSettings = mergeUserSettings(cache.userSettings, new: newSettings)
         // Channel events
         case .channelCreate:
             guard let newCh = data as? Channel else { break }
