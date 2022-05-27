@@ -33,7 +33,11 @@ public enum MessageType: Int, Codable {
     case contextMenuCmd = 23
 }
 
-public struct Message: Codable, GatewayData {
+public struct Message: Codable, GatewayData, Equatable {
+    public static func == (lhs: Message, rhs: Message) -> Bool {
+        lhs.id == rhs.id
+    }
+    
     public let id: Snowflake
     public let channel_id: Snowflake
     public let guild_id: Snowflake?
