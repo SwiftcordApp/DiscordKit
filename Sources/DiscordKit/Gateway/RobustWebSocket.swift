@@ -243,7 +243,6 @@ public class RobustWebSocket: NSObject, ObservableObject {
             // isReconnecting = false // Resuming failed/not attempted
             guard let identify = getIdentify() else {
                 log.debug("Token not in keychain")
-                Logger().debug("Hello there, \("safljslaf", privacy: .private(mask: .hash))")
                 // authFailed = true
                 // socket.disconnect(closeCode: 1000)
                 close(code: .normalClosure)
