@@ -107,7 +107,7 @@ public class DiscordGateway: ObservableObject {
             cache.dms = d.private_channels
             cache.user = d.user
             for user in d.users { cache.users.updateValue(user, forKey: user.id) }
-            cache.guildSequence = d.user_settings.guild_positions
+            cache.userSettings = d.user_settings
             
             log.info("Gateway ready")
         // Guild events
@@ -141,7 +141,7 @@ public class DiscordGateway: ObservableObject {
             cache.user = updatedUser
         case .userSettingsUpdate:
             guard let newSettings = data as? UserSettings else { break }
-            cache.guildSequence = newSettings.guild_positions
+            cache.userSettings = newSettings
         // Channel events
         case .channelCreate:
             guard let newCh = data as? Channel else { break }

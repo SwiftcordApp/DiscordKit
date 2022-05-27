@@ -15,14 +15,7 @@ public struct CachedState {
     ///
     /// > The guild's ID is its key
     public var guilds: [Snowflake: Guild] = [:]
-    
-    /// Sequence of guild IDs
-    ///
-    /// The IDs of ordered guilds are in this array. If the guild
-    /// is not ordered (i.e. never dragged from its initial position at
-    /// the top of the server list), its id will not be in this array.
-    public var guildSequence: [Snowflake] = []
-    
+        
     /// DM channels the user is in
 	public var dms: [Channel] = []
     
@@ -32,4 +25,9 @@ public struct CachedState {
     /// Cached users, initially populated from `READY` event and might
     /// grow over time
     public var users: [Snowflake: User] = [:]
+    
+    /// User settings
+    ///
+    /// View ``UserSettings`` for information about each entry.
+    public var userSettings: UserSettings? = nil
 }
