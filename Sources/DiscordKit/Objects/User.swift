@@ -26,18 +26,49 @@ public enum UserFlags: Int, CaseIterable {
 
 public struct User: Codable, GatewayData {
     public let id: Snowflake
+    
+    /// Username of this user
     public let username: String
+    
+    /// Discriminator of this user
+    ///
+    /// A string in the format #0000
     public let discriminator: String
-    public let avatar: String? // User's avatar hash
+    
+    /// User's avatar hash
+    public let avatar: String?
+    
+    /// If this user is a bot
     public let bot: Bool?
+    
+    /// Bio of this user
     public let bio: String?
+    
+    /// If this user is a system user
     public let system: Bool?
-    public let mfa_enabled: Bool? // Whether the user has two factor enabled on their account
-    public let banner: String? // User's banner hash
+    
+    /// If the user has 2FA enabled on their account
+    public let mfa_enabled: Bool?
+    
+    /// Phone number associated with this account
+    ///
+    /// > Will only be present for the current user
+    public let phone: String?
+    
+    /// Email associated with this account
+    ///
+    /// > Will only be present for the current user
+    public let email: String?
+    
+    /// Banner image hash (nitro-only)
+    public let banner: String?
+    
+    /// Banner color
     public let accent_color: Int?
     public let locale: Locale?
+    
+    /// If the user's email is verified
     public let verified: Bool?
-    public let email: String?
     public let flags: Int?
     public let premium_type: Int?
     public let public_flags: Int?
