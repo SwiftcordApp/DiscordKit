@@ -10,7 +10,7 @@ import Foundation
 /// A struct for storing cached data from the Gateway
 ///
 /// Used in ``DiscordGateway/cache``.
-public struct CachedState {
+public class CachedState: ObservableObject {
     /// Dictionary of guilds the user is in
     ///
     /// > The guild's ID is its key

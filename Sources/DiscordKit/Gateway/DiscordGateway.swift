@@ -177,7 +177,7 @@ public class DiscordGateway: ObservableObject {
             print(p)
         default: eventWasHandled = false
         }
-        if eventWasHandled { objectWillChange.send() }
+        if eventWasHandled { cache.objectWillChange.send() }
         onEvent.notify(event: (type, data))
         log.info("Dispatched event <\(type.rawValue, privacy: .public)>")
     }
