@@ -24,7 +24,11 @@ public enum UserFlags: Int, CaseIterable {
     case botHTTPInteractions = 19
 }
 
-public struct User: Codable, GatewayData {
+public struct User: Codable, GatewayData, Equatable {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.id == rhs.id
+    }
+    
     public let id: Snowflake
     
     /// Username of this user
