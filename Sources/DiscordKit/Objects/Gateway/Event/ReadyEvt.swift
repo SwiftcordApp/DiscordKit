@@ -9,7 +9,7 @@ import Foundation
 
 public struct ReadyEvt: Decodable, GatewayData {
     public let v: Int
-    public let user: User
+    public let user: CurrentUser
     public let users: [User]
     public let guilds: [Guild]
     public let session_id: String

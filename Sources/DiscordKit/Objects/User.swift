@@ -50,16 +50,6 @@ public struct User: Codable, GatewayData {
     /// If the user has 2FA enabled on their account
     public let mfa_enabled: Bool?
     
-    /// Phone number associated with this account
-    ///
-    /// > Will only be present for the current user
-    public let phone: String?
-    
-    /// Email associated with this account
-    ///
-    /// > Will only be present for the current user
-    public let email: String?
-    
     /// Banner image hash (nitro-only)
     public let banner: String?
     
@@ -72,6 +62,51 @@ public struct User: Codable, GatewayData {
     public let flags: Int?
     public let premium_type: Int?
     public let public_flags: Int?
+}
+
+public struct CurrentUser: Codable, GatewayData {
+    /// Phone number associated with this account
+    ///
+    /// > Will only be present for the current user, and is nil
+    /// > if the user did not add a number to the account
+    public let phone: String?
+    
+    /// Email associated with this account
+    ///
+    /// > Will only be present for the current user
+    public let email: String
+    
+    /// ID of the current user
+    public let id: Snowflake
+    
+    /// Username of this user
+    public let username: String
+    
+    /// Discriminator of this user
+    ///
+    /// A string in the format #0000
+    public let discriminator: String
+    
+    public let public_flags: Int
+    public let purchased_flags: Int
+    
+    public let premium: Bool
+    public let nsfw_allowed: Bool
+    public let mobile: Bool
+    public let desktop: Bool
+    public let mfa_enabled: Bool
+    public let flags: Int
+    
+    public let bio: String?
+    
+    /// Banner color
+    public let accent_color: Int?
+    
+    /// Banner image hash (nitro-only)
+    public let banner: String?
+    
+    /// User's avatar hash
+    public let avatar: String?
 }
 
 // User profile endpoint is undocumented

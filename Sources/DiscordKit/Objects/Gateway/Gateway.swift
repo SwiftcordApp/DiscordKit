@@ -112,7 +112,7 @@ public struct GatewayIncoming: Decodable {
             case .presenceUpdate: d = try values.decode(PresenceUpdate.self, forKey: .d)
                 // TODO: Add the remaining like 100 events
                 
-            case .userUpdate: d = try values.decode(User.self, forKey: .d)
+            case .userUpdate: d = try values.decode(CurrentUser.self, forKey: .d)
             case .typingStart: d = try values.decode(TypingStart.self, forKey: .d)
                 
                 // User-specific events

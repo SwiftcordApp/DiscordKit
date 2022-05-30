@@ -20,7 +20,7 @@ public class CachedState: ObservableObject {
 	public var dms: [Channel] = []
     
     /// Cached object of current user
-	public var user: User?
+	public var user: CurrentUser?
     
     /// Cached users, initially populated from `READY` event and might
     /// grow over time

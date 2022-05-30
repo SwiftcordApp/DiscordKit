@@ -137,7 +137,7 @@ public class DiscordGateway: ObservableObject {
             cache.guilds[d.id] = d
         // User updates
         case .userUpdate:
-            guard let updatedUser = data as? User else { break }
+            guard let updatedUser = data as? CurrentUser else { break }
             cache.user = updatedUser
         case .userSettingsUpdate:
             guard let newSettings = data as? UserSettings else { break }
