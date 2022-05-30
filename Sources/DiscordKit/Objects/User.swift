@@ -124,3 +124,8 @@ public extension User {
 		flags?.decodeFlags(flags: UserFlags.staff)
     }
 }
+public extension CurrentUser {
+    var flagsArr: [UserFlags]? {
+        flags.decodeFlags(flags: UserFlags.staff)
+    }
+}
