@@ -29,6 +29,7 @@ let package = Package(
 				"Objects/README.md"
 			]
 		),
-		.target(name: "DiscordKitCommon")
+		.target(name: "DiscordKitCommon"),
+        .testTarget(name: "DiscordKitTests", dependencies: ["DiscordKit"])
 	]
 )

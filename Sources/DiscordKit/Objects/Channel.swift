@@ -59,7 +59,7 @@ public struct Channel: Identifiable, Codable, GatewayData, Equatable {
     public let thread_metadata: ThreadMeta?
     public let member: ThreadMember? // Thread member object for the current user, if they have joined the thread, only included on certain API endpoints
     public let default_auto_archive_duration: Int? // Default duration that the clients (not the API) will use for newly created threads, in minutes, to automatically archive the thread after recent activity, can be set to: 60, 1440, 4320, 10080
-    public let permissions: String? // Computed permissions for the invoking user in the channel, including overwrites, only included when part of the resolved data received on a slash command interaction
+    public let permissions: Permissions? // Computed permissions for the invoking user in the channel, including overwrites, only included when part of the resolved data received on a slash command interaction
 }
 
 /*
