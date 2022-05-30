@@ -87,8 +87,8 @@ public struct CurrentUser: Codable, GatewayData {
     /// A string in the format #0000
     public let discriminator: String
     
-    public let public_flags: Int
-    public let purchased_flags: Int
+    public let public_flags: Int?
+    public let purchased_flags: Int?
     
     public let premium: Bool
     public let nsfw_allowed: Bool
