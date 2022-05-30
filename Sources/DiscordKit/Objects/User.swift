@@ -25,6 +25,25 @@ public enum UserFlags: Int, CaseIterable {
 }
 
 public struct User: Codable, GatewayData, Equatable {
+    // To work around the default access level
+    public init(id: Snowflake, username: String, discriminator: String, avatar: String?, bot: Bool?, bio: String?, system: Bool?, mfa_enabled: Bool?, banner: String?, accent_color: Int?, locale: Locale?, verified: Bool?, flags: Int?, premium_type: Int?, public_flags: Int?) {
+        self.id = id
+        self.username = username
+        self.discriminator = discriminator
+        self.avatar = avatar
+        self.bot = bot
+        self.bio = bio
+        self.system = system
+        self.mfa_enabled = mfa_enabled
+        self.banner = banner
+        self.accent_color = accent_color
+        self.locale = locale
+        self.verified = verified
+        self.flags = flags
+        self.premium_type = premium_type
+        self.public_flags = public_flags
+    }
+    
     public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.id == rhs.id
     }
@@ -115,6 +134,15 @@ public struct CurrentUser: Codable, GatewayData {
 
 // User profile endpoint is undocumented
 public struct UserProfile: Codable, GatewayData {
+    public init(connected_accounts: [Connection], guild_member: Member?, premium_guild_since: ISOTimestamp?, premium_since: ISOTimestamp?, mutual_guilds: [MutualGuild]?, user: User) {
+        self.connected_accounts = connected_accounts
+        self.guild_member = guild_member
+        self.premium_guild_since = premium_guild_since
+        self.premium_since = premium_since
+        self.mutual_guilds = mutual_guilds
+        self.user = user
+    }
+    
     public let connected_accounts: [Connection]
     public let guild_member: Member?
     public let premium_guild_since: ISOTimestamp?
