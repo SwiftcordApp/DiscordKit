@@ -25,6 +25,7 @@ public enum ConnectionType: String, Codable {
     case xbox = "xbox"
     case battleNet = "battle.net"
     case playstation = "playstation"
+    case leagueOfLegends = "leagueoflegends"
 }
 
 // Connections with external accounts (e.g. Reddit, YouTube, Steam etc.)
