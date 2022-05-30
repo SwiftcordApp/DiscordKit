@@ -154,11 +154,17 @@ public struct UserProfile: Codable, GatewayData {
 
 public extension User {
     var flagsArr: [UserFlags]? {
-		flags?.decodeFlags(flags: UserFlags.staff)
+        guard var decodedFlags = flags?.decodeFlags(flags: UserFlags.staff) else {
+            return nil
+        }
+        if premium_type != nil { decodedFlags.append(.premium) }
+        return decodedFlags
     }
 }
 public extension CurrentUser {
     var flagsArr: [UserFlags] {
-        flags.decodeFlags(flags: UserFlags.staff)
+        var decodedFlags = flags.decodeFlags(flags: UserFlags.staff)
+        if premium { decodedFlags.append(.premium) }
+        return decodedFlags
     }
 }
