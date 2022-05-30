@@ -23,8 +23,8 @@ public enum ConnectionType: String, Codable {
     case facebook = "facebook"
     case twitter = "twitter"
     case xbox = "xbox"
-    case battleNet = "battle.net" // Guess
-    // Cannot guess PlayStation Network
+    case battleNet = "battle.net"
+    case playstation = "playstation"
 }
 
 // Connections with external accounts (e.g. Reddit, YouTube, Steam etc.)
