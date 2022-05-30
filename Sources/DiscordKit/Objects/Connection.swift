@@ -23,7 +23,7 @@ public enum ConnectionType: String, Codable {
     case facebook = "facebook"
     case twitter = "twitter"
     case xbox = "xbox"
-    case battleNet = "battle.net"
+    case battleNet = "battlenet"
     case playstation = "playstation"
     case leagueOfLegends = "leagueoflegends"
 }
