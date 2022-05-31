@@ -221,7 +221,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
         switch decoded.op {
         case .heartbeat:
             log.debug("Sending expedited heartbeat as requested")
-            send(op: .heartbeat, data: GatewayHeartbeat())
+            send(op: .heartbeat, data: GatewayHeartbeat(seq))
         case .heartbeatAck: awaitingHb -= 1
         case .hello:
             hasConnected()
@@ -380,7 +380,7 @@ public extension RobustWebSocket {
             log.error("Too many pending heartbeats, closing socket")
             forceClose()
         }
-        send(op: .heartbeat, data: GatewayHeartbeat())
+        send(op: .heartbeat, data: GatewayHeartbeat(seq))
         awaitingHb += 1
     }
     

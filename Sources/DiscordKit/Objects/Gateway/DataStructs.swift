@@ -65,7 +65,16 @@ public struct GatewayConnProperties: OutgoingGatewayData {
 }
 
 /// Opcode 1 - _Heartbeat_
-public struct GatewayHeartbeat: OutgoingGatewayData {}
+public struct GatewayHeartbeat: OutgoingGatewayData {
+    private let seq: Int?
+    
+    init(_ seq: Int?) { self.seq = seq }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(seq)
+    }
+}
 
 /// Opcode 2 - _Identify_
 public struct GatewayIdentify: OutgoingGatewayData {
