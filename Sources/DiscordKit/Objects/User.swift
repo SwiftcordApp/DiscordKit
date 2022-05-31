@@ -84,7 +84,7 @@ public struct User: Codable, GatewayData, Equatable {
     public let public_flags: Int?
 }
 
-public struct CurrentUser: Codable, GatewayData {
+public struct CurrentUser: Codable, GatewayData, Equatable {
     /// Phone number associated with this account
     ///
     /// > Will only be present for the current user, and is nil

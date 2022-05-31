@@ -222,7 +222,7 @@ public struct GuildScheduledEventEntityMeta: Codable, GatewayData {
 }
 
 // Guild folders sent in ready event
-public struct GuildFolder: Decodable, GatewayData {
+public struct GuildFolder: Decodable, GatewayData, Equatable {
     public let name: String?
     // let id: Int? // Sometimes Discord sends over String snowflakes, but sometimes it sends int snowflakes instead just to make life hard
     public let guild_ids: [Snowflake]

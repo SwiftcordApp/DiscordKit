@@ -25,7 +25,7 @@ func mergeUserSettings(_ old: UserSettings?, new: UserSettings) -> UserSettings 
     )
 }
 
-public struct UserSettings: Decodable, GatewayData {
+public struct UserSettings: Decodable, GatewayData, Equatable {
     /// Sequence of guild IDs
     ///
     /// The IDs of ordered guilds are in this array. If the guild
