@@ -51,6 +51,7 @@ public enum MessageType: Int, Codable {
     case contextMenuCmd = 23
 }
 
+/// Represents a message sent in a channel within Discord
 public struct Message: Codable, GatewayData, Equatable {
     public static func == (lhs: Message, rhs: Message) -> Bool {
         lhs.id == rhs.id
@@ -149,7 +150,19 @@ public struct Message: Codable, GatewayData, Equatable {
     
     /// Message flags
     public var flags: Int?
-    // Recursive properties don't work, so referenced_message can't be here for now
+    
+    /// The message associated with the message\_reference
+    ///
+    /// This field is only returned for messages with a type of ``MessageType/reply``
+    /// or ``MessageType/threadStarterMsg``. If the message is a reply but the
+    /// referenced\_message field is not present, the backend did not attempt to
+    /// fetch the message that was being replied to, so its state is unknown. If
+    /// the field exists but is null, the referenced message was deleted.
+    ///
+    /// > Currently, it is not possible to distinguish between the field being `nil`
+    /// > or the field not being present. This is due to limitations with the built-in
+    /// > `Decodable` type.
+    public let referenced_message: PartialMessage?
     
     /// Present if the message is a response to an Interaction
     public var interaction: MessageInteraction?
@@ -164,8 +177,12 @@ public struct Message: Codable, GatewayData, Equatable {
     public var sticker_items: [StickerItem]?
 }
 
-// A complete copy of Message but with most properties as Optional
-// Swift doesn't have a Optional or Partial wrapper yet :(((
+/// A complete copy of Message but with most properties marked as Optional
+///
+/// Swift doesn't have a Optional or Partial wrapper yet :(((
+///
+/// Refer to ``Message`` for documentation. Used for ``Message/referenced_message``
+/// and gateway message update events.
 public struct PartialMessage: Codable, GatewayData {
     public let id: Snowflake
     public let channel_id: Snowflake
