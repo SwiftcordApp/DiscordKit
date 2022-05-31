@@ -22,7 +22,7 @@ public enum UserFlags: Int, CaseIterable {
     case verifiedDev = 17
     case certifiedMod = 18
     case botHTTPInteractions = 19
-    case premium = 20 // Not actually a possible flag, but included for use in arrays
+    case premium = 50 // Not actually a possible flag, but included for use in arrays
 }
 
 public struct User: Codable, GatewayData, Equatable {
