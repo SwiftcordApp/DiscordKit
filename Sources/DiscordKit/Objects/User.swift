@@ -157,7 +157,9 @@ public extension User {
         guard var decodedFlags = flags?.decodeFlags(flags: UserFlags.staff) else {
             return nil
         }
-        if premium_type != nil { decodedFlags.append(.premium) }
+        if let premiumType = premium_type, premiumType != 0 {
+            decodedFlags.append(.premium)
+        }
         return decodedFlags
     }
 }
