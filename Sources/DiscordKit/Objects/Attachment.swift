@@ -19,7 +19,7 @@ public struct Attachment: Codable, Identifiable, Equatable {
     public let width: Int? // Width of file (if image)
     public let ephemeral: Bool?
     
-    static func == (lhs: Self, rhs: Self) -> Bool {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.id == rhs.id
     }
 }

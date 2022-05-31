@@ -45,10 +45,6 @@ public struct User: Codable, GatewayData, Equatable {
         self.public_flags = public_flags
     }
     
-    public static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.id == rhs.id
-    }
-    
     public let id: Snowflake
     
     /// Username of this user
