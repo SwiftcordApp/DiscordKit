@@ -94,7 +94,7 @@ public struct Guild: GatewayData, Equatable, Identifiable {
 	}
 
     public static func == (lhs: Guild, rhs: Guild) -> Bool {
-        lhs.id == rhs.id
+        lhs.id == rhs.id && lhs.name == rhs.name && lhs.channels == rhs.channels
     }
     
     public let id: Snowflake
