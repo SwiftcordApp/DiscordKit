@@ -36,6 +36,8 @@ public enum MessageType: Int, Codable {
 public struct Message: Codable, GatewayData, Equatable {
     public static func == (lhs: Message, rhs: Message) -> Bool {
         lhs.id == rhs.id
+        && lhs.content == rhs.content
+        && lhs.attachments == rhs.attachments
     }
     
     public let id: Snowflake
