@@ -16,8 +16,8 @@ public extension HashedAsset {
         case webp = "webp"
         case gif = "gif"
     }
-
-    private func joinPaths(with format: assetFormat, _ paths: String...) -> URL {
+    
+    private static func joinPaths(with format: assetFormat, _ paths: String...) -> URL {
         var base = URL(string: GatewayConfig.default.cdnURL)!
 
         for path in paths { base.appendPathComponent(path) }
@@ -25,7 +25,9 @@ public extension HashedAsset {
         
         return base
     }
+}
 
+public extension HashedAsset {
     // TODO: Validate requested format
     
     /// Returns the avatar URL of a user
@@ -42,7 +44,8 @@ public extension HashedAsset {
         with format: assetFormat = .png,
         size: Int? = nil
     ) -> URL {
-        return joinPaths(with: format, "avatars", userID, self).setSize(size: size)
+        return HashedAsset.joinPaths(with: format, "avatars", userID, self)
+            .setSize(size: size)
     }
     
     /// Returns the banner URL of a guild or user
@@ -59,7 +62,8 @@ public extension HashedAsset {
         with format: assetFormat = .png,
         size: Int? = nil
     ) -> URL {
-        return joinPaths(with: format, "banners", id, self).setSize(size: size)
+        return HashedAsset.joinPaths(with: format, "banners", id, self)
+            .setSize(size: size)
     }
 
     /// Returns the icon URL of a guild
@@ -76,6 +80,19 @@ public extension HashedAsset {
         with format: assetFormat = .png,
         size: Int? = nil
     ) -> URL {
-        return joinPaths(with: format, "icons", guildID, self).setSize(size: size)
+        return HashedAsset.joinPaths(with: format, "icons", guildID, self)
+            .setSize(size: size)
+    }
+}
+
+public extension HashedAsset {
+    /// Get the default avatar image of a provided user discriminator
+    ///
+    /// - Parameter discriminator: User discriminator string
+    static func defaultAvatar(of discriminator: String) -> URL {
+        return HashedAsset.joinPaths(
+            with: .png,
+            "embed", "avatars", String((Int(discriminator) ?? 0) % 5)
+        )
     }
 }
