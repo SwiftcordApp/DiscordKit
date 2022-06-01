@@ -36,7 +36,7 @@ public enum PremiumType: Int, Codable {
 
 public struct User: Codable, GatewayData, Equatable {
     // To work around the default access level
-    public init(id: Snowflake, username: String, discriminator: String, avatar: String?, bot: Bool?, bio: String?, system: Bool?, mfa_enabled: Bool?, banner: String?, accent_color: Int?, locale: Locale?, verified: Bool?, flags: Int?, premium_type: PremiumType?, public_flags: Int?) {
+    public init(id: Snowflake, username: String, discriminator: String, avatar: HashedAsset?, bot: Bool?, bio: String?, system: Bool?, mfa_enabled: Bool?, banner: HashedAsset?, accent_color: Int?, locale: Locale?, verified: Bool?, flags: Int?, premium_type: PremiumType?, public_flags: Int?) {
         self.id = id
         self.username = username
         self.discriminator = discriminator
@@ -66,7 +66,7 @@ public struct User: Codable, GatewayData, Equatable {
     public let discriminator: String
     
     /// User's avatar hash
-    public let avatar: String?
+    public let avatar: HashedAsset?
     
     /// If this user is a bot
     public let bot: Bool?
@@ -81,7 +81,7 @@ public struct User: Codable, GatewayData, Equatable {
     public let mfa_enabled: Bool?
     
     /// Banner image hash (nitro-only)
-    public let banner: String?
+    public let banner: HashedAsset?
     
     /// Banner color
     public let accent_color: Int?
@@ -171,10 +171,10 @@ public struct CurrentUser: Codable, GatewayData, Equatable {
     public let accent_color: Int?
     
     /// Banner image hash (nitro-only)
-    public let banner: String?
+    public let banner: HashedAsset?
     
     /// User's avatar hash
-    public let avatar: String?
+    public let avatar: HashedAsset?
 }
 
 /// A user's profile, containing more data about the user and a fuller ``User`` struct
