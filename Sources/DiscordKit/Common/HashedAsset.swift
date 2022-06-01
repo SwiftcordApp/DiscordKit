@@ -39,7 +39,7 @@ public extension HashedAsset {
     ///  - size: Size of asset, a power of 2 from 16 to 4096
     func avatarURL(
         of userID: Snowflake,
-        with format: assetFormat = .webp,
+        with format: assetFormat = .png,
         size: Int? = nil
     ) -> URL {
         return joinPaths(with: format, "avatars", userID, self).setSize(size: size)
@@ -56,7 +56,7 @@ public extension HashedAsset {
     ///  - size: Size of asset, a power of 2 from 16 to 4096
     func bannerURL(
         of id: Snowflake,
-        with format: assetFormat = .webp,
+        with format: assetFormat = .png,
         size: Int? = nil
     ) -> URL {
         return joinPaths(with: format, "banners", id, self).setSize(size: size)
@@ -73,7 +73,7 @@ public extension HashedAsset {
     ///  - size: Size of asset, a power of 2 from 16 to 4096
     func guildIconURL(
         of guildID: Snowflake,
-        with format: assetFormat = .webp,
+        with format: assetFormat = .png,
         size: Int? = nil
     ) -> URL {
         return joinPaths(with: format, "icons", guildID, self).setSize(size: size)
