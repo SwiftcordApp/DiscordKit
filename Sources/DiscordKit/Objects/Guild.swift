@@ -99,8 +99,8 @@ public struct Guild: GatewayData, Equatable, Identifiable {
     
     public let id: Snowflake
     public let name: String
-    public let icon: String? // Icon hash
-    public let icon_hash: String? // Also icon hash
+    public let icon: HashedAsset? // Icon hash
+    public let icon_hash: HashedAsset? // Also icon hash
     public let splash: String? // Splash hash
     public let discovery_splash: String?
     public let owner: Bool? // If current user is owner of guild
@@ -135,7 +135,7 @@ public struct Guild: GatewayData, Equatable, Identifiable {
     public let max_members: Int?
     public let vanity_url_code: String?
     public let description: String?
-    public let banner: String? // Banner hash
+    public let banner: HashedAsset? // Banner hash
     public let premium_tier: PremiumLevel
     public let premium_subscription_count: Int? // Number of server boosts
     public let preferred_locale: Locale // Defaults to en-US
