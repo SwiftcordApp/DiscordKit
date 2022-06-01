@@ -21,10 +21,10 @@ public struct GuildMemberUpdate: Codable, GatewayData {
     public let user: User
     public let nick: String?
     public let avatar: String? // User's guild avatar hash
-    public let joined_at: ISOTimestamp?
-    public let premium_since: ISOTimestamp? // When user started boosting guild
+    public let joined_at: Date?
+    public let premium_since: Date? // When user started boosting guild
     public let deaf: Bool?
     public let mute: Bool?
     public let pending: Bool?
-    public let communication_disabled_until: ISOTimestamp?
+    public let communication_disabled_until: Date?
 }

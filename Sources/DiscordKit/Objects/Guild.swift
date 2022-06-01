@@ -38,7 +38,7 @@ public enum GuildFeature: String, Codable {
 }
     
 public struct Guild: GatewayData, Equatable, Identifiable {
-	public init(id: Snowflake, name: String, icon: String? = nil, icon_hash: String? = nil, splash: String? = nil, discovery_splash: String? = nil, owner: Bool? = nil, owner_id: Snowflake, permissions: String? = nil, region: String? = nil, afk_channel_id: Snowflake? = nil, afk_timeout: Int, widget_enabled: Bool? = nil, widget_channel_id: Snowflake? = nil, verification_level: VerificationLevel, default_message_notifications: MessageNotifLevel, explicit_content_filter: ExplicitContentFilterLevel, roles: [DecodableThrowable<Role>], emojis: [DecodableThrowable<Emoji>], features: [DecodableThrowable<GuildFeature>], mfa_level: MFALevel, application_id: Snowflake? = nil, system_channel_id: Snowflake? = nil, system_channel_flags: Int, rules_channel_id: Snowflake? = nil, joined_at: ISOTimestamp? = nil, large: Bool? = nil, unavailable: Bool? = nil, member_count: Int? = nil, voice_states: [VoiceState]? = nil, members: [Member]? = nil, channels: [Channel]? = nil, threads: [Channel]? = nil, presences: [PresenceUpdate]? = nil, max_presences: Int? = nil, max_members: Int? = nil, vanity_url_code: String? = nil, description: String? = nil, banner: String? = nil, premium_tier: PremiumLevel, premium_subscription_count: Int? = nil, preferred_locale: Locale, public_updates_channel_id: Snowflake? = nil, max_video_channel_users: Int? = nil, approximate_member_count: Int? = nil, approximate_presence_count: Int? = nil, welcome_screen: GuildWelcomeScreen? = nil, nsfw_level: NSFWLevel, stage_instances: [StageInstance]? = nil, stickers: [Sticker]? = nil, guild_scheduled_events: [GuildScheduledEvent]? = nil, premium_progress_bar_enabled: Bool) {
+	public init(id: Snowflake, name: String, icon: String? = nil, icon_hash: String? = nil, splash: String? = nil, discovery_splash: String? = nil, owner: Bool? = nil, owner_id: Snowflake, permissions: String? = nil, region: String? = nil, afk_channel_id: Snowflake? = nil, afk_timeout: Int, widget_enabled: Bool? = nil, widget_channel_id: Snowflake? = nil, verification_level: VerificationLevel, default_message_notifications: MessageNotifLevel, explicit_content_filter: ExplicitContentFilterLevel, roles: [DecodableThrowable<Role>], emojis: [DecodableThrowable<Emoji>], features: [DecodableThrowable<GuildFeature>], mfa_level: MFALevel, application_id: Snowflake? = nil, system_channel_id: Snowflake? = nil, system_channel_flags: Int, rules_channel_id: Snowflake? = nil, joined_at: Date? = nil, large: Bool? = nil, unavailable: Bool? = nil, member_count: Int? = nil, voice_states: [VoiceState]? = nil, members: [Member]? = nil, channels: [Channel]? = nil, threads: [Channel]? = nil, presences: [PresenceUpdate]? = nil, max_presences: Int? = nil, max_members: Int? = nil, vanity_url_code: String? = nil, description: String? = nil, banner: String? = nil, premium_tier: PremiumLevel, premium_subscription_count: Int? = nil, preferred_locale: Locale, public_updates_channel_id: Snowflake? = nil, max_video_channel_users: Int? = nil, approximate_member_count: Int? = nil, approximate_presence_count: Int? = nil, welcome_screen: GuildWelcomeScreen? = nil, nsfw_level: NSFWLevel, stage_instances: [StageInstance]? = nil, stickers: [Sticker]? = nil, guild_scheduled_events: [GuildScheduledEvent]? = nil, premium_progress_bar_enabled: Bool) {
 		self.id = id
 		self.name = name
 		self.icon = icon
@@ -122,7 +122,7 @@ public struct Guild: GatewayData, Equatable, Identifiable {
     public let system_channel_id: Snowflake? // ID of channel for system-created messages
     public let system_channel_flags: Int
     public let rules_channel_id: Snowflake?
-    public var joined_at: ISOTimestamp?
+    public var joined_at: Date?
     public var large: Bool?
     public var unavailable: Bool? // If guild is unavailable due to an outage
     public var member_count: Int?
@@ -205,8 +205,8 @@ public struct GuildScheduledEvent: Codable, GatewayData {
     public let creator_id: Snowflake?
     public let name: String
     public let description: String?
-    public let scheduled_start_time: ISOTimestamp
-    public let scheduled_end_time: ISOTimestamp?
+    public let scheduled_start_time: Date
+    public let scheduled_end_time: Date?
     public let privacy_level: GuildScheduledEvtPrivacyLvl
     public let status: GuildScheduledEvtStatus
     public let entity_type: GuildScheduledEvtEntityType
