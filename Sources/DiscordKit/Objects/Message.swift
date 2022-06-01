@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// Type of message
 public enum MessageType: Int, Codable {
     /// Default text message
     case defaultMsg = 0
@@ -177,7 +178,7 @@ public struct Message: Codable, GatewayData, Equatable {
     public var sticker_items: [StickerItem]?
 }
 
-/// A complete copy of Message but with most properties marked as Optional
+/// A complete copy of ``Message`` but with most properties marked as Optional
 ///
 /// Swift doesn't have a Optional or Partial wrapper yet :(((
 ///
@@ -256,7 +257,9 @@ public enum MessageComponentTypes: Int, Codable {
     case textInput = 4
 }
 
-// MARK: New message component struct, incomplete
+/// New message component struct
+///
+/// > Warning: This struct is incomplete
 public struct MessageComponent: Codable {
     public let type: MessageComponentTypes
 }
