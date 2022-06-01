@@ -111,7 +111,7 @@ public struct CurrentUser: Codable, GatewayData, Equatable {
     public let purchased_flags: Int?
     
     public let premium: Bool
-    public let nsfw_allowed: Bool
+    public let nsfw_allowed: Bool?
     public let mobile: Bool
     public let desktop: Bool
     public let mfa_enabled: Bool
