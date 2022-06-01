@@ -64,7 +64,13 @@ public struct GatewayConnProperties: OutgoingGatewayData {
     public let client_build_number: Int?
 }
 
-/// Opcode 1 - _Heartbeat_
+/// Gateway Heartbeat
+///
+/// Sent when establishing a new session with the Gateway, to identify the client.
+/// Refer to ``GatewayHello/heartbeat_interval`` for more details regarding
+/// the heartbeat timings.
+///
+/// > Outgoing Gateway data struct for opcode 2
 public struct GatewayHeartbeat: OutgoingGatewayData {
     private let seq: Int?
     
@@ -76,7 +82,12 @@ public struct GatewayHeartbeat: OutgoingGatewayData {
     }
 }
 
-/// Opcode 2 - _Identify_
+/// Gateway Identify
+///
+/// Sent every ``GatewayHello/heartbeat_interval``, to prevent the Gateway
+/// from closing the connection and
+///
+/// > Outgoing Gateway data struct for opcode 1
 public struct GatewayIdentify: OutgoingGatewayData {
     public let token: String
     public let properties: GatewayConnProperties
@@ -87,7 +98,11 @@ public struct GatewayIdentify: OutgoingGatewayData {
     public let capabilities: Int // Hardcode this to 253
 }
 
-/// Opcode 3 - _Presence Update_
+/// Presence Update
+///
+/// Sent to update the presence of the current client.
+///
+/// > Outgoing Gateway data struct for opcode 3
 public struct GatewayPresenceUpdate: OutgoingGatewayData {
     public let since: Int // Unix time (in milliseconds) of when the client went idle, or null if the client is not idle
     public let activities: [ActivityOutgoing]
@@ -95,7 +110,11 @@ public struct GatewayPresenceUpdate: OutgoingGatewayData {
     public let afk: Bool
 }
 
-// Opcode 4 - _Voice State Update_
+/// Voice State Update
+///
+/// Sent to update the client's voice, deaf and video state.
+///
+/// > Outgoing Gateway data struct for opcode 4
 public struct GatewayVoiceStateUpdate: OutgoingGatewayData, GatewayData {
     public let guild_id: Snowflake?
     public let channel_id: Snowflake? // ID of the voice channel client wants to join (null if disconnecting)
@@ -122,14 +141,20 @@ public struct GatewayVoiceStateUpdate: OutgoingGatewayData, GatewayData {
     }
 }
 
-/// Opcode 6 - _Resume_
+/// Gateway Resume
+///
+/// Sent when attempting to resume a broken websocket connection.
+///
+/// > Outgoing Gateway data struct for opcode 6
 public struct GatewayResume: OutgoingGatewayData {
     public let token: String
     public let session_id: String
     public let seq: Int // Last sequence number received
 }
 
-/// Opcode 8 - _Guild Request Members_
+/// Guild Request Members
+///
+/// > Outgoing Gateway data struct for opcode 8
 public struct GatewayGuildRequestMembers: GatewayData {
     public let guild_id: Snowflake
     public let query: String?
@@ -139,22 +164,37 @@ public struct GatewayGuildRequestMembers: GatewayData {
     public let nonce: String? // Nonce to identify the Guild Members Chunk response
 }
 
-/// Opcode 10 - _Hello_
+
+/// Gateway Hello
+///
+/// > Incoming Gateway data struct for opcode 10
 public struct GatewayHello: GatewayData {
+    /// Interval between outgoing heartbeats, in ms
+    ///
+    /// The Gateway has an approx 25% time tolerance to delayed heartbeats,
+    /// that is, it will close the connection if no heartbeat is received after
+    /// ``heartbeat_interval``\*125% ms from the last received heartbeat.
+    /// As per official docs, the first heartbeat should be sent
+    /// ``heartbeat_interval``\*[0...1] ms after receiving the ``GatewayHello``
+    /// payload, where [0...1] is a random double from 0-1.
     public let heartbeat_interval: Int
 }
 
-/// Opcode 14 - _Subscribe Guild Events_
+/// Subscribe Guild Events
+///
+/// > Outgoing Gateway data struct for opcode 11
 public struct SubscribeGuildEvts: OutgoingGatewayData {
     public let guild_id: Snowflake
-    public let typing: Bool
-    public let activities: Bool
-    public let threads: Bool
+    public let typing: Bool?
+    public let activities: Bool?
+    public let threads: Bool?
+    public let members: [Snowflake]?
 
-	public init(guild_id: Snowflake, typing: Bool = false, activities: Bool = false, threads: Bool = false) {
+    public init(guild_id: Snowflake, typing: Bool? = nil, activities: Bool? = nil, threads: Bool? = nil, members: [Snowflake]? = nil) {
 		self.guild_id = guild_id
 		self.typing = typing
 		self.activities = activities
 		self.threads = threads
+        self.members = members
 	}
 }
