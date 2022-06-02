@@ -138,16 +138,18 @@ public class RobustWebSocket: NSObject, ObservableObject {
             // print(result)
             switch result {
             case .success(let message):
-                switch (message) {
-                case .data(let data):
-                    if let decompressed = self?.decompressor.push_data(data) {
-                        self?.handleMessage(message: decompressed)
-                    } else { self?.log.debug("Data has not ended yet") }
-                    break
-                case .string(let str): self?.handleMessage(message: str)
-                @unknown default: self?.log.warning("Unknown sock message case!")
+                do {
+                    switch (message) {
+                    case .data(let data):
+                        if let decompressed = self?.decompressor.push_data(data) {
+                            try self?.handleMessage(with: decompressed)
+                        } else { self?.log.debug("Data has not ended yet") }
+                    case .string(let str): try self?.handleMessage(with: str)
+                    @unknown default: self?.log.warning("Unknown sock message case!")
+                    }
+                } catch {
+                    self?.log.warning("Error decoding message: \(error.localizedDescription, privacy: .public)")
                 }
-                // self?.onMessage.notify(event: message)
                 self?.attachSockReceiveListener()
             case .failure(let error):
                 // If an error is encountered here, the connection is probably broken
@@ -186,7 +188,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
     }
     
     // MARK: - Handlers
-    private func handleMessage(message: String) {
+    private func handleMessage(with message: String) throws {
         /*
          For debugging JSON decoding errors, how wonderful!
         do {
@@ -207,14 +209,8 @@ public class RobustWebSocket: NSObject, ObservableObject {
             print("error: ", error)
         }*/
 
-		let decoded: GatewayIncoming
-		do {
-            decoded = try DiscordAPI.decoder().decode(GatewayIncoming.self, from: message.data(using: .utf8) ?? Data())
-		} catch {
-			print(error)
-            //print(message)
-			return
-		}
+        guard let msgData = message.data(using: .utf8) else { return }
+		let decoded = try DiscordAPI.decoder().decode(GatewayIncoming.self, from: msgData)
         
         if let sequence = decoded.s { seq = sequence }
         

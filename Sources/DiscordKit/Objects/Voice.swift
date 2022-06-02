@@ -20,5 +20,5 @@ public struct VoiceState: Codable, GatewayData {
     public let self_stream: Bool?
     public let self_video: Bool
     public let suppress: Bool
-    public let request_to_speak_timestamp: ISOTimestamp? // Time when user requested to speak, if any
+    public let request_to_speak_timestamp: Date? // Time when user requested to speak, if any
 }
