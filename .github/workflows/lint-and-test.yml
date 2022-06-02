@@ -43,9 +43,9 @@ jobs:
 
       - name: Download Build
         uses: actions/download-artifact@v3.0.0
-          with:
-            name: build
-            path: .build
+        with:
+          name: build
+          path: .build
 
       - name: Test
         run: swift test
