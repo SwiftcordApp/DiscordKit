@@ -11,5 +11,5 @@ import Foundation
 public struct ChannelPinsUpdate: Codable, GatewayData {
     public let guild_id: Snowflake?
     public let channel_id: Snowflake
-    public let last_pin_timestamp: ISOTimestamp?
+    public let last_pin_timestamp: Date?
 }

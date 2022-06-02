@@ -21,7 +21,7 @@ public struct Embed: Codable, Identifiable {
     public let type: EmbedType?
     public let description: String?
     public let url: String?
-    public let timestamp: ISOTimestamp?
+    public let timestamp: Date?
     public let color: Int?
     public let footer: EmbedFooter?
     public let image: EmbedMedia?
@@ -31,7 +31,7 @@ public struct Embed: Codable, Identifiable {
     public let author: EmbedAuthor?
     public let fields: [EmbedField]?
     public var id: String {
-		"\(title ?? "")\(description ?? "")\(url ?? "")\(String(color ?? 0))\(timestamp ?? "")"
+		"\(title ?? "")\(description ?? "")\(url ?? "")\(String(color ?? 0))\(String(timestamp?.timeIntervalSince1970 ?? 0))"
     }
 }
 

@@ -89,11 +89,11 @@ public struct Message: Codable, GatewayData, Equatable {
     public var content: String
     
     /// When this message was sent
-    public let timestamp: ISOTimestamp
-    
+    public let timestamp: Date
+
     /// When this message was edited (or null if never)
-    public var edited_timestamp: ISOTimestamp?
-    
+    public var edited_timestamp: Date?
+
     /// If this was a TTS message
     public var tts: Bool
     
@@ -191,8 +191,8 @@ public struct PartialMessage: Codable, GatewayData {
     public let author: User?
     public let member: Member?
     public let content: String? // The message contents (up to 2000 characters)
-    public let timestamp: ISOTimestamp?
-    public let edited_timestamp: ISOTimestamp?
+    public let timestamp: Date?
+    public let edited_timestamp: Date?
     public let tts: Bool?
     public let mention_everyone: Bool?
     public let mentions: [User]?

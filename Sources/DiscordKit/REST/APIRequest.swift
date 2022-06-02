@@ -70,7 +70,7 @@ public extension DiscordAPI {
         
         req.setValue(Locale.englishUS.rawValue, forHTTPHeaderField: "x-discord-locale")
         req.setValue("bugReporterEnabled", forHTTPHeaderField: "x-debug-options")
-        guard let superEncoded = try? JSONEncoder().encode(getSuperProperties()) else {
+        guard let superEncoded = try? DiscordAPI.encoder().encode(getSuperProperties()) else {
             DiscordAPI.log.error("Couldn't encode super properties, something is seriously wrong")
             return nil
         }
@@ -118,9 +118,9 @@ public extension DiscordAPI {
             guard let d = try? await makeRequest(path: path, query: query)
             else { return nil }
             
-            return try JSONDecoder().decode(T.self, from: d)
+            return try DiscordAPI.decoder().decode(T.self, from: d)
         } catch let DecodingError.dataCorrupted(context) {
-            print(context)
+            print(context.debugDescription)
         } catch let DecodingError.keyNotFound(key, context) {
             print("Key '\(key)' not found:", context.debugDescription)
             print("codingPath:", context.codingPath)
@@ -142,7 +142,7 @@ public extension DiscordAPI {
         body: B? = nil,
         attachments: [URL] = []
     ) async -> D? {        
-        let p = body != nil ? try? JSONEncoder().encode(body) : nil
+        let p = body != nil ? try? DiscordAPI.encoder().encode(body) : nil
         guard let d = try? await makeRequest(
             path: path,
             attachments: attachments,
@@ -151,7 +151,7 @@ public extension DiscordAPI {
         )
         else { return nil }
         
-        return try? JSONDecoder().decode(D.self, from: d)
+        return try? DiscordAPI.decoder().decode(D.self, from: d)
     }
     
     /// Make a `POST` request to the Discord REST API, for endpoints

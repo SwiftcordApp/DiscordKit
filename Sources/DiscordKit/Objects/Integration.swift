@@ -30,7 +30,7 @@ public struct Integration: Codable, GatewayData {
     public let expire_grace_period: Int? // The grace period (in days) before expiring subscribers
     public let user: User?
     public let account: IntegrationAccount
-    public let synced_at: ISOTimestamp?
+    public let synced_at: Date?
     public let subscriber_count: Int?
     public let revoked: Bool?
     public let application: IntegrationApplication?

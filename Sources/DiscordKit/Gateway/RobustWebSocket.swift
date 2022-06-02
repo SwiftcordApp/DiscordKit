@@ -209,10 +209,10 @@ public class RobustWebSocket: NSObject, ObservableObject {
 
 		let decoded: GatewayIncoming
 		do {
-			decoded = try JSONDecoder().decode(GatewayIncoming.self, from: message.data(using: .utf8) ?? Data())
+            decoded = try DiscordAPI.decoder().decode(GatewayIncoming.self, from: message.data(using: .utf8) ?? Data())
 		} catch {
 			print(error)
-            print(message)
+            //print(message)
 			return
 		}
         
@@ -485,7 +485,7 @@ public extension RobustWebSocket {
         guard connected else { return }
 
         let sendPayload = GatewayOutgoing(op: op, d: data, s: seq)
-        guard let encoded = try? JSONEncoder().encode(sendPayload)
+        guard let encoded = try? DiscordAPI.encoder().encode(sendPayload)
         else { return }
         
         log.debug("Outgoing Payload: <\(String(describing: op), privacy: .public)> \(String(describing: data), privacy: .sensitive(mask: .hash)) [seq: \(String(describing: self.seq), privacy: .public)]")
