@@ -1,0 +1,52 @@
+name: Lint and Test
+
+on:
+  push:
+  pull_request:
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    # The type of runner that the job will run on
+    runs-on: macos-12
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Xcode Select
+        uses: devbotsxyz/xcode-select@v1.1.0
+        with:
+          version: 13.3.1
+
+      # Runs a single command using the runners shell
+      - name: Build
+        run: swift build
+      
+      - name: Upload Build
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: build
+          path: .build
+
+  test:
+    runs-on: macos-12
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Xcode Select
+        uses: devbotsxyz/xcode-select@v1.1.0
+        with:
+          version: 13.3.1
+
+      - name: Download Build
+        uses: actions/download-artifact@v3.0.0
+          with:
+            name: build
+            path: .build
+
+      - name: Test
+        run: swift test
+
