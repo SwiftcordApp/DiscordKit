@@ -29,8 +29,8 @@ jobs:
         with:
           name: build
           path: |
-          .build
-          !.build/checkouts
+            .build
+            !.build/checkouts
 
   test:
     runs-on: macos-12
