@@ -101,14 +101,20 @@ public class DiscordGateway: ObservableObject, Equatable {
         switch (event, data) {
             case let (.ready, event as ReadyEvt):
                 // Populate cache with data sent in ready event
-                for guild in event.guilds { cache.guilds.updateValue(guild, forKey: guild.id) }
+                for guild in event.guilds {
+                    cache.guilds.updateValue(guild, forKey: guild.id)
+                }
                 /* self.cache.guilds = (d.guilds
                      .filter({ g in !d.user_settings.guild_positions.contains(g.id) })
                      .sorted(by: { lhs, rhs in lhs.joined_at! > rhs.joined_at! }))
                  + d.user_settings.guild_positions.compactMap({ id in d.guilds.first { g in g.id == id } }) */
                 cache.dms = event.private_channels
                 cache.user = event.user
-                for user in event.users { cache.users.updateValue(user, forKey: user.id) }
+
+                for user in event.users {
+                    cache.users.updateValue(user, forKey: user.id)
+                }
+
                 cache.userSettings = event.user_settings
 
                 log.info("Gateway ready")
