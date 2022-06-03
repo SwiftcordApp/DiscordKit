@@ -193,7 +193,7 @@ public extension User {
             locale: nil,
             verified: nil,
             flags: user.flags,
-            premium_type: user.premium ? user.purchased_flags : User.PremiumType.none,
+            premium_type: user.premium ? .nitro : User.PremiumType.none,
             public_flags: user.public_flags
         )
     }
