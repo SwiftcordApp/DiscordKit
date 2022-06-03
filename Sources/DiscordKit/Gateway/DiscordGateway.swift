@@ -99,89 +99,105 @@ public class DiscordGateway: ObservableObject, Equatable {
         var eventWasHandled = true
 
         switch type {
-        case .ready:
-            guard let d = data as? ReadyEvt else { break }
+            case .ready:
+                guard let d = data as? ReadyEvt else { break }
 
-            // Populate cache with data sent in ready event
-            for guild in d.guilds { cache.guilds.updateValue(guild, forKey: guild.id) }
-            /*self.cache.guilds = (d.guilds
-                .filter({ g in !d.user_settings.guild_positions.contains(g.id) })
-                .sorted(by: { lhs, rhs in lhs.joined_at! > rhs.joined_at! }))
-            + d.user_settings.guild_positions.compactMap({ id in d.guilds.first { g in g.id == id } })*/
-            cache.dms = d.private_channels
-            cache.user = d.user
-            for user in d.users { cache.users.updateValue(user, forKey: user.id) }
-            cache.userSettings = d.user_settings
+                // Populate cache with data sent in ready event
+                for guild in d.guilds { cache.guilds.updateValue(guild, forKey: guild.id) }
+                /* self.cache.guilds = (d.guilds
+                     .filter({ g in !d.user_settings.guild_positions.contains(g.id) })
+                     .sorted(by: { lhs, rhs in lhs.joined_at! > rhs.joined_at! }))
+                 + d.user_settings.guild_positions.compactMap({ id in d.guilds.first { g in g.id == id } }) */
+                cache.dms = d.private_channels
+                cache.user = d.user
+                for user in d.users { cache.users.updateValue(user, forKey: user.id) }
+                cache.userSettings = d.user_settings
 
-            log.info("Gateway ready")
-        // Guild events
-        case .guildCreate:
-            guard let d = data as? Guild else { break }
-            cache.guilds.updateValue(d, forKey: d.id)
-        case .guildDelete:
-            guard let d = data as? GuildUnavailable else { break }
-            cache.guilds.removeValue(forKey: d.id)
-        case .guildUpdate:
-            guard var d = data as? Guild else { break }
-            guard let oldGuild = cache.guilds[d.id]
-            else { return }
+                log.info("Gateway ready")
 
-            // Fuse the old guild with the updated guild
-            d.joined_at = oldGuild.joined_at
-            d.large = oldGuild.large
-            d.unavailable = oldGuild.unavailable
-            d.member_count = oldGuild.member_count
-            d.voice_states = oldGuild.voice_states
-            d.members = oldGuild.members
-            d.channels = oldGuild.channels
-            d.threads = oldGuild.threads
-            d.presences = oldGuild.presences
-            d.stage_instances = oldGuild.stage_instances
-            d.guild_scheduled_events = oldGuild.guild_scheduled_events
-            cache.guilds[d.id] = d
-        // User updates
-        case .userUpdate:
-            guard let updatedUser = data as? CurrentUser else { break }
-            cache.user = updatedUser
-        case .userSettingsUpdate:
-            guard let newSettings = data as? UserSettings else { break }
-            cache.userSettings = mergeUserSettings(cache.userSettings, new: newSettings)
-        // Channel events
-        case .channelCreate:
-            guard let newCh = data as? Channel else { break }
-            if let guildID = newCh.guild_id {
-                cache.guilds[guildID]?.channels?.append(newCh)
-            }
-        case .channelDelete:
-            guard let delCh = data as? Channel else { break }
-            if let guildID = delCh.guild_id {
-                cache.guilds[guildID]?.channels?.removeAll { delCh.id == $0.id }
-            }
-        case .channelUpdate:
-            guard let updatedCh = data as? Channel else { break }
-            if let guildID = updatedCh.guild_id,
-               let chIdx = cache.guilds[guildID]?
-                .channels?
-                .firstIndex(where: { updatedCh.id == $0.id }) {
-                cache.guilds[updatedCh.guild_id!]?.channels?[chIdx] = updatedCh
-            }
-        case .messageCreate:
-            guard let msg = data as? Message else { break }
-            if let guild = msg.guild_id,
-               let idx = cache.guilds[guild]?
-                .channels?
-                .firstIndex(where: { $0.id == msg.channel_id }) {
+            // Guild events
+            case .guildCreate:
+                guard let d = data as? Guild else { break }
+                cache.guilds.updateValue(d, forKey: d.id)
+
+            case .guildDelete:
+                guard let d = data as? GuildUnavailable else { break }
+                cache.guilds.removeValue(forKey: d.id)
+
+            case .guildUpdate:
+                guard var d = data as? Guild else { break }
+                guard let oldGuild = cache.guilds[d.id]
+                else { return }
+
+                // Fuse the old guild with the updated guild
+                d.joined_at = oldGuild.joined_at
+                d.large = oldGuild.large
+                d.unavailable = oldGuild.unavailable
+                d.member_count = oldGuild.member_count
+                d.voice_states = oldGuild.voice_states
+                d.members = oldGuild.members
+                d.channels = oldGuild.channels
+                d.threads = oldGuild.threads
+                d.presences = oldGuild.presences
+                d.stage_instances = oldGuild.stage_instances
+                d.guild_scheduled_events = oldGuild.guild_scheduled_events
+                cache.guilds[d.id] = d
+
+            // User updates
+            case .userUpdate:
+                guard let updatedUser = data as? CurrentUser else { break }
+                cache.user = updatedUser
+
+            case .userSettingsUpdate:
+                guard let newSettings = data as? UserSettings else { break }
+                cache.userSettings = mergeUserSettings(cache.userSettings, new: newSettings)
+
+            // Channel events
+            case .channelCreate:
+                guard let newCh = data as? Channel else { break }
+                if let guildID = newCh.guild_id {
+                    cache.guilds[guildID]?.channels?.append(newCh)
+                }
+
+            case .channelDelete:
+                guard let delCh = data as? Channel else { break }
+                if let guildID = delCh.guild_id {
+                    cache.guilds[guildID]?.channels?.removeAll { delCh.id == $0.id }
+                }
+
+            case .channelUpdate:
+                guard let updatedCh = data as? Channel else { break }
+                if let guildID = updatedCh.guild_id,
+                   let chIdx = cache.guilds[guildID]?
+                   .channels?
+                   .firstIndex(where: { updatedCh.id == $0.id }) {
+                    cache.guilds[updatedCh.guild_id!]?.channels?[chIdx] = updatedCh
+                }
+
+            case .messageCreate:
+                guard let msg = data as? Message else { break }
+                if let guild = msg.guild_id,
+                   let idx = cache.guilds[guild]?
+                   .channels?
+                   .firstIndex(where: { $0.id == msg.channel_id }) {
                     cache.guilds[guild]?.channels?[idx].last_message_id = msg.id
-            } else if let idx = cache.dms.firstIndex(where: { $0.id == msg.channel_id }) {
-                cache.dms[idx].last_message_id = msg.id
-            }
-        case .presenceUpdate:
-            guard let p = data as? PresenceUpdate else { return }
-            print("Presence update!")
-            print(p)
-        default: eventWasHandled = false
+                } else if let idx = cache.dms.firstIndex(where: { $0.id == msg.channel_id }) {
+                    cache.dms[idx].last_message_id = msg.id
+                }
+
+            case .presenceUpdate:
+                guard let p = data as? PresenceUpdate else { return }
+                print("Presence update!")
+                print(p)
+
+            default:
+                eventWasHandled = false
         }
-        if eventWasHandled { cache.objectWillChange.send() }
+
+        if eventWasHandled {
+            cache.objectWillChange.send()
+        }
+
         onEvent.notify(event: (type, data))
         log.info("Dispatched event <\(type.rawValue, privacy: .public)>")
     }
