@@ -159,14 +159,14 @@ public class DiscordGateway: ObservableObject, Equatable {
 
             case let (.channelDelete, channel as Channel):
                 if let guildID = channel.guild_id {
-                    cache.guilds[guildID]?.channels?.removeAll { channel.id == $0.id }
+                    cache.guilds[guildID]?.channels?.removeAll(matchingIdentifierFor: channel)
                 }
 
             case let (.channelUpdate, channel as Channel):
                 if let guildID = channel.guild_id,
                    let chIdx = cache.guilds[guildID]?
                    .channels?
-                   .firstIndex(where: { channel.id == $0.id }) {
+                   .firstIndex(matchingIdentifierFor: channel) {
                     cache.guilds[channel.guild_id!]?.channels?[chIdx] = channel
                 }
 
