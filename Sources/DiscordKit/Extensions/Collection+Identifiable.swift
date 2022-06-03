@@ -46,7 +46,7 @@ public extension RangeReplaceableCollection where Element: Identifiable {
     /// is preserved.
     /// - Parameter element: The identifiable element you want to find.
     /// - Complexity: O(*n*), where *n* is the length of the collection.
-    mutating func removeAll(matchingIdentifierFor element: Element){
+    mutating func removeAll(matchingIdentifierFor element: Element) {
         removeAll(identifiedBy: element.id)
     }
 }
