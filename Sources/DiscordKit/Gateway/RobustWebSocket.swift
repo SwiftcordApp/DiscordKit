@@ -28,7 +28,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
     /// An ``EventDispatch`` that is notified when an event dispatch
     /// is received from the Gateway
     public let onEvent = EventDispatch<(GatewayEvent, GatewayData?)>()
-    
+
     /// An ``EventDispatch`` that is notified when the gateway closes
     /// with an auth failure, or when the token is not present
     /// in the keychain
@@ -38,26 +38,26 @@ public class RobustWebSocket: NSObject, ObservableObject {
     /// or reachability status changes. Event is notified with
     /// a (sessionOpen: Bool, reachable: Bool) tuple.
     public let onConnStateChange = EventDispatch<(Bool, Bool)>()
-    
+
     /// An ``EventDispatch`` that is notified when the session cannot be
     /// resumed, most likely when the socket has been disconnected for too
     /// long and the session is invalidated. A fresh reconnection will
     /// be attempted if/when this happens.
     public let onSessionInvalid = EventDispatch<Void>()
-    
+
     private var session: URLSession!, socket: URLSessionWebSocketTask!,
                 decompressor: DecompressionEngine!
 	private let reachability = try! Reachability(), log = Logger(subsystem: Bundle.main.bundleIdentifier ?? DiscordAPI.subsystem, category: "RobustWebSocket")
-    
+
     private let queue: OperationQueue
-        
+
     private let timeout: TimeInterval, maxMsgSize: Int,
                 reconnectInterval: (URLSessionWebSocketTask.CloseCode?, Int) -> TimeInterval?
     private var attempts = 0, reconnects = -1, awaitingHb: Int = 0,
                 reconnectWhenOnlineAgain = false, explicitlyClosed = false,
                 seq: Int? = nil, canResume = false, sessionID: String? = nil,
                 pendingReconnect: Timer? = nil, connTimeout: Timer? = nil
-    
+
     /// If the Gateway socket is connected
     ///
     /// This is set to `true` immediately after the socket connection
@@ -81,16 +81,16 @@ public class RobustWebSocket: NSObject, ObservableObject {
     public var sessionOpen = false {
         didSet { onConnStateChange.notify(event: (sessionOpen, reachable)) }
     }
-    
-    fileprivate var hbCancellable: AnyCancellable? = nil
-    
+
+    fileprivate var hbCancellable: AnyCancellable?
+
     private func clearPendingReconnectIfNeeded() {
         if let reconnectTimer = pendingReconnect {
             reconnectTimer.invalidate()
             pendingReconnect = nil
         }
     }
-    
+
     private func hasConnected() {
         if let timer = connTimeout {
             timer.invalidate()
@@ -100,7 +100,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
         attempts = 0
         connected = true
     }
-        
+
     // MARK: - (Re)Connection
     private func reconnect(code: URLSessionWebSocketTask.CloseCode?) {
         guard !explicitlyClosed else {
@@ -112,7 +112,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
             return
         }
         guard connTimeout == nil else { return }
-        
+
         let delay = reconnectInterval(code, attempts)
         if let delay = delay {
             log.info("Reconnecting after \(delay)s...")
@@ -132,14 +132,14 @@ public class RobustWebSocket: NSObject, ObservableObject {
             }
         }
     }
-    
+
     private func attachSockReceiveListener() {
         socket.receive { [weak self] result in
             // print(result)
             switch result {
             case .success(let message):
                 do {
-                    switch (message) {
+                    switch message {
                     case .data(let data):
                         if let decompressed = self?.decompressor.push_data(data) {
                             try self?.handleMessage(with: decompressed)
@@ -161,13 +161,13 @@ public class RobustWebSocket: NSObject, ObservableObject {
     private func connect() {
         pendingReconnect = nil
         awaitingHb = 0
-        
+
         var gatewayReq = URLRequest(url: URL(string: GatewayConfig.default.gateway)!)
         // The difference in capitalisation is intentional
 		gatewayReq.setValue(DiscordAPI.userAgent, forHTTPHeaderField: "User-Agent")
         socket = session.webSocketTask(with: gatewayReq)
         socket.maximumMessageSize = maxMsgSize
-        
+
         DispatchQueue.main.async { [weak self] in
             self?.connTimeout = Timer.scheduledTimer(withTimeInterval: self!.timeout, repeats: false) { [weak self] _ in
                 self?.connTimeout = nil
@@ -176,17 +176,17 @@ public class RobustWebSocket: NSObject, ObservableObject {
                 self?.forceClose()
             }
         }
-        
+
         attempts += 1
         // Create new instance of decompressor
         // It's best to do it here, before resuming the task since sometimes, messages arrive before the compressor is initialised in the socket open handler.
         decompressor = DecompressionEngine()
         socket.resume()
-        
+
         setupReachability()
         attachSockReceiveListener()
     }
-    
+
     // MARK: - Handlers
     private func handleMessage(with message: String) throws {
         /*
@@ -211,9 +211,9 @@ public class RobustWebSocket: NSObject, ObservableObject {
 
         guard let msgData = message.data(using: .utf8) else { return }
 		let decoded = try DiscordAPI.decoder().decode(GatewayIncoming.self, from: msgData)
-        
+
         if let sequence = decoded.s { seq = sequence }
-        
+
         switch decoded.op {
         case .heartbeat:
             log.debug("Sending expedited heartbeat as requested")
@@ -225,7 +225,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
             guard let d = decoded.d as? GatewayHello else { return }
             log.debug("Hello payload is: \(String(describing: d), privacy: .public)")
             startHeartbeating(interval: Double(d.heartbeat_interval) / 1000.0)
-        
+
             // Check if we're attempting to and can resume
             if canResume, let sessionID = sessionID, let seq = seq {
                 log.info("Attempting resume")
@@ -285,10 +285,9 @@ public class RobustWebSocket: NSObject, ObservableObject {
             forceClose()
         }
     }
-    
-    
+
     // MARK: - Initializers
-    
+
     /// Inits an instance of ``RobustWebSocket`` with provided parameters
     ///
     /// A convenience init is also provided that uses reasonable defaults instead.
@@ -309,7 +308,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
         session = URLSession(configuration: .default, delegate: self, delegateQueue: queue)
         connect()
     }
-    
+
     /// Inits an instance of ``RobustWebSocket`` with all parameters set
     /// to reasonable defaults.
     ///
@@ -321,19 +320,18 @@ public class RobustWebSocket: NSObject, ObservableObject {
         self.init(timeout: TimeInterval(4), maxMessageSize: 1024*1024*10) { code, times in
             guard code != .policyViolation, code != .internalServerError, times < 10
             else { return nil }
-            
+
             return pow(1.4, Double(times)) * 5 - 5
         }
     }
 }
-
 
 // MARK: - WebSocketTask delegate functions
 extension RobustWebSocket: URLSessionWebSocketDelegate {
     public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
         log.info("Socket connection opened")
     }
-    
+
     public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
         reconnect(code: closeCode)
         connected = false
@@ -343,7 +341,6 @@ extension RobustWebSocket: URLSessionWebSocketDelegate {
         log.info("Socket connection closed")
     }
 }
-
 
 // MARK: - Reachability
 public extension RobustWebSocket {
@@ -360,17 +357,15 @@ public extension RobustWebSocket {
             self?.log.info("Connection unreachable")
             self?.forceClose()
         }
-        do { try reachability.startNotifier() }
-        catch { log.error("Starting reachability notifier failed!") }
+        do { try reachability.startNotifier() } catch { log.error("Starting reachability notifier failed!") }
     }
 }
-
 
 // MARK: - Heartbeating
 public extension RobustWebSocket {
     @objc private func sendHeartbeat() {
         guard connected else { return }
-        
+
         log.debug("Sending heartbeat, awaiting \(self.awaitingHb) ACKs")
         if awaitingHb > 1 {
             log.error("Too many pending heartbeats, closing socket")
@@ -379,13 +374,13 @@ public extension RobustWebSocket {
         send(op: .heartbeat, data: GatewayHeartbeat(seq))
         awaitingHb += 1
     }
-    
+
     private func startHeartbeating(interval: TimeInterval) {
         log.debug("Sending heartbeats every \(interval)s")
         awaitingHb = 0
-        
+
         guard hbCancellable == nil else { return }
-        
+
         // First heartbeat after interval * jitter where jitter is a value from 0-1
         // ~ Discord API docs
         DispatchQueue.main.asyncAfter(
@@ -395,14 +390,13 @@ public extension RobustWebSocket {
         ) {
             // Only ever start 1 publishing timer
             self.sendHeartbeat()
-            
+
             self.hbCancellable = Timer.publish(every: interval, tolerance: 2, on: .main, in: .common)
                 .autoconnect()
-                .sink() { _ in self.sendHeartbeat() }
+                .sink { _ in self.sendHeartbeat() }
         }
     }
 }
-
 
 // MARK: - Extension with public exposed methods
 public extension RobustWebSocket {
@@ -423,13 +417,12 @@ public extension RobustWebSocket {
         log.warning("Forcibly closing connection")
         self.socket.cancel(with: code, reason: nil)
         connected = false
-        if shouldReconnect { self.reconnect(code: nil) }
-        else {
+        if shouldReconnect { self.reconnect(code: nil) } else {
             sessionID = nil
             seq = nil
         }
     }
-    
+
     /// Explicitly close the Gateway socket connection
     ///
     /// When this method is called, the Gateway socket will gracefully close
@@ -444,10 +437,10 @@ public extension RobustWebSocket {
         sessionID = nil
         seq = nil
         reachability.stopNotifier()
-        
+
         socket.cancel(with: code, reason: nil)
     }
-    
+
     /// Initiates a Gateway socket connection
     ///
     /// This will open a socket connection to the Gateway, and identify with it
@@ -460,10 +453,10 @@ public extension RobustWebSocket {
         clearPendingReconnectIfNeeded()
         reconnectWhenOnlineAgain = false
         explicitlyClosed = false
-        
+
         connect()
     }
-    
+
     /// Send a outgoing payload to the Gateway
     ///
     /// This method has no effect if the Gateway socket is not connected
@@ -483,7 +476,7 @@ public extension RobustWebSocket {
         let sendPayload = GatewayOutgoing(op: op, d: data, s: seq)
         guard let encoded = try? DiscordAPI.encoder().encode(sendPayload)
         else { return }
-        
+
         log.debug("Outgoing Payload: <\(String(describing: op), privacy: .public)> \(String(describing: data), privacy: .sensitive(mask: .hash)) [seq: \(String(describing: self.seq), privacy: .public)]")
 
         socket.send(.data(encoded), completionHandler: completionHandler ?? { [weak self] err in

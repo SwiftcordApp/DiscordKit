@@ -13,13 +13,13 @@ public extension DiscordAPI {
     static func getCurrentUser() async -> User? {
         return await getReq(path: "users/@me")
     }
-    
+
     // MARK: Get User (Get user object from ID)
     // GET /users/{user.id}
     static func getUser(user: Snowflake) async -> User? {
         return await getReq(path: "users/\(user)")
     }
-    
+
     // MARK: Get Profile (Undocumented endpoint!)
     // GET /users/{user.id}
     static func getProfile(
@@ -33,10 +33,10 @@ public extension DiscordAPI {
         }
         return await getReq(path: "users/\(user)/profile", query: query)
     }
-    
+
     // MARK: Modify Current User
     // TODO: Patch not yet implemented
-    
+
     // MARK: Get Current User Guilds
     // GET /users/@me/guilds
     static func getGuilds(
@@ -46,18 +46,18 @@ public extension DiscordAPI {
     ) async -> [PartialGuild]? {
         return await getReq(path: "users/@me/guilds")
     }
-    
+
     // MARK: Get Current User Guild Member
     // Get guild member object for current user in a guild
     // GET /users/@me/guilds/{guild.id}/member
     static func getGuildMember(guild: Snowflake) async -> Member? {
         return await getReq(path: "users/@me/guilds/\(guild)/member")
     }
-    
+
     // MARK: Leave Guild
     // DELETE /users/@me/guilds/{guild.id}
     // TODO: Delete not yet implemented
-    
+
     // MARK: Create DM
-    
+
 }

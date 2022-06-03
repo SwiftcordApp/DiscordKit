@@ -10,9 +10,9 @@ import Foundation
 
 // Target official Discord client version for feature parity
 public enum ClientReleaseChannel: String {
-    case canary = "canary"
-    case beta = "beta"
-    case stable = "stable"
+    case canary
+    case beta
+    case stable
 }
 
 /// Information about the target official client to emulate
@@ -47,12 +47,12 @@ public struct GatewayConfig {
     /// Currently the only missing piece of emulating the official
     /// desktop client completely is ETK packing/unpacking.
 	public let parity: ClientParityVersion
-    
+
     /// Base REST endpoint URL
 	public let restBase: String
     /// Gateway WebSocket URL
 	public let gateway: String
-    
+
     /// Populate struct values with provided parameters
 	public init(
         baseURL: String,

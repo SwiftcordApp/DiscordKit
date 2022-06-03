@@ -22,18 +22,18 @@ public class DiscordGateway: ObservableObject, Equatable {
     public static func == (lhs: DiscordGateway, rhs: DiscordGateway) -> Bool {
         lhs.cache == rhs.cache
     }
-    
+
     // Events
     /// An ``EventDispatch`` that is notified when an event is dispatched
     /// from the Gateway
 	public let onEvent = EventDispatch<(GatewayEvent, GatewayData?)>()
-    
+
     /// Proxies ``RobustWebSocket/onAuthFailure``
 	public let onAuthFailure = EventDispatch<Void>()
-    
+
     // WebSocket object
     @Published public var socket: RobustWebSocket!
-    
+
     /// A cache for some data received from the Gateway
     ///
     /// Data from the `READY` event is stored in this cache. The data
@@ -46,11 +46,11 @@ public class DiscordGateway: ObservableObject, Equatable {
     /// > In the future, presence updates and REST API requests will
     /// > also be stored and kept fresh in this cache.
     public var cache: CachedState = CachedState()
-    
+
     private var evtListenerID: EventDispatch.HandlerIdentifier? = nil,
                 authFailureListenerID: EventDispatch.HandlerIdentifier? = nil,
                 connStateChangeListenerID: EventDispatch.HandlerIdentifier? = nil
-    
+
     /// If the Gateway socket is connected
     ///
     /// `@Published` proxy of ``RobustWebSocket/sessionOpen``
@@ -59,17 +59,17 @@ public class DiscordGateway: ObservableObject, Equatable {
     ///
     /// `@Published` proxy of ``RobustWebSocket/reachable``
     @Published public var reachable = false
-    
+
     // Logger
 	private let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? DiscordAPI.subsystem, category: "DiscordGateway")
-    
+
     /// Log out the current user, closing the Gateway socket connection
     ///
     /// This method removes the Discord token from the keychain and
     /// closes the Gateway socket. The socket will _not_ reconnect.
     public func logout() {
         log.debug("Logging out on request")
-        
+
         // Remove token from the keychain
         Keychain.remove(key: "authToken")
         // Reset user defaults
@@ -79,11 +79,11 @@ public class DiscordGateway: ObservableObject, Equatable {
         // Clear cache
         cache = CachedState()
         objectWillChange.send()
-        
+
         socket.close(code: .normalClosure)
         onAuthFailure.notify()
     }
-    
+
     /// Opens the socket connection with the Gateway
     ///
     /// Calls ``RobustWebSocket/open()``
@@ -94,14 +94,14 @@ public class DiscordGateway: ObservableObject, Equatable {
     public func connect() {
         socket.open()
     }
-    
+
     private func handleEvt(type: GatewayEvent, data: GatewayData?) {
         var eventWasHandled = true
-        
-        switch (type) {
+
+        switch type {
         case .ready:
             guard let d = data as? ReadyEvt else { break }
-            
+
             // Populate cache with data sent in ready event
             for guild in d.guilds { cache.guilds.updateValue(guild, forKey: guild.id) }
             /*self.cache.guilds = (d.guilds
@@ -112,7 +112,7 @@ public class DiscordGateway: ObservableObject, Equatable {
             cache.user = d.user
             for user in d.users { cache.users.updateValue(user, forKey: user.id) }
             cache.userSettings = d.user_settings
-            
+
             log.info("Gateway ready")
         // Guild events
         case .guildCreate:
@@ -125,7 +125,7 @@ public class DiscordGateway: ObservableObject, Equatable {
             guard var d = data as? Guild else { break }
             guard let oldGuild = cache.guilds[d.id]
             else { return }
-            
+
             // Fuse the old guild with the updated guild
             d.joined_at = oldGuild.joined_at
             d.large = oldGuild.large
@@ -185,7 +185,7 @@ public class DiscordGateway: ObservableObject, Equatable {
         onEvent.notify(event: (type, data))
         log.info("Dispatched event <\(type.rawValue, privacy: .public)>")
     }
-    
+
     /// Inits an instance of ``DiscordGateway``
     ///
     /// Refer to ``RobustWebSocket/init()`` for more details about parameters
@@ -211,16 +211,16 @@ public class DiscordGateway: ObservableObject, Equatable {
             }
         }
     }
-    
+
     deinit {
         if let evtListenerID = evtListenerID {
-            let _ = socket.onEvent.removeHandler(handler: evtListenerID)
+            _ = socket.onEvent.removeHandler(handler: evtListenerID)
         }
         if let authFailureListenerID = authFailureListenerID {
-            let _ = socket.onAuthFailure.removeHandler(handler: authFailureListenerID)
+            _ = socket.onAuthFailure.removeHandler(handler: authFailureListenerID)
         }
         if let connStateChangeListenerID = connStateChangeListenerID {
-            let _ = socket.onConnStateChange.removeHandler(handler: connStateChangeListenerID)
+            _ = socket.onConnStateChange.removeHandler(handler: connStateChangeListenerID)
         }
     }
 }

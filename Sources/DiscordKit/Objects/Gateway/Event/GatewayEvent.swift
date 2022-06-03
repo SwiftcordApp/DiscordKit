@@ -14,13 +14,13 @@ public enum GatewayEvent: String, Codable {
     case ready = "READY"
     case readySuppplmental = "READY_SUPPLEMENTAL"
     case resumed = "RESUMED" // End of events replay
-    
+
     // MARK: Channels
     case channelCreate = "CHANNEL_CREATE"
     case channelUpdate = "CHANNEL_UPDATE"
     case channelDelete = "CHANNEL_DELETE"
     case channelPinUpdate = "CHANNEL_PIN_UPDATE"
-    
+
     // MARK: Threads
     case threadCreate = "THREAD_CREATE"
     case threadUpdate = "THREAD_UPDATE"
@@ -28,7 +28,7 @@ public enum GatewayEvent: String, Codable {
     case threadListSync = "THREAD_LIST_SYNC" // Sent when gaining access to a channel, contains all active threads in that channel
     case threadMemberUpdate = "THREAD_MEMBER_UPDATE" // Thread member for the current user was updated
     case threadMembersUpdate = "THREAD_MEMBERS_UPDATE"
-    
+
     // MARK: - Guilds
     case guildCreate = "GUILD_CREATE"
     case guildUpdate = "GUILD_UPDATE"
@@ -53,19 +53,19 @@ public enum GatewayEvent: String, Codable {
     case guildSchEvtDelete = "GUILD_SCHEDULED_EVENT_DELETE"
     case guildSchEvtUserAdd = "GUILD_SCHEDULED_EVENT_USER_ADD"
     case guildSchEvtUserRemove = "GUILD_SCHEDULED_EVENT_USER_REMOVE"
-    
+
     // MARK: Integrations
     case integrationCreate = "INTEGRATION_CREATE"
     case integrationUpdate = "INTEGRATION_UPDATE"
     case integrationDelete = "INTEGRATION_DELETE"
-    
+
     // MARK: Interaction
     case interactionCreate = "INTERACTION_CREATE"
-    
+
     // MARK: Invites
     case inviteCreate = "INVITE_CREATE"
     case inviteDelete = "INVITE_DELETE"
-    
+
     // MARK: - Messages
     case messageCreate = "MESSAGE_CREATE"
     case messageUpdate = "MESSAGE_UPDATE"
@@ -77,27 +77,27 @@ public enum GatewayEvent: String, Codable {
     case messageReactRemove = "MESSAGE_REACTION_REMOVE"
     case messageReactRemoveAll = "MESSAGE_REACTION_REMOVE_ALL"
     case messageReactRemoveEmoji = "MESSAGE_REACTION_REMOVE_EMOJI"
-    
+
     // MARK: Presence Update
     case presenceUpdate = "PRESENCE_UPDATE"
 
     // MARK: Sessions
     case sessionsReplace = "SESSIONS_REPLACE"
-    
+
     // MARK: Stages
     case stageInstanceCreate = "STAGE_INSTANCE_CREATE"
     case stageInstanceDelete = "STAGE_INSTANCE_DELETE"
     case stageInstanceUpdate = "STAGE_INSTANCE_UPDATE"
-    
+
     // MARK: Typing
     case typingStart = "TYPING_START"
-    
+
     // MARK: Misc Updates
     case userUpdate = "USER_UPDATE"
     case voiceStateUpdate = "VOICE_STATE_UPDATE"
     case voiceServerUpdate = "VOICE_SERVER_UPDATE"
     case webhooksUpdate = "WEBHOOKS_UPDATE"
-    
+
     // MARK: Human account-specific Events
     case channelUnreadUpdate = "CHANNEL_UNREAD_UPDATE"
     case userSettingsUpdate = "USER_SETTINGS_UPDATE"

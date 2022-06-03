@@ -17,24 +17,24 @@ public class CachedState: ObservableObject, Equatable {
         lhs.user == rhs.user &&
         lhs.userSettings == rhs.userSettings
     }
-    
+
     /// Dictionary of guilds the user is in
     ///
     /// > The guild's ID is its key
     public var guilds: [Snowflake: Guild] = [:]
-        
+
     /// DM channels the user is in
 	public var dms: [Channel] = []
-    
+
     /// Cached object of current user
 	public var user: CurrentUser?
-    
+
     /// Cached users, initially populated from `READY` event and might
     /// grow over time
     public var users: [Snowflake: User] = [:]
-    
+
     /// User settings
     ///
     /// View ``UserSettings`` for information about each entry.
-    public var userSettings: UserSettings? = nil
+    public var userSettings: UserSettings?
 }

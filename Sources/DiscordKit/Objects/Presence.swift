@@ -9,7 +9,7 @@ import Foundation
 
 // TODO: Fill this in
 public struct Presence: Codable {
-    
+
 }
 
 public enum PresenceStatus: String, Codable {

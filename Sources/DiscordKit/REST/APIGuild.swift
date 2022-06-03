@@ -13,13 +13,13 @@ public extension DiscordAPI {
     static func getGuild(id: Snowflake) async -> Guild? {
         return await getReq(path: "guilds/\(id)")
     }
-    
+
     // MARK: Get Guild Channels
     // GET /guilds/{guild.id}/channels
     static func getGuildChannels(id: Snowflake) async -> [DecodableThrowable<Channel>]? {
         return await getReq(path: "guilds/\(id)/channels")
     }
-    
+
     // MARK: Get Guild Roles
     // GET /guilds/{guild.id}/roles
     static func getGuildRoles(id: Snowflake) async -> [Role]? {

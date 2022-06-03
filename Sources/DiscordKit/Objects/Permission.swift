@@ -92,11 +92,11 @@ public struct Permissions: OptionSet, Codable {
     public static let useEmbeddedActivities = Permissions(rawValue: 1 << 39)
     /// Allows for timing out users to prevent them from sending or reacting to messages in chat and threads, and from speaking in voice and stage channels
     public static let moderateMembers = Permissions(rawValue: 1 << 40)
-    
+
     public init(rawValue: UInt64) {
         self.rawValue = rawValue
     }
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let raw = try container.decode(String.self)

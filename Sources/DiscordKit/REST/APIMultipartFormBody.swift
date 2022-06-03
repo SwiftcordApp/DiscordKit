@@ -30,7 +30,7 @@ public extension DiscordAPI {
             body.append(attachmentData)
             body.append("\r\n".data(using: .utf8)!)
         }
-        
+
         if let payloadJson = payloadJson {
             body.append("--\(boundary)\r\n".data(using: .utf8)!)
             body.append("Content-Disposition: form-data; name=\"payload_json\"\r\nContent-Type: application/json\r\n\r\n".data(using: .utf8)!)

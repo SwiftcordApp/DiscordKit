@@ -17,7 +17,7 @@ public extension DiscordAPI {
     static func getDMs() async -> [DecodableThrowable<Channel>]? {
         return await getReq(path: "users/@me/channels")
     }
-    
+
     // MARK: Change Current User Password
     // PATCH /users/@me
     // Fields: new_password, password
@@ -27,7 +27,7 @@ public extension DiscordAPI {
         newPW: String
     ) async -> User? {
         // Patch isn't implemented yet
-        
+
         return nil
     }
 }

@@ -56,22 +56,22 @@ public struct GatewayIncoming: Decodable {
     public let s: Int? // Sequence #
     public let t: GatewayEvent?
     public var primitiveData: Any?
-    
+
     private enum CodingKeys: String, CodingKey {
         case op
         case d
         case s
         case t
    }
-    
+
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         let action = try values.decode(GatewayIncomingOpcodes.self, forKey: .op)
-        
+
         op = action
         s = try values.decodeIfPresent(Int.self, forKey: .s)
         t = try values.decodeIfPresent(GatewayEvent.self, forKey: .t)
-                
+
         switch action {
         case .hello: d = try values.decode(GatewayHello.self, forKey: .d)
         case .invalidSession: primitiveData = try values.decode(Bool.self, forKey: .d) // Parse data as bool
@@ -83,11 +83,11 @@ public struct GatewayIncoming: Decodable {
             case .channelCreate, .channelUpdate, .channelDelete, .threadCreate, .threadUpdate, .threadDelete:
                 d = try values.decode(Channel.self, forKey: .d)
             case .channelPinUpdate: d = try values.decode(ChannelPinsUpdate.self, forKey: .d)
-                
+
             case .threadListSync: d = try values.decode(ThreadListSync.self, forKey: .d)
             case .threadMemberUpdate: d = try values.decode(ThreadMember.self, forKey: .d)
             case .threadMembersUpdate: d = try values.decode(ThreadMembersUpdate.self, forKey: .d)
-                
+
             case .guildUpdate, .guildCreate: d = try values.decode(Guild.self, forKey: .d)
             case .guildDelete: d = try values.decode(GuildUnavailable.self, forKey: .d)
             case .guildBanAdd, .guildBanRemove: d = try values.decode(GuildBan.self, forKey: .d)
@@ -102,7 +102,7 @@ public struct GatewayIncoming: Decodable {
             case .guildRoleDelete: d = try values.decode(GuildRoleDelete.self, forKey: .d)
             case .guildSchEvtCreate, .guildSchEvtUpdate, .guildSchEvtDelete: d = try values.decode(GuildScheduledEvent.self, forKey: .d)
             case .guildSchEvtUserAdd, .guildSchEvtUserRemove: d = try values.decode(GuildSchEvtUserEvt.self, forKey: .d)
-                
+
                 // TODO: More events go here
             case .messageCreate: d = try values.decode(Message.self, forKey: .d)
             case .messageUpdate: d = try values.decode(PartialMessage.self, forKey: .d)
@@ -111,10 +111,10 @@ public struct GatewayIncoming: Decodable {
             case .messageDeleteBulk: d = try values.decode(MessageDeleteBulk.self, forKey: .d)
             case .presenceUpdate: d = try values.decode(PresenceUpdate.self, forKey: .d)
                 // TODO: Add the remaining like 100 events
-                
+
             case .userUpdate: d = try values.decode(CurrentUser.self, forKey: .d)
             case .typingStart: d = try values.decode(TypingStart.self, forKey: .d)
-                
+
                 // User-specific events
             case .channelUnreadUpdate: d = try values.decode(ChannelUnreadUpdate.self, forKey: .d)
             case .userSettingsUpdate: d = try values.decode(UserSettings.self, forKey: .d)

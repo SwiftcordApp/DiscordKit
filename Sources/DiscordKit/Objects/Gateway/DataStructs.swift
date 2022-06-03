@@ -17,7 +17,7 @@ public struct GatewayConnProperties: OutgoingGatewayData {
     ///
     /// Always `Mac OS X`
     public let os: String
-    
+
     /// Browser name
     ///
     /// Observed values were `Chrome` when running on Google Chrome and
@@ -27,17 +27,17 @@ public struct GatewayConnProperties: OutgoingGatewayData {
     /// > ``DiscordAPI/getSuperProperties()`` method. Customisability
     /// > might be added in a future release.
     public let browser: String
-    
+
     /// Release channel of target official client
     ///
     /// Refer to ``GatewayConfig/clientParity`` for more details.
     public let release_channel: String?
-    
+
     /// Version of target official client
     ///
     /// Refer to ``GatewayConfig/clientParity`` for more details.
     public let client_version: String?
-    
+
     /// OS version
     ///
     /// The version of the OS the client is running on. This is dynamically
@@ -45,19 +45,19 @@ public struct GatewayConnProperties: OutgoingGatewayData {
     /// For macOS, it is the version of the Darwin Kernel, which is `21.4.0`
     /// as of macOS `12.3`.
     public let os_version: String?
-    
+
     /// Machine arch
     ///
     /// The arch of the machine the client is running on. This is dynamically
     /// retrieved in ``DiscordAPI/getSuperProperties()`` by calling `uname()`.
     /// For macOS, it could be either `x86_64` (Intel) or `arm64` (Apple Silicon).
     public let os_arch: String?
-    
+
     /// System locale
     ///
     /// The locale (language) of the system. This is hardcoded to be `en-US` for now.
     public let system_locale: String?
-    
+
     /// Build number of target official client
     ///
     /// Refer to ``GatewayConfig/clientParity`` for more details.
@@ -73,9 +73,9 @@ public struct GatewayConnProperties: OutgoingGatewayData {
 /// > Outgoing Gateway data struct for opcode 2
 public struct GatewayHeartbeat: OutgoingGatewayData {
     private let seq: Int?
-    
+
     init(_ seq: Int?) { self.seq = seq }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(seq)
@@ -129,7 +129,7 @@ public struct GatewayVoiceStateUpdate: OutgoingGatewayData, GatewayData {
 		self.self_deaf = self_deaf
 		self.self_video = self_video
 	}
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         // Encoding containers directly so nil optionals get encoded as "null" and not just removed
@@ -163,7 +163,6 @@ public struct GatewayGuildRequestMembers: GatewayData {
     public let user_ids: [Snowflake]? // Used to specify which users you wish to fetch
     public let nonce: String? // Nonce to identify the Guild Members Chunk response
 }
-
 
 /// Gateway Hello
 ///

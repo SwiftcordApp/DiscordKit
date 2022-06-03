@@ -32,7 +32,7 @@ public struct Channel: Identifiable, Codable, GatewayData, Equatable {
     public static func == (lhs: Channel, rhs: Channel) -> Bool {
         lhs.id == rhs.id && lhs.name == rhs.name && lhs.position == rhs.position
     }
-    
+
     public let id: Snowflake
     public let type: ChannelType
     public let guild_id: Snowflake?

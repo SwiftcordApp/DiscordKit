@@ -23,7 +23,7 @@ public extension RobustWebSocket {
         // Keychain.remove(key: "token") // For testing
         guard let token: String = Keychain.load(key: "authToken")
         else { return nil }
-            
+
         return GatewayIdentify(
             token: token,
 			properties: DiscordAPI.getSuperProperties(),
@@ -47,7 +47,7 @@ public extension RobustWebSocket {
     func getResume(seq: Int, sessionID: String) -> GatewayResume? {
         guard let token: String = Keychain.load(key: "authToken")
         else { return nil }
-        
+
         return GatewayResume(
             token: token,
             session_id: sessionID,
@@ -55,4 +55,3 @@ public extension RobustWebSocket {
         )
     }
 }
-

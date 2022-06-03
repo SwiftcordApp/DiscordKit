@@ -11,7 +11,7 @@ public extension User {
         /// Nitro
         case nitro = 2
 
-        // MARK:  Identifiable
+        // MARK: Identifiable
 
         public var id: RawValue {
             return rawValue

@@ -15,7 +15,7 @@ public struct DiscordAPI {
 
 	static let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? Self.subsystem, category: "DiscordAPI")
     // How empty, everything is broken into smaller files (for now xD)
-    
+
     static var session: URLSession = {
         // Create URL Session Configuration
         let configuration = URLSessionConfiguration.default

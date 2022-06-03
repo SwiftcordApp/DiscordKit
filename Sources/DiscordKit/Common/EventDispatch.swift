@@ -1,6 +1,5 @@
 /// EventDispatch.swift
 
-
 import Foundation
 
 /// `EventDispatch` is a helper class that can be used to implement
@@ -15,14 +14,14 @@ import Foundation
 /// [swift-event-dispatch](https://github.com/gongzhang/)
 public class EventDispatch<Event>: EventDispatchProtocol {
     public typealias HandlerIdentifier = Int
-    
-    private typealias Handler = (Event) -> ()
+
+    private typealias Handler = (Event) -> Void
     private var handlerIds = [HandlerIdentifier]()
     private var handlers = [Handler]()
     private var lastId: HandlerIdentifier = 0
-    
+
     private let evtQueue: DispatchQueue
-    
+
     /// Inits an instance of ``EventDispatch``
     ///
     /// Set the event type by using generics, for example:
@@ -44,7 +43,7 @@ public class EventDispatch<Event>: EventDispatchProtocol {
     public init() {
         evtQueue = DispatchQueue(label: UUID().uuidString, qos: .userInteractive, attributes: .concurrent, target: .main)
     }
-    
+
     /// Register a handler closure to be called when the event is notified
     ///
     /// - Parameters:
@@ -53,26 +52,26 @@ public class EventDispatch<Event>: EventDispatchProtocol {
     ///
     /// - Returns: A `HandlerIdentifier` that can be passed to `removeHandler()`
     /// to remove this handler
-    public func addHandler(handler: @escaping (Event) -> ()) -> HandlerIdentifier {
+    public func addHandler(handler: @escaping (Event) -> Void) -> HandlerIdentifier {
         lastId += 1
         handlerIds.append(lastId)
         handlers.append(handler)
         return lastId
     }
-    
+
     /// Similar to addHandler(), but removes the handler after it's notified
     ///
     /// - Parameters:
     ///   - handler: A closure that is called with the event when this `EventDispatch`
     ///   is notified. This closure will only be called _once_.
-    public func handleOnce(handler: @escaping (Event) -> ()) {
+    public func handleOnce(handler: @escaping (Event) -> Void) {
         var id: HandlerIdentifier!
         id = addHandler { [weak self] event in
             handler(event)
             _ = self?.removeHandler(handler: id)
         }
     }
-    
+
     /// Removes a handler with a given identifier
     ///
     /// - Parameters:
@@ -82,13 +81,13 @@ public class EventDispatch<Event>: EventDispatchProtocol {
     public func removeHandler(handler: HandlerIdentifier) -> Bool {
         if let index = handlerIds.firstIndex(of: handler) {
             handlerIds.remove(at: index)
-            let _ = handlers.remove(at: index)
+            _ = handlers.remove(at: index)
             return true
         } else {
             return false
         }
     }
-    
+
     /// Notify all handlers of this `EventDispatch` with event data
     ///
     /// This method will immediately notify all registered handlers

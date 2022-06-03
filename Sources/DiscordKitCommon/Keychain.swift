@@ -20,11 +20,11 @@ public class Keychain {
 	@discardableResult
 	public class func save(key: String, data: Data) -> OSStatus {
         let query = [
-            kSecClass as String       : kSecClassGenericPassword as String,
-            kSecAttrAccount as String : "\(Bundle.main.bundleIdentifier!).\(key)",
+            kSecClass as String: kSecClassGenericPassword as String,
+            kSecAttrAccount as String: "\(Bundle.main.bundleIdentifier!).\(key)",
             kSecAttrApplicationTag as String: tag,
-            kSecValueData as String   : data
-        ] as [String : Any]
+            kSecValueData as String: data
+        ] as [String: Any]
 
         SecItemDelete(query as CFDictionary)
 
@@ -34,11 +34,11 @@ public class Keychain {
 	@discardableResult
 	public class func remove(key: String) -> OSStatus {
         let query = [
-            kSecClass as String       : kSecClassGenericPassword as String,
-            kSecAttrAccount as String : "\(Bundle.main.bundleIdentifier!).\(key)",
+            kSecClass as String: kSecClassGenericPassword as String,
+            kSecAttrAccount as String: "\(Bundle.main.bundleIdentifier!).\(key)",
             kSecAttrApplicationTag as String: tag,
-            kSecMatchLimit as String  : kSecMatchLimitOne
-        ] as [String : Any]
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ] as [String: Any]
 
         return SecItemDelete(query as CFDictionary)
     }
@@ -48,17 +48,17 @@ public class Keychain {
         else { return nil }
         return String(data: d, encoding: .utf8)
     }
-	
+
 	public class func loadData(key: String) -> Data? {
         let query = [
-            kSecClass as String       : kSecClassGenericPassword,
-            kSecAttrAccount as String : "\(Bundle.main.bundleIdentifier!).\(key)",
-            kSecReturnData as String  : kCFBooleanTrue!,
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: "\(Bundle.main.bundleIdentifier!).\(key)",
+            kSecReturnData as String: kCFBooleanTrue!,
             kSecAttrApplicationTag as String: tag,
-            kSecMatchLimit as String  : kSecMatchLimitOne
-        ] as [String : Any]
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ] as [String: Any]
 
-        var dataTypeRef: AnyObject? = nil
+        var dataTypeRef: AnyObject?
 
         let status: OSStatus = SecItemCopyMatching(query as CFDictionary, &dataTypeRef)
 

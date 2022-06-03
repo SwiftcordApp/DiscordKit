@@ -22,7 +22,7 @@ class PermissionTests: XCTestCase {
             try JSONDecoder().decode(Permissions.self, from: "1092".data(using: .utf8)!)
         )
     }
-    
+
     func testPermissionsEncode() {
         XCTAssertEqual(
             "\"3072\"",

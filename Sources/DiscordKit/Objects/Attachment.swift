@@ -18,7 +18,7 @@ public struct Attachment: Codable, Identifiable, Equatable {
     public let height: Int? // Height of file (if image)
     public let width: Int? // Width of file (if image)
     public let ephemeral: Bool?
-    
+
     public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.id == rhs.id
     }
