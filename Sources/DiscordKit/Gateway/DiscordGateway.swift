@@ -45,7 +45,7 @@ public class DiscordGateway: ObservableObject, Equatable {
     ///
     /// > In the future, presence updates and REST API requests will
     /// > also be stored and kept fresh in this cache.
-    public var cache: CachedState = CachedState()
+    @Published public var cache: CachedState = CachedState()
 
     private var evtListenerID: EventDispatch.HandlerIdentifier? = nil,
                 authFailureListenerID: EventDispatch.HandlerIdentifier? = nil,
@@ -95,95 +95,51 @@ public class DiscordGateway: ObservableObject, Equatable {
         socket.open()
     }
 
-    private func handleEvt(type: GatewayEvent, data: GatewayData?) {
-        var eventWasHandled = true
+    private func handleEvent(_ event: GatewayEvent, data: GatewayData?) {
+        switch (event, data) {
+            case let (.ready, event as ReadyEvt):
+                cache.configure(using: event)
+                log.info("Gateway ready")
 
-        switch type {
-        case .ready:
-            guard let d = data as? ReadyEvt else { break }
+            // Guild events
+            case let (.guildCreate, guild as Guild):
+                cache.appendOrReplace(guild)
 
-            // Populate cache with data sent in ready event
-            for guild in d.guilds { cache.guilds.updateValue(guild, forKey: guild.id) }
-            /*self.cache.guilds = (d.guilds
-                .filter({ g in !d.user_settings.guild_positions.contains(g.id) })
-                .sorted(by: { lhs, rhs in lhs.joined_at! > rhs.joined_at! }))
-            + d.user_settings.guild_positions.compactMap({ id in d.guilds.first { g in g.id == id } })*/
-            cache.dms = d.private_channels
-            cache.user = d.user
-            for user in d.users { cache.users.updateValue(user, forKey: user.id) }
-            cache.userSettings = d.user_settings
+            case let (.guildDelete, guild as GuildUnavailable):
+                cache.remove(guild)
 
-            log.info("Gateway ready")
-        // Guild events
-        case .guildCreate:
-            guard let d = data as? Guild else { break }
-            cache.guilds.updateValue(d, forKey: d.id)
-        case .guildDelete:
-            guard let d = data as? GuildUnavailable else { break }
-            cache.guilds.removeValue(forKey: d.id)
-        case .guildUpdate:
-            guard var d = data as? Guild else { break }
-            guard let oldGuild = cache.guilds[d.id]
-            else { return }
+            case let (.guildUpdate, guild as Guild):
+                handleGuildUpdate(guild)
 
-            // Fuse the old guild with the updated guild
-            d.joined_at = oldGuild.joined_at
-            d.large = oldGuild.large
-            d.unavailable = oldGuild.unavailable
-            d.member_count = oldGuild.member_count
-            d.voice_states = oldGuild.voice_states
-            d.members = oldGuild.members
-            d.channels = oldGuild.channels
-            d.threads = oldGuild.threads
-            d.presences = oldGuild.presences
-            d.stage_instances = oldGuild.stage_instances
-            d.guild_scheduled_events = oldGuild.guild_scheduled_events
-            cache.guilds[d.id] = d
-        // User updates
-        case .userUpdate:
-            guard let updatedUser = data as? CurrentUser else { break }
-            cache.user = updatedUser
-        case .userSettingsUpdate:
-            guard let newSettings = data as? UserSettings else { break }
-            cache.userSettings = mergeUserSettings(cache.userSettings, new: newSettings)
-        // Channel events
-        case .channelCreate:
-            guard let newCh = data as? Channel else { break }
-            if let guildID = newCh.guild_id {
-                cache.guilds[guildID]?.channels?.append(newCh)
-            }
-        case .channelDelete:
-            guard let delCh = data as? Channel else { break }
-            if let guildID = delCh.guild_id {
-                cache.guilds[guildID]?.channels?.removeAll { delCh.id == $0.id }
-            }
-        case .channelUpdate:
-            guard let updatedCh = data as? Channel else { break }
-            if let guildID = updatedCh.guild_id,
-               let chIdx = cache.guilds[guildID]?
-                .channels?
-                .firstIndex(where: { updatedCh.id == $0.id }) {
-                cache.guilds[updatedCh.guild_id!]?.channels?[chIdx] = updatedCh
-            }
-        case .messageCreate:
-            guard let msg = data as? Message else { break }
-            if let guild = msg.guild_id,
-               let idx = cache.guilds[guild]?
-                .channels?
-                .firstIndex(where: { $0.id == msg.channel_id }) {
-                    cache.guilds[guild]?.channels?[idx].last_message_id = msg.id
-            } else if let idx = cache.dms.firstIndex(where: { $0.id == msg.channel_id }) {
-                cache.dms[idx].last_message_id = msg.id
-            }
-        case .presenceUpdate:
-            guard let p = data as? PresenceUpdate else { return }
-            print("Presence update!")
-            print(p)
-        default: eventWasHandled = false
+            // User updates
+            case let (.userUpdate, currentUser as CurrentUser):
+                cache.user = currentUser
+
+            case let (.userSettingsUpdate, settings as UserSettings):
+                cache.mergeOrReplace(settings)
+
+            // Channel events
+            case let (.channelCreate, channel as Channel):
+                cache.append(channel)
+
+            case let (.channelDelete, channel as Channel):
+                cache.remove(channel)
+
+            case let (.channelUpdate, channel as Channel):
+                cache.replace(channel)
+
+            case let (.messageCreate, message as Message):
+                cache.appendOrReplace(message)
+
+            case let (.presenceUpdate, update as PresenceUpdate):
+                log.info("Presence update: \(String(describing: update))")
+
+            default:
+                break
         }
-        if eventWasHandled { cache.objectWillChange.send() }
-        onEvent.notify(event: (type, data))
-        log.info("Dispatched event <\(type.rawValue, privacy: .public)>")
+
+        onEvent.notify(event: (event, data))
+        log.info("Dispatched event <\(event.rawValue, privacy: .public)>")
     }
 
     /// Inits an instance of ``DiscordGateway``
@@ -199,7 +155,7 @@ public class DiscordGateway: ObservableObject, Equatable {
 	public init(connectionTimeout: Double = 5, maxMissedACK: Int = 3) {
         socket = RobustWebSocket()
         evtListenerID = socket.onEvent.addHandler { [weak self] (t, d) in
-            self?.handleEvt(type: t, data: d)
+            self?.handleEvent(t, data: d)
         }
         authFailureListenerID = socket.onAuthFailure.addHandler { [weak self] in
             self?.onAuthFailure.notify()
@@ -222,5 +178,30 @@ public class DiscordGateway: ObservableObject, Equatable {
         if let connStateChangeListenerID = connStateChangeListenerID {
             _ = socket.onConnStateChange.removeHandler(handler: connStateChangeListenerID)
         }
+    }
+
+    // MARK: - Private Event Handlers
+
+    private func handleGuildUpdate(_ updatedGuild: Guild) {
+        guard let existingGuild = cache.guilds[updatedGuild.id] else {
+            return
+        }
+
+        var modifiedGuild = updatedGuild
+
+        // ``GatewayEvent.guildUpdate`` events are missing data that is only present in the initial ``GatewayEvent.ready`` event, so we need to copy those properties over manually.
+        modifiedGuild.joined_at = existingGuild.joined_at
+        modifiedGuild.large = existingGuild.large
+        modifiedGuild.unavailable = existingGuild.unavailable
+        modifiedGuild.member_count = existingGuild.member_count
+        modifiedGuild.voice_states = existingGuild.voice_states
+        modifiedGuild.members = existingGuild.members
+        modifiedGuild.channels = existingGuild.channels
+        modifiedGuild.threads = existingGuild.threads
+        modifiedGuild.presences = existingGuild.presences
+        modifiedGuild.stage_instances = existingGuild.stage_instances
+        modifiedGuild.guild_scheduled_events = existingGuild.guild_scheduled_events
+
+        cache.appendOrReplace(modifiedGuild)
     }
 }
