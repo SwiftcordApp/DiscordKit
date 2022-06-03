@@ -64,6 +64,7 @@ public struct GatewayIncoming: Decodable {
         case t
    }
 
+    // swiftlint:disable cyclomatic_complexity
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         let action = try values.decode(GatewayIncomingOpcodes.self, forKey: .op)
@@ -103,14 +104,14 @@ public struct GatewayIncoming: Decodable {
             case .guildSchEvtCreate, .guildSchEvtUpdate, .guildSchEvtDelete: d = try values.decode(GuildScheduledEvent.self, forKey: .d)
             case .guildSchEvtUserAdd, .guildSchEvtUserRemove: d = try values.decode(GuildSchEvtUserEvt.self, forKey: .d)
 
-                // TODO: More events go here
+                // More events go here
             case .messageCreate: d = try values.decode(Message.self, forKey: .d)
             case .messageUpdate: d = try values.decode(PartialMessage.self, forKey: .d)
             case .messageDelete: d = try values.decode(MessageDelete.self, forKey: .d)
             case .messageACK: d = try values.decode(MessageACKEvt.self, forKey: .d)
             case .messageDeleteBulk: d = try values.decode(MessageDeleteBulk.self, forKey: .d)
             case .presenceUpdate: d = try values.decode(PresenceUpdate.self, forKey: .d)
-                // TODO: Add the remaining like 100 events
+                // Add the remaining like 100 events
 
             case .userUpdate: d = try values.decode(CurrentUser.self, forKey: .d)
             case .typingStart: d = try values.decode(TypingStart.self, forKey: .d)
