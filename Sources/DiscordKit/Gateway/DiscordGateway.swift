@@ -45,7 +45,7 @@ public class DiscordGateway: ObservableObject, Equatable {
     ///
     /// > In the future, presence updates and REST API requests will
     /// > also be stored and kept fresh in this cache.
-    public var cache: CachedState = CachedState()
+    @Published public var cache: CachedState = CachedState()
 
     private var evtListenerID: EventDispatch.HandlerIdentifier? = nil,
                 authFailureListenerID: EventDispatch.HandlerIdentifier? = nil,
@@ -96,8 +96,6 @@ public class DiscordGateway: ObservableObject, Equatable {
     }
 
     private func handleEvent(_ event: GatewayEvent, data: GatewayData?) {
-        var eventWasHandled = true
-
         switch (event, data) {
             case let (.ready, event as ReadyEvt):
                 // Populate cache with data sent in ready event
@@ -183,15 +181,10 @@ public class DiscordGateway: ObservableObject, Equatable {
                 }
 
             case let (.presenceUpdate, update as PresenceUpdate):
-                print("Presence update!")
-                print(update)
+                log.info("Presence update: \(String(describing: update))")
 
             default:
-                eventWasHandled = false
-        }
-
-        if eventWasHandled {
-            cache.objectWillChange.send()
+                break
         }
 
         onEvent.notify(event: (event, data))
