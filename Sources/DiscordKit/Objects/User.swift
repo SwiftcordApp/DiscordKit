@@ -112,12 +112,17 @@ public struct CurrentUser: Codable, GatewayData, Equatable {
     public let flags: User.Flags
 
     /// The public flags of this user
+    ///
     /// > This appears to always be the same as ``CurrentUser/flags``
     public let public_flags: User.Flags?
 
     /// The user's purchased flags
-    /// (Guess: This is equivalent to ``User/premium_type``)
-    public let purchased_flags: User.PremiumType?
+    ///
+    /// Temporarily removed to prevent decoding errors.
+    ///
+    /// > Experiment: If anyone figures out the possible values and function of
+    /// > this property, please make a PR with relevant changes :D
+    // public let purchased_flags: User.PremiumType?
 
     /// If this user is a premium (nitro) user
     public let premium: Bool
