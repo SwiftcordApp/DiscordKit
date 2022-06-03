@@ -95,10 +95,10 @@ public class DiscordGateway: ObservableObject, Equatable {
         socket.open()
     }
 
-    private func handleEvt(type: GatewayEvent, data: GatewayData?) {
+    private func handleEvent(_ event: GatewayEvent, data: GatewayData?) {
         var eventWasHandled = true
 
-        switch (type, data) {
+        switch (event, data) {
             case let (.ready, event as ReadyEvt):
                 // Populate cache with data sent in ready event
                 for guild in event.guilds { cache.guilds.updateValue(guild, forKey: guild.id) }
@@ -188,8 +188,8 @@ public class DiscordGateway: ObservableObject, Equatable {
             cache.objectWillChange.send()
         }
 
-        onEvent.notify(event: (type, data))
-        log.info("Dispatched event <\(type.rawValue, privacy: .public)>")
+        onEvent.notify(event: (event, data))
+        log.info("Dispatched event <\(event.rawValue, privacy: .public)>")
     }
 
     /// Inits an instance of ``DiscordGateway``
@@ -205,7 +205,7 @@ public class DiscordGateway: ObservableObject, Equatable {
 	public init(connectionTimeout: Double = 5, maxMissedACK: Int = 3) {
         socket = RobustWebSocket()
         evtListenerID = socket.onEvent.addHandler { [weak self] (t, d) in
-            self?.handleEvt(type: t, data: d)
+            self?.handleEvent(t, data: d)
         }
         authFailureListenerID = socket.onAuthFailure.addHandler { [weak self] in
             self?.onAuthFailure.notify()
