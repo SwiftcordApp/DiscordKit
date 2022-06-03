@@ -12,19 +12,6 @@ public enum UITheme: String, Codable {
     case light = "light"
 }
 
-func mergeUserSettings(_ old: UserSettings?, new: UserSettings) -> UserSettings {
-    return UserSettings(
-        guild_positions: new.guild_positions ?? old?.guild_positions,
-        guild_folders: new.guild_folders ?? old?.guild_folders,
-        inline_attachment_media: new.inline_attachment_media ?? old?.inline_attachment_media,
-        locale: new.locale ?? old?.locale,
-        theme: new.theme ?? old?.theme,
-        timezone_offset: new.timezone_offset ?? old?.timezone_offset,
-        developer_mode: new.developer_mode ?? old?.developer_mode,
-        message_display_compact: new.message_display_compact ?? old?.message_display_compact
-    )
-}
-
 public struct UserSettings: Decodable, GatewayData, Equatable {
     /// Sequence of guild IDs
     ///
@@ -56,4 +43,19 @@ public struct UserSettings: Decodable, GatewayData, Equatable {
 
     /// If compact message view is enabled
     public let message_display_compact: Bool?
+}
+
+extension UserSettings {
+    func merged(with settings: UserSettings) -> UserSettings {
+        return UserSettings(
+            guild_positions: settings.guild_positions ?? guild_positions,
+            guild_folders: settings.guild_folders ?? guild_folders,
+            inline_attachment_media: settings.inline_attachment_media ?? inline_attachment_media,
+            locale: settings.locale ?? locale,
+            theme: settings.theme ?? theme,
+            timezone_offset: settings.timezone_offset ?? timezone_offset,
+            developer_mode: settings.developer_mode ?? developer_mode,
+            message_display_compact: settings.message_display_compact ?? message_display_compact
+        )
+    }
 }

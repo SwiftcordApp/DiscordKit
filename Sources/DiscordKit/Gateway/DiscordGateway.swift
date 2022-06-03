@@ -98,11 +98,12 @@ public class DiscordGateway: ObservableObject, Equatable {
     private func handleEvent(_ event: GatewayEvent, data: GatewayData?) {
         switch (event, data) {
             case let (.ready, event as ReadyEvt):
-                handleReadyEvent(event)
+                cache.configure(using: event)
+                log.info("Gateway ready")
 
             // Guild events
             case let (.guildCreate, guild as Guild):
-                cache.update(guild)
+                cache.appendOrReplace(guild)
 
             case let (.guildDelete, guild as GuildUnavailable):
                 cache.remove(guild)
@@ -115,7 +116,7 @@ public class DiscordGateway: ObservableObject, Equatable {
                 cache.user = currentUser
 
             case let (.userSettingsUpdate, settings as UserSettings):
-                cache.userSettings = mergeUserSettings(cache.userSettings, new: settings)
+                cache.mergeOrReplace(settings)
 
             // Channel events
             case let (.channelCreate, channel as Channel):
@@ -125,10 +126,10 @@ public class DiscordGateway: ObservableObject, Equatable {
                 cache.remove(channel)
 
             case let (.channelUpdate, channel as Channel):
-                cache.update(channel)
+                cache.replace(channel)
 
             case let (.messageCreate, message as Message):
-                cache.append(message)
+                cache.appendOrReplace(message)
 
             case let (.presenceUpdate, update as PresenceUpdate):
                 log.info("Presence update: \(String(describing: update))")
@@ -181,45 +182,26 @@ public class DiscordGateway: ObservableObject, Equatable {
 
     // MARK: - Private Event Handlers
 
-    private func handleReadyEvent(_ event: ReadyEvt) {
-        // Populate cache with data sent in ready event
-        event.guilds.forEach(cache.update(_:))
-
-        /* self.cache.guilds = (d.guilds
-         .filter({ g in !d.user_settings.guild_positions.contains(g.id) })
-         .sorted(by: { lhs, rhs in lhs.joined_at! > rhs.joined_at! }))
-         + d.user_settings.guild_positions.compactMap({ id in d.guilds.first { g in g.id == id } }) */
-        cache.dms = event.private_channels
-        cache.user = event.user
-
-        for user in event.users {
-            cache.users.updateValue(user, forKey: user.id)
-        }
-
-        cache.userSettings = event.user_settings
-
-        log.info("Gateway ready")
-    }
-
-    private func handleGuildUpdate(_ guild: Guild) {
-        guard let oldGuild = cache.guilds[guild.id] else {
+    private func handleGuildUpdate(_ updatedGuild: Guild) {
+        guard let existingGuild = cache.guilds[updatedGuild.id] else {
             return
         }
 
-        // Fuse the old guild with the updated guild
-        var updatedGuild = guild
-        updatedGuild.joined_at = oldGuild.joined_at
-        updatedGuild.large = oldGuild.large
-        updatedGuild.unavailable = oldGuild.unavailable
-        updatedGuild.member_count = oldGuild.member_count
-        updatedGuild.voice_states = oldGuild.voice_states
-        updatedGuild.members = oldGuild.members
-        updatedGuild.channels = oldGuild.channels
-        updatedGuild.threads = oldGuild.threads
-        updatedGuild.presences = oldGuild.presences
-        updatedGuild.stage_instances = oldGuild.stage_instances
-        updatedGuild.guild_scheduled_events = oldGuild.guild_scheduled_events
+        var modifiedGuild = updatedGuild
 
-        cache.update(updatedGuild)
+        // ``GatewayEvent.guildUpdate`` events are missing data that is only present in the initial ``GatewayEvent.ready`` event, so we need to copy those properties over manually.
+        modifiedGuild.joined_at = existingGuild.joined_at
+        modifiedGuild.large = existingGuild.large
+        modifiedGuild.unavailable = existingGuild.unavailable
+        modifiedGuild.member_count = existingGuild.member_count
+        modifiedGuild.voice_states = existingGuild.voice_states
+        modifiedGuild.members = existingGuild.members
+        modifiedGuild.channels = existingGuild.channels
+        modifiedGuild.threads = existingGuild.threads
+        modifiedGuild.presences = existingGuild.presences
+        modifiedGuild.stage_instances = existingGuild.stage_instances
+        modifiedGuild.guild_scheduled_events = existingGuild.guild_scheduled_events
+
+        cache.appendOrReplace(modifiedGuild)
     }
 }
