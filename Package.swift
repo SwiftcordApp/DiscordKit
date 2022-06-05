@@ -6,8 +6,8 @@ import PackageDescription
 let package = Package(
 	name: "DiscordKit",
 	platforms: [
-		.macOS(.v12)
-	],
+		.macOS(.v11)
+    ],
 	products: [
 		.library(name: "DiscordKit", targets: ["DiscordKit"]),
 		.library(name: "DiscordKitCommon", targets: ["DiscordKitCommon"])
@@ -31,5 +31,6 @@ let package = Package(
 		),
 		.target(name: "DiscordKitCommon"),
         .testTarget(name: "DiscordKitTests", dependencies: ["DiscordKit"])
-	]
+	],
+    swiftLanguageVersions: [.v5]
 )
