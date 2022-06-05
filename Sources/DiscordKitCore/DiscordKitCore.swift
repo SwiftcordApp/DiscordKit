@@ -1,15 +1,13 @@
 //
-//  DiscordRestAPI.swift
-//  DiscordAPI
+//  File.swift
+//  
 //
-//  Created by Vincent Kwok on 21/2/22.
+//  Created by Vincent Kwok on 5/6/22.
 //
 
 import Foundation
 import os
 
-/// A struct with only static methods/properties for making requests
-/// to Discord's REST API endpoints
 public struct DiscordAPI {
     static let subsystem = "com.cryptoalgo.discordapi"
 

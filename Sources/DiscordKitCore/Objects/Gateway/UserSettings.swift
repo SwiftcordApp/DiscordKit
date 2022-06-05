@@ -46,7 +46,7 @@ public struct UserSettings: Decodable, GatewayData, Equatable {
 }
 
 extension UserSettings {
-    func merged(with settings: UserSettings) -> UserSettings {
+    public func merged(with settings: UserSettings) -> UserSettings {
         return UserSettings(
             guild_positions: settings.guild_positions ?? guild_positions,
             guild_folders: settings.guild_folders ?? guild_folders,

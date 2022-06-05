@@ -9,6 +9,7 @@ import Foundation
 import os
 import SwiftUI
 import DiscordKitCommon
+import DiscordKitCore
 
 /// Higher-level Gateway manager, mainly for handling and dispatching
 /// Gateway events
@@ -18,11 +19,7 @@ import DiscordKitCommon
 /// since it hides away even more implementation details.
 ///
 /// Conforms to `ObservableObject` for use in SwiftUI projects.
-public class DiscordGateway: ObservableObject, Equatable {
-    public static func == (lhs: DiscordGateway, rhs: DiscordGateway) -> Bool {
-        lhs.cache == rhs.cache
-    }
-
+public class DiscordGateway: ObservableObject {
     // Events
     /// An ``EventDispatch`` that is notified when an event is dispatched
     /// from the Gateway

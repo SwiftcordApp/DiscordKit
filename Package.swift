@@ -9,28 +9,33 @@ let package = Package(
 		.macOS(.v11)
     ],
 	products: [
+        .library(name: "DiscordKitCore", targets: ["DiscordKitCore"]),
 		.library(name: "DiscordKit", targets: ["DiscordKit"]),
-		.library(name: "DiscordKitCommon", targets: ["DiscordKitCommon"])
+		.library(name: "DiscordKitCommon", targets: ["DiscordKitCommon"]),
 	],
 	dependencies: [
 		.package(url: "https://github.com/ashleymills/Reachability.swift", from: "5.1.0"),
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0")
 	],
 	targets: [
+        .target(
+            name: "DiscordKitCore",
+            dependencies: [
+                .product(name: "Reachability", package: "Reachability.swift"),
+                .target(name: "DiscordKitCommon"),
+            ],
+            exclude: [
+                "REST/README.md",
+                "Gateway/README.md",
+                "Objects/README.md"
+            ]
+        ),
 		.target(
-			name: "DiscordKit",
-			dependencies: [
-				.product(name: "Reachability", package: "Reachability.swift"),
-                .target(name: "DiscordKitCommon")
-			],
-			exclude: [
-				"REST/README.md",
-				"Gateway/README.md",
-				"Objects/README.md"
-			]
-		),
+            name: "DiscordKit",
+            dependencies: [.target(name: "DiscordKitCore")]
+        ),
 		.target(name: "DiscordKitCommon"),
-        .testTarget(name: "DiscordKitTests", dependencies: ["DiscordKit"])
+        .testTarget(name: "DiscordKitCoreTests", dependencies: ["DiscordKit"])
 	],
     swiftLanguageVersions: [.v5]
 )
