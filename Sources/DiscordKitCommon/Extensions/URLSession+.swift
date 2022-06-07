@@ -8,7 +8,7 @@
 import Foundation
 
 @available(macOS, deprecated: 12.0, message: "Use the built-in API instead")
-extension URLSession {
+public extension URLSession {
     func data(for request: URLRequest) async throws -> (Data, URLResponse) {
         try await withCheckedThrowingContinuation { continuation in
             let task = self.dataTask(with: request) { data, response, error in

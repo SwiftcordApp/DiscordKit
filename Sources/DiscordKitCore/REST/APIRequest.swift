@@ -9,7 +9,7 @@ import Foundation
 import DiscordKitCommon
 
 /// Utility wrappers for easy request-making
-public extension DiscordAPI {
+public extension DiscordREST {
     /// The few supported request methods
     enum RequestMethod: String {
         case get = "GET"
@@ -35,16 +35,20 @@ public extension DiscordAPI {
     ///   (currently `.get`, `.post`, `.delete` or `.patch`)
     ///
     /// - Returns: Raw `Data` of response, or nil if the request failed
-    static func makeRequest(
+    func makeRequest(
         path: String,
         query: [URLQueryItem] = [],
         attachments: [URL] = [],
         body: String? = nil,
         method: RequestMethod = .get
     ) async throws -> Data? {
-        DiscordAPI.log.debug("\(method.rawValue): \(path)")
+        guard let token = token else {
+            DiscordREST.log.error("Not making request without token. Call setToken(token:) to set a token.")
+            return nil
+        }
 
-        guard let token = Keychain.load(key: "authToken") else { return nil }
+        DiscordREST.log.debug("\(method.rawValue): \(path)")
+
         guard var apiURL = URL(string: GatewayConfig.default.restBase) else { return nil }
         apiURL.appendPathComponent(path, isDirectory: false)
 
@@ -63,15 +67,16 @@ public extension DiscordAPI {
         // req.setValue("?0", forHTTPHeaderField: "sec-ch-ua-mobile") // The day this runs on iOS...
         // req.setValue("macOS", forHTTPHeaderField: "sec-ch-ua-platform") // We only run on macOS
         // The top 2 headers are only sent when running in browsers
-        req.setValue(DiscordAPI.userAgent, forHTTPHeaderField: "user-agent")
+        req.setValue(DiscordREST.userAgent, forHTTPHeaderField: "user-agent")
         req.setValue("cors", forHTTPHeaderField: "sec-fetch-mode")
         req.setValue("same-origin", forHTTPHeaderField: "sec-fetch-site")
         req.setValue("empty", forHTTPHeaderField: "sec-fetch-dest")
 
         req.setValue(Locale.englishUS.rawValue, forHTTPHeaderField: "x-discord-locale")
         req.setValue("bugReporterEnabled", forHTTPHeaderField: "x-debug-options")
-        guard let superEncoded = try? DiscordAPI.encoder().encode(getSuperProperties()) else {
-            DiscordAPI.log.error("Couldn't encode super properties, something is seriously wrong")
+        guard let superEncoded = try? DiscordREST.encoder().encode(DiscordREST.getSuperProperties())
+        else {
+            DiscordREST.log.error("Couldn't encode super properties, something is seriously wrong")
             return nil
         }
         req.setValue(superEncoded.base64EncodedString(), forHTTPHeaderField: "x-super-properties")
@@ -80,18 +85,18 @@ public extension DiscordAPI {
             // Exact boundary format used by Electron (WebKit) in Discord Desktop
             let boundary = "----WebKitFormBoundary\(String.random(count: 16))"
             req.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "content-type")
-            req.httpBody = createMultipartBody(with: body, boundary: boundary, attachments: attachments)
+            req.httpBody = DiscordREST.createMultipartBody(with: body, boundary: boundary, attachments: attachments)
         } else if let body = body {
             req.setValue("application/json", forHTTPHeaderField: "content-type")
             req.httpBody = body.data(using: .utf8)
         }
 
         // Make request
-        let (data, response) = try await DiscordAPI.session.data(for: req)
+        let (data, response) = try await DiscordREST.session.data(for: req)
         guard let httpResponse = response as? HTTPURLResponse else { return nil }
         guard httpResponse.statusCode / 100 == 2 else { // Check if status code is 2**
-            log.warning("Status code is not 2xx: \(httpResponse.statusCode, privacy: .public)")
-            log.warning("Response: \(String(decoding: data, as: UTF8.self), privacy: .public)")
+            DiscordREST.log.warning("Status code is not 2xx: \(httpResponse.statusCode, privacy: .public)")
+            DiscordREST.log.warning("Response: \(String(decoding: data, as: UTF8.self), privacy: .public)")
             return nil
         }
 
@@ -109,7 +114,7 @@ public extension DiscordAPI {
     ///
     /// - Returns: Struct of response conforming to Decodable, or nil
     /// if the request failed or the response couldn't be JSON-decoded.
-    static func getReq<T: Decodable>(
+    func getReq<T: Decodable>(
         path: String,
         query: [URLQueryItem] = []
     ) async -> T? {
@@ -118,7 +123,7 @@ public extension DiscordAPI {
             guard let d = try? await makeRequest(path: path, query: query)
             else { return nil }
 
-            return try DiscordAPI.decoder().decode(T.self, from: d)
+            return try DiscordREST.decoder().decode(T.self, from: d)
         } catch let DecodingError.dataCorrupted(context) {
             print(context.debugDescription)
         } catch let DecodingError.keyNotFound(key, context) {
@@ -137,12 +142,12 @@ public extension DiscordAPI {
     }
 
     /// Make a `POST` request to the Discord REST API
-    static func postReq<D: Decodable, B: Encodable>(
+    func postReq<D: Decodable, B: Encodable>(
         path: String,
         body: B? = nil,
         attachments: [URL] = []
     ) async -> D? {
-        let p = body != nil ? try? DiscordAPI.encoder().encode(body) : nil
+        let p = body != nil ? try? DiscordREST.encoder().encode(body) : nil
         guard let d = try? await makeRequest(
             path: path,
             attachments: attachments,
@@ -151,12 +156,12 @@ public extension DiscordAPI {
         )
         else { return nil }
 
-        return try? DiscordAPI.decoder().decode(D.self, from: d)
+        return try? DiscordREST.decoder().decode(D.self, from: d)
     }
 
     /// Make a `POST` request to the Discord REST API, for endpoints
     /// that both require no payload and returns a 204 empty response
-    static func emptyPostReq(path: String) async -> Bool {
+    func emptyPostReq(path: String) async -> Bool {
         guard (try? await makeRequest(
             path: path,
             body: nil,
@@ -167,7 +172,7 @@ public extension DiscordAPI {
     }
 
     /// Make a `DELETE` request to the Discord REST API
-    static func deleteReq(path: String) async -> Bool {
+    func deleteReq(path: String) async -> Bool {
         return (try? await makeRequest(path: path, method: .delete)) != nil
     }
 }

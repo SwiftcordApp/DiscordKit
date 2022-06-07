@@ -6,15 +6,16 @@
 //
 
 import Foundation
+import DiscordKitCommon
 
 /// API endpoints for everything related to the current user only
 /// Most (all) endpoints here aren't documented and were found
 /// from reverse engineering, observation and speculation.
 
-public extension DiscordAPI {
+public extension DiscordREST {
     // MARK: Get Current User DMs
     // GET /users/@me/channels
-    static func getDMs() async -> [DecodableThrowable<Channel>]? {
+    func getDMs() async -> [DecodableThrowable<Channel>]? {
         return await getReq(path: "users/@me/channels")
     }
 
@@ -22,7 +23,7 @@ public extension DiscordAPI {
     // PATCH /users/@me
     // Fields: new_password, password
     // Returns: User
-    static func changeCurUserPW(
+    func changeCurUserPW(
         oldPW: String,
         newPW: String
     ) async -> User? {

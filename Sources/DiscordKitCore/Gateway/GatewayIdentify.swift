@@ -18,15 +18,12 @@ public extension RobustWebSocket {
     ///
     /// - Returns: A `GatewayIdentify` struct, or nil if the Discord token is
     /// not present in the keychain
-    func getIdentify() -> GatewayIdentify? {
+    internal func getIdentify() -> GatewayIdentify? {
         // Keychain.save(key: "token", data: "token goes here")
         // Keychain.remove(key: "token") // For testing
-        guard let token: String = Keychain.load(key: "authToken")
-        else { return nil }
-
         return GatewayIdentify(
-            token: token,
-			properties: DiscordAPI.getSuperProperties(),
+            token: self.token,
+			properties: DiscordREST.getSuperProperties(),
             compress: false,
             large_threshold: nil,
             shard: nil,
@@ -44,10 +41,7 @@ public extension RobustWebSocket {
     ///
     /// - Returns: A `GatewayResume` struct, or nil if the Discord token is
     /// not present in the keychain
-    func getResume(seq: Int, sessionID: String) -> GatewayResume? {
-        guard let token: String = Keychain.load(key: "authToken")
-        else { return nil }
-
+    internal func getResume(seq: Int, sessionID: String) -> GatewayResume? {
         return GatewayResume(
             token: token,
             session_id: sessionID,

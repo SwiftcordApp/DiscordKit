@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import DiscordKitCommon
 
 let iso8601 = { () -> ISO8601DateFormatter in
     let fmt = ISO8601DateFormatter()
@@ -19,12 +20,12 @@ let iso8601WithFractionalSeconds = { () -> ISO8601DateFormatter in
     return fmt
 }()
 
-public extension DiscordAPI {
+public extension DiscordREST {
     /// Populate a ``GatewayConnProperties`` struct with some constant
     /// values + some dynamic versions
     ///
     /// - Returns: Populated ``GatewayConnProperties``
-	static func getSuperProperties() -> GatewayConnProperties {
+	internal static func getSuperProperties() -> GatewayConnProperties {
 		var systemInfo = utsname()
 		uname(&systemInfo)
 

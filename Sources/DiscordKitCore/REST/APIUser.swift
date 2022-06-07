@@ -6,23 +6,24 @@
 //
 
 import Foundation
+import DiscordKitCommon
 
-public extension DiscordAPI {
+public extension DiscordREST {
     // MARK: Get Current User
     // GET /users/@me
-    static func getCurrentUser() async -> User? {
+    func getCurrentUser() async -> User? {
         return await getReq(path: "users/@me")
     }
 
     // MARK: Get User (Get user object from ID)
     // GET /users/{user.id}
-    static func getUser(user: Snowflake) async -> User? {
+    func getUser(user: Snowflake) async -> User? {
         return await getReq(path: "users/\(user)")
     }
 
     // MARK: Get Profile (Undocumented endpoint!)
     // GET /users/{user.id}
-    static func getProfile(
+    func getProfile(
         user: Snowflake,
         mutualGuilds: Bool = false,
         guildID: Snowflake? = nil
@@ -39,7 +40,7 @@ public extension DiscordAPI {
 
     // MARK: Get Current User Guilds
     // GET /users/@me/guilds
-    static func getGuilds(
+    func getGuilds(
         before: Snowflake? = nil,
         after: Snowflake? = nil,
         limit: Int = 200
@@ -50,7 +51,7 @@ public extension DiscordAPI {
     // MARK: Get Current User Guild Member
     // Get guild member object for current user in a guild
     // GET /users/@me/guilds/{guild.id}/member
-    static func getGuildMember(guild: Snowflake) async -> Member? {
+    func getGuildMember(guild: Snowflake) async -> Member? {
         return await getReq(path: "users/@me/guilds/\(guild)/member")
     }
 

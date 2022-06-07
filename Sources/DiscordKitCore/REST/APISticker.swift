@@ -6,11 +6,12 @@
 //
 
 import Foundation
+import DiscordKitCommon
 
-public extension DiscordAPI {
+public extension DiscordREST {
     // MARK: Get Sticker
     // GET /stickers/{sticker.id}
-    static func getSticker(id: Snowflake) async -> Sticker? {
+    func getSticker(id: Snowflake) async -> Sticker? {
         return await getReq(path: "stickers/\(id)")
     }
 }

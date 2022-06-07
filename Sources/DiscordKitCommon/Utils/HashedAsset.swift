@@ -18,7 +18,7 @@ public extension HashedAsset {
     }
 
     private static func joinPaths(with format: AssetFormat, _ paths: String...) -> URL {
-        var base = URL(string: GatewayConfig.default.cdnURL)!
+        var base = URL(string: DiscordKitConfig.default.cdnURL)!
 
         for path in paths { base.appendPathComponent(path) }
         base.appendPathExtension(format.rawValue)

@@ -6,17 +6,18 @@
 //
 
 import Foundation
+import DiscordKitCommon
 
-public extension DiscordAPI {
+public extension DiscordREST {
     // MARK: Get Channel
     // GET /channels/{channel.id}
-    static func getChannel(id: Snowflake) async -> Channel? {
+    func getChannel(id: Snowflake) async -> Channel? {
         return await getReq(path: "channels/\(id)")
     }
 
     // MARK: Get Channel Messages
     // GET /channels/{channel.id}/messages
-    static func getChannelMsgs(
+    func getChannelMsgs(
         id: Snowflake,
         limit: Int = 50,
         around: Snowflake? = nil,
@@ -31,7 +32,7 @@ public extension DiscordAPI {
 
     // MARK: Get Channel Message (Actual endpoint only available to bots, so we're using a workaround)
     // Ailas of getChannelMsgs with predefined params
-    static func getChannelMsg(
+    func getChannelMsg(
         id: Snowflake,
         msgID: Snowflake
     ) async -> Message? {
@@ -42,7 +43,7 @@ public extension DiscordAPI {
 
     // MARK: Create Channel Message
     // POST /channels/{channel.id}/messages
-    static func createChannelMsg(
+    func createChannelMsg(
         message: NewMessage,
         attachments: [URL],
         id: Snowflake
@@ -52,7 +53,7 @@ public extension DiscordAPI {
 
     // MARK: Delete Message
     // DELETE /channels/{channel.id}/messages/{message.id}
-    static func deleteMsg(
+    func deleteMsg(
         id: Snowflake,
         msgID: Snowflake
     ) async -> Bool {
@@ -61,7 +62,7 @@ public extension DiscordAPI {
 
     // MARK: Acknowledge Message Read (Undocumented endpoint!)
     // POST /channels/{channel.id}/messages/{message.id}/ack
-    static func ackMessageRead(
+    func ackMessageRead(
         id: Snowflake,
         msgID: Snowflake
     ) async -> MessageReadAck? {
@@ -69,7 +70,7 @@ public extension DiscordAPI {
     }
 
     // MARK: Typing Start (Undocumented endpoint!)
-    static func typingStart(id: Snowflake) async -> Bool {
+    func typingStart(id: Snowflake) async -> Bool {
         return await emptyPostReq(path: "channels/\(id)/typing")
     }
 }

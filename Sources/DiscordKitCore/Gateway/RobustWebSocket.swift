@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import DiscordKitCommon
 import Reachability
 import OSLog
 import Combine
@@ -47,7 +48,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
 
     private var session: URLSession!, socket: URLSessionWebSocketTask!,
                 decompressor: DecompressionEngine!
-	private let reachability = try! Reachability(), log = Logger(subsystem: Bundle.main.bundleIdentifier ?? DiscordAPI.subsystem, category: "RobustWebSocket")
+	private let reachability = try! Reachability(), log = Logger(subsystem: Bundle.main.bundleIdentifier ?? DiscordREST.subsystem, category: "RobustWebSocket")
 
     private let queue: OperationQueue
 
@@ -57,6 +58,8 @@ public class RobustWebSocket: NSObject, ObservableObject {
                 reconnectWhenOnlineAgain = false, explicitlyClosed = false,
                 seq: Int? = nil, canResume = false, sessionID: String? = nil,
                 pendingReconnect: Timer? = nil, connTimeout: Timer? = nil
+
+    internal let token: String
 
     /// If the Gateway socket is connected
     ///
@@ -164,7 +167,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
 
         var gatewayReq = URLRequest(url: URL(string: GatewayConfig.default.gateway)!)
         // The difference in capitalisation is intentional
-		gatewayReq.setValue(DiscordAPI.userAgent, forHTTPHeaderField: "User-Agent")
+		gatewayReq.setValue(DiscordREST.userAgent, forHTTPHeaderField: "User-Agent")
         socket = session.webSocketTask(with: gatewayReq)
         socket.maximumMessageSize = maxMsgSize
 
@@ -210,7 +213,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
         }*/
 
         guard let msgData = message.data(using: .utf8) else { return }
-		let decoded = try DiscordAPI.decoder().decode(GatewayIncoming.self, from: msgData)
+		let decoded = try DiscordREST.decoder().decode(GatewayIncoming.self, from: msgData)
 
         if let sequence = decoded.s { seq = sequence }
 
@@ -293,13 +296,20 @@ public class RobustWebSocket: NSObject, ObservableObject {
     /// A convenience init is also provided that uses reasonable defaults instead.
     ///
     /// - Parameters:
+    ///   - token: Discord token used for authentication
     ///   - timeout: The timeout before the connection attempt is aborted. The
     ///   socket will attempt to reconnect if connection times out.
     ///   - maxMessageSize: The maximum outgoing and incoming payload size for the socket.
     ///   - reconnectIntClosure: A closure called with `(closecode, reconnectionTimes)`
     ///   used to determine the reconnection delay.
-    public init(timeout: TimeInterval, maxMessageSize: Int, reconnectIntClosure: @escaping (URLSessionWebSocketTask.CloseCode?, Int) -> TimeInterval?) {
+    public init(
+        token: String,
+        timeout: TimeInterval,
+        maxMessageSize: Int,
+        reconnectIntClosure: @escaping (URLSessionWebSocketTask.CloseCode?, Int) -> TimeInterval?
+    ) {
         self.timeout = timeout
+        self.token = token
         queue = OperationQueue()
         queue.qualityOfService = .utility
         reconnectInterval = reconnectIntClosure
@@ -316,8 +326,10 @@ public class RobustWebSocket: NSObject, ObservableObject {
     /// - Connection timeout: 4s
     /// - Maximum socket payload size: 10MiB
     /// - Reconnection delay: `1.4^reconnectionTimes * 5 - 5`
-    public override convenience init() {
-        self.init(timeout: TimeInterval(4), maxMessageSize: 1024*1024*10) { code, times in
+    ///
+    /// - Parameter token: Discord token used for authentication
+    public convenience init(token: String) {
+        self.init(token: token, timeout: TimeInterval(4), maxMessageSize: 1024*1024*10) { code, times in
             guard code != .policyViolation, code != .internalServerError, times < 10
             else { return nil }
 
@@ -428,6 +440,9 @@ public extension RobustWebSocket {
     /// When this method is called, the Gateway socket will gracefully close
     /// and will not reconnect. This can be used when the user signs out, for example.
     ///
+    /// The socket connection cannot be reconnected after ``close(code:)`` is
+    /// called. To reconnect, recreate the ``RobustWebSocket`` instance.
+    ///
     /// - Parameter code: The close code to close the socket with.
     func close(code: URLSessionWebSocketTask.CloseCode) {
         clearPendingReconnectIfNeeded()
@@ -474,7 +489,7 @@ public extension RobustWebSocket {
         guard connected else { return }
 
         let sendPayload = GatewayOutgoing(op: op, d: data, s: seq)
-        guard let encoded = try? DiscordAPI.encoder().encode(sendPayload)
+        guard let encoded = try? DiscordREST.encoder().encode(sendPayload)
         else { return }
 
         log.debug("Outgoing Payload: <\(String(describing: op), privacy: .public)> \(String(describing: data), privacy: .sensitive(mask: .hash)) [seq: \(String(describing: self.seq), privacy: .public)]")

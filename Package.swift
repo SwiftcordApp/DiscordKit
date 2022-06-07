@@ -22,19 +22,21 @@ let package = Package(
             name: "DiscordKitCore",
             dependencies: [
                 .product(name: "Reachability", package: "Reachability.swift", condition: .when(platforms: [.macOS])),
-                .target(name: "DiscordKitCommon"),
+                .target(name: "DiscordKitCommon")
             ],
             exclude: [
                 "REST/README.md",
-                "Gateway/README.md",
-                "Objects/README.md"
+                "Gateway/README.md"
             ]
         ),
 		.target(
             name: "DiscordKit",
             dependencies: [.target(name: "DiscordKitCore")]
         ),
-		.target(name: "DiscordKitCommon"),
+		.target(
+            name: "DiscordKitCommon",
+            exclude: ["Objects/README.md"]
+        ),
         .testTarget(name: "DiscordKitCoreTests", dependencies: ["DiscordKit"])
 	],
     swiftLanguageVersions: [.v5]

@@ -7,6 +7,7 @@
 
 import Foundation
 import DiscordKitCore
+import DiscordKitCommon
 
 /// A struct for storing cached data from the Gateway
 ///

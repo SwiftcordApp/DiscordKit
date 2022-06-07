@@ -6,8 +6,9 @@
 //
 
 import Foundation
+import DiscordKitCommon
 
-public extension DiscordAPI {
+public extension DiscordREST {
     static func createMultipartBody(
         with payloadJson: String?,
         boundary: String,
@@ -18,7 +19,7 @@ public extension DiscordAPI {
         for (n, attachment) in attachments.enumerated() {
             let name = try! attachment.resourceValues(forKeys: [URLResourceKey.nameKey]).name!
             guard let attachmentData = try? Data(contentsOf: attachment) else {
-                DiscordAPI.log.error("Could not get data of attachment #\(n)")
+                DiscordREST.log.error("Could not get data of attachment #\(n)")
                 continue
             }
 

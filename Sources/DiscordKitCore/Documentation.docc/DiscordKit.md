@@ -1,4 +1,4 @@
-# ``DiscordKit``
+# ``DiscordKitCore``
 
 DiscordKit: A Discord API implementation for Swift. 
 
