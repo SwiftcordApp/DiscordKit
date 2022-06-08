@@ -6,11 +6,17 @@
 //
 
 import Foundation
+#if canImport(UniformTypeIdentifiers)
 import UniformTypeIdentifiers
+#endif
 
 public extension URL {
 	var mimeType: String {
-		UTType(filenameExtension: self.pathExtension)?.preferredMIMEType ?? "application/octet-stream"
+        #if canImport(UniformTypeIdentifiers)
+        UTType(filenameExtension: self.pathExtension)?.preferredMIMEType ?? "application/octet-stream"
+        #else
+        "application/octet-stream"
+        #endif
     }
 
     /// Appends one or more query items to the URL
