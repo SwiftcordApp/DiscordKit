@@ -6,7 +6,8 @@
 //
 
 import Foundation
-import os
+//import os
+import Logging
 import DiscordKitCommon
 import DiscordKitCore
 

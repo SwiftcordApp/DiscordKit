@@ -6,6 +6,9 @@
 //
 
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 import DiscordKitCommon
 
 /// Utility wrappers for easy request-making
@@ -95,8 +98,8 @@ public extension DiscordREST {
         let (data, response) = try await DiscordREST.session.data(for: req)
         guard let httpResponse = response as? HTTPURLResponse else { return nil }
         guard httpResponse.statusCode / 100 == 2 else { // Check if status code is 2**
-            DiscordREST.log.warning("Status code is not 2xx: \(httpResponse.statusCode, privacy: .public)")
-            DiscordREST.log.warning("Response: \(String(decoding: data, as: UTF8.self), privacy: .public)")
+            DiscordREST.log.warning("Status code is not 2xx: \(httpResponse.statusCode)")
+            DiscordREST.log.warning("Response: \(String(decoding: data, as: UTF8.self))")
             return nil
         }
 

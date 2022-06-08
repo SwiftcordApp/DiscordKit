@@ -6,8 +6,10 @@
 //
 
 import Foundation
+#if canImport(Compression)
 import Compression
-import OSLog
+#endif
+import Logging
 
 /// Decompresses `zlib-stream`-compressed payloads received
 /// from the Gateway
@@ -23,7 +25,7 @@ import OSLog
 public class DecompressionEngine {
     private static let ZLIB_SUFFIX = Data([0x00, 0x00, 0xff, 0xff]), BUFFER_SIZE = 32_768
 
-	private static let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? DiscordREST.subsystem, category: "DecompressionEngine")
+	private static let log = Logger(label: DiscordREST.subsystem)//subsystem: Bundle.main.bundleIdentifier ?? DiscordREST.subsystem, category: "DecompressionEngine")
     private var buf = Data(), stream: compression_stream, status: compression_status,
                 decompressing = false
 

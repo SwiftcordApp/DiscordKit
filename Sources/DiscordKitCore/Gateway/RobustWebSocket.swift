@@ -7,9 +7,14 @@
 
 import Foundation
 import DiscordKitCommon
+#if canImport(Reachability)
 import Reachability
-import OSLog
-import Combine
+#endif
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+import Logging
+import OpenCombineShim
 
 /// A robust WebSocket that handles resuming, reconnection and heartbeats
 /// with the Discord Gateway
@@ -48,7 +53,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
 
     private var session: URLSession!, socket: URLSessionWebSocketTask!,
                 decompressor: DecompressionEngine!
-	private let reachability = try! Reachability(), log = Logger(subsystem: Bundle.main.bundleIdentifier ?? DiscordREST.subsystem, category: "RobustWebSocket")
+	private let reachability = try! Reachability(), log = Logger(label: DiscordREST.subsystem) //Logger(subsystem: Bundle.main.bundleIdentifier ?? DiscordREST.subsystem, category: "RobustWebSocket")
 
     private let queue: OperationQueue
 

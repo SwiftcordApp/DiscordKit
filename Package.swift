@@ -17,6 +17,7 @@ let package = Package(
         .package(url: "https://github.com/ashleymills/Reachability.swift", from: "5.1.0"),
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
         .package(url: "https://github.com/OpenCombine/OpenCombine.git", from: "0.13.0"),
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
 	],
 	targets: [
         .target(
@@ -24,6 +25,7 @@ let package = Package(
             dependencies: [
                 .product(name: "Reachability", package: "Reachability.swift", condition: .when(platforms: [.macOS])),
                 .product(name: "OpenCombineShim", package: "OpenCombine"),
+                .product(name: "Logging", package: "swift-log"),
                 .target(name: "DiscordKitCommon")
             ],
             exclude: [
