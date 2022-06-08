@@ -6,7 +6,7 @@
 //
 
 import XCTest
-import DiscordKitCore
+import DiscordKitCommon
 
 class PermissionTests: XCTestCase {
     func testPermissionsDecode() {
