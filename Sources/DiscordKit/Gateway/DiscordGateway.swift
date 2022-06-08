@@ -110,7 +110,7 @@ public class DiscordGateway: ObservableObject {
         socket!.open()
     }
 
-    public func send(op: GatewayOutgoingOpcodes, data: OutgoingGatewayData) {
+    public func send<T: OutgoingGatewayData>(op: GatewayOutgoingOpcodes, data: T) {
         guard let socket = socket else {
             log.warning("Not sending data to a non existant socket")
             return
