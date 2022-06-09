@@ -53,7 +53,10 @@ public class RobustWebSocket: NSObject, ObservableObject {
 
     private var session: URLSession!, socket: URLSessionWebSocketTask!,
                 decompressor: DecompressionEngine!
-	private let reachability = try! Reachability(), log = Logger(label: DiscordREST.subsystem) //Logger(subsystem: Bundle.main.bundleIdentifier ?? DiscordREST.subsystem, category: "RobustWebSocket")
+    #if canImport(Reachability)
+	private let reachability = try! Reachability()
+    #endif
+    private let log = Logger(label: DiscordREST.subsystem) //Logger(subsystem: Bundle.main.bundleIdentifier ?? DiscordREST.subsystem, category: "RobustWebSocket")
 
     private let queue: OperationQueue
 
@@ -190,8 +193,9 @@ public class RobustWebSocket: NSObject, ObservableObject {
         // It's best to do it here, before resuming the task since sometimes, messages arrive before the compressor is initialised in the socket open handler.
         decompressor = DecompressionEngine()
         socket.resume()
-
+        #if canImport(Reachability)
         setupReachability()
+        #endif
         attachSockReceiveListener()
     }
 
@@ -360,6 +364,7 @@ extension RobustWebSocket: URLSessionWebSocketDelegate {
 }
 
 // MARK: - Reachability
+#if canImport(Reachability)
 public extension RobustWebSocket {
     private func setupReachability() {
         reachability.whenReachable = { [weak self] _ in
@@ -377,6 +382,7 @@ public extension RobustWebSocket {
         do { try reachability.startNotifier() } catch { log.error("Starting reachability notifier failed!") }
     }
 }
+#endif
 
 // MARK: - Heartbeating
 public extension RobustWebSocket {
@@ -456,7 +462,9 @@ public extension RobustWebSocket {
         connected = false
         sessionID = nil
         seq = nil
+        #if canImport(Reachability)
         reachability.stopNotifier()
+        #endif
 
         socket.cancel(with: code, reason: nil)
     }
