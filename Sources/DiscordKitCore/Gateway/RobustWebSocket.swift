@@ -51,8 +51,10 @@ public class RobustWebSocket: NSObject, ObservableObject {
     /// be attempted if/when this happens.
     public let onSessionInvalid = EventDispatch<Void>()
 
-    private var session: URLSession!, socket: URLSessionWebSocketTask!,
-                decompressor: DecompressionEngine!
+    private var session: URLSession!, socket: URLSessionWebSocketTask!
+    #if !os(Linux)
+    private var decompressor: DecompressionEngine!
+    #endif
     #if canImport(Reachability)
 	private let reachability = try! Reachability()
     #endif
@@ -151,10 +153,12 @@ public class RobustWebSocket: NSObject, ObservableObject {
             case .success(let message):
                 do {
                     switch message {
+                    #if !os(Linux)
                     case .data(let data):
                         if let decompressed = self?.decompressor.push_data(data) {
                             try self?.handleMessage(with: decompressed)
                         } else { self?.log.debug("Data has not ended yet") }
+                    #endif
                     case .string(let str): try self?.handleMessage(with: str)
                     @unknown default: self?.log.warning("Unknown sock message case!")
                     }
@@ -191,7 +195,9 @@ public class RobustWebSocket: NSObject, ObservableObject {
         attempts += 1
         // Create new instance of decompressor
         // It's best to do it here, before resuming the task since sometimes, messages arrive before the compressor is initialised in the socket open handler.
+        #if !os(Linux)
         decompressor = DecompressionEngine()
+        #endif
         socket.resume()
         #if canImport(Reachability)
         setupReachability()

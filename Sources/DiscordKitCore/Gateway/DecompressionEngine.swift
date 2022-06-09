@@ -4,7 +4,7 @@
 //
 //  Created by Vincent Kwok on 13/5/22.
 //
-
+#if !os(Linux)
 import Foundation
 #if canImport(Compression)
 import Compression
@@ -150,3 +150,4 @@ public extension DecompressionEngine {
         return decompressed
     }
 }
+#endif
