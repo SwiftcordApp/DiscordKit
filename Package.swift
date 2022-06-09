@@ -41,7 +41,7 @@ let package = Package(
             name: "DiscordKitCommon",
             exclude: ["Objects/README.md"]
         ),
-        .testTarget(name: "DiscordKitCoreTests", dependencies: ["DiscordKit"])
+        .testTarget(name: "DiscordKitCommonTests", dependencies: ["DiscordKitCommon"])
 	],
     swiftLanguageVersions: [.v5]
 )
