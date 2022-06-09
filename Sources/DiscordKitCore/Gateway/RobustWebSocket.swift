@@ -156,12 +156,12 @@ public class RobustWebSocket: NSObject, ObservableObject {
                     @unknown default: self?.log.warning("Unknown sock message case!")
                     }
                 } catch {
-                    self?.log.warning("Error decoding message: \(error.localizedDescription, privacy: .public)")
+                    self?.log.warning("Error decoding message: \(error.localizedDescription)")
                 }
                 self?.attachSockReceiveListener()
             case .failure(let error):
                 // If an error is encountered here, the connection is probably broken
-                self?.log.error("Error when receiving: \(error.localizedDescription, privacy: .public)")
+                self?.log.error("Error when receiving: \(error.localizedDescription)")
                 self?.forceClose()
             }
         }
@@ -231,7 +231,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
             hasConnected()
             // Start heartbeating and send identify
             guard let d = decoded.d as? GatewayHello else { return }
-            log.debug("Hello payload is: \(String(describing: d), privacy: .public)")
+            log.debug("Hello payload is: \(String(describing: d))")
             startHeartbeating(interval: Double(d.heartbeat_interval) / 1000.0)
 
             // Check if we're attempting to and can resume
@@ -497,10 +497,10 @@ public extension RobustWebSocket {
         guard let encoded = try? DiscordREST.encoder().encode(sendPayload)
         else { return }
 
-        log.debug("Outgoing Payload: <\(String(describing: op), privacy: .public)> \(String(describing: data), privacy: .sensitive(mask: .hash)) [seq: \(String(describing: self.seq), privacy: .public)]")
+        log.debug("Outgoing Payload: <\(String(describing: op))> \(String(describing: data).hash)) [seq: \(String(describing: self.seq))]")
 
         socket.send(.data(encoded), completionHandler: completionHandler ?? { [weak self] err in
-            if let err = err { self?.log.error("Socket send error: \(err.localizedDescription, privacy: .public)") }
+            if let err = err { self?.log.error("Socket send error: \(err.localizedDescription)") }
         })
     }
 }

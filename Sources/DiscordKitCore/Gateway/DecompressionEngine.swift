@@ -60,7 +60,7 @@ public class DecompressionEngine {
         buf.append(data)
 
         guard buf.count >= 4, buf.suffix(4) == DecompressionEngine.ZLIB_SUFFIX else {
-            DecompressionEngine.log.debug("Appending to buf, current buf len: \(self.buf.count, privacy: .public)")
+            DecompressionEngine.log.debug("Appending to buf, current buf len: \(self.buf.count)")
             return nil
         }
 
@@ -94,7 +94,7 @@ public extension DecompressionEngine {
         var decompressed = Data(), srcChunk: Data?
 
         defer {
-            DecompressionEngine.log.debug("Decompressed \(initialSize)B -> \(decompressed.count, privacy: .public)B")
+            DecompressionEngine.log.debug("Decompressed \(initialSize)B -> \(decompressed.count)B")
             decompressing = false
             destinationBufferPointer.deallocate()
         }

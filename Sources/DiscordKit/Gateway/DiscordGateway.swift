@@ -6,7 +6,6 @@
 //
 
 import Foundation
-//import os
 import Logging
 import DiscordKitCommon
 import DiscordKitCore
@@ -59,8 +58,7 @@ public class DiscordGateway: ObservableObject {
 
     // Logger
     private let log = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? DiscordKitConfig.subsystem,
-        category: "DiscordGateway"
+        label: Bundle.main.bundleIdentifier ?? DiscordKitConfig.subsystem
     )
 
     /// Log out the current user, closing the Gateway socket connection
@@ -164,7 +162,7 @@ public class DiscordGateway: ObservableObject {
 
         cache.objectWillChange.send()
         onEvent.notify(event: (event, data))
-        log.info("Dispatched event <\(event.rawValue, privacy: .public)>")
+        log.info("Dispatched event <\(event.rawValue)>")
     }
 
     /// Inits an instance of ``DiscordGateway``
