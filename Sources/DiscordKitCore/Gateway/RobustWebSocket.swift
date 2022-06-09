@@ -386,7 +386,7 @@ public extension RobustWebSocket {
 
 // MARK: - Heartbeating
 public extension RobustWebSocket {
-    @objc private func sendHeartbeat() {
+    private func sendHeartbeat() {
         guard connected else { return }
 
         log.debug("Sending heartbeat, awaiting \(self.awaitingHb) ACKs")
