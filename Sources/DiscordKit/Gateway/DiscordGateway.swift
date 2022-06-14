@@ -90,9 +90,8 @@ public class DiscordGateway: ObservableObject {
 
     /// Opens the socket connection with the Gateway
     ///
-    /// > The socket will be automatically opened when an instance of
-    /// > ``DiscordGateway`` is created, so there is no need to call
-    /// > this method right after initing an instance.
+    /// > Important: This method will be called when a token is provided to ``init(token:)``,
+    /// > so there is no need to call this method again.
     ///
     /// - Parameter token: Token to use to authenticate with the Gateway
     public func connect(token: String) {
@@ -168,8 +167,13 @@ public class DiscordGateway: ObservableObject {
 
     /// Inits an instance of ``DiscordGateway``
     ///
-    /// Refer to ``RobustWebSocket/init()`` for more details about parameters
-    public init() {
+    /// - Parameter token: Optionally provide a Discord token to connect with. If one is provided,
+    /// ``connect(token:)`` will be called. Otherwise, ``connect(token:)`` has to be called
+    /// to set the token and connect.
+    public init(token: String? = nil) {
+        if let token = token {
+            connect(token: token)
+        }
     }
 
     private func removeHandlers() {
