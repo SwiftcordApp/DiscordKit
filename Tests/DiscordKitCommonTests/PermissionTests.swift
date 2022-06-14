@@ -12,14 +12,23 @@ class PermissionTests: XCTestCase {
     func testPermissionsDecode() {
         XCTAssertEqual(
             Permissions([.viewChannel, .addReactions, .banMembers]),
-            try! JSONDecoder().decode(Permissions.self, from: "\"1092\"".data(using: .utf8)!)
+            try JSONDecoder().decode(Permissions.self, from: "\"1092\"".data(using: .utf8)!)
         )
         XCTAssertEqual(
             Permissions([]),
-            try! JSONDecoder().decode(Permissions.self, from: "\"\"".data(using: .utf8)!)
+            try JSONDecoder().decode(Permissions.self, from: "\"\"".data(using: .utf8)!)
         )
         XCTAssertThrowsError(
             try JSONDecoder().decode(Permissions.self, from: "1092".data(using: .utf8)!)
+        )
+        XCTAssertThrowsError(
+            try JSONDecoder().decode(Permissions.self, from: "\"-5\"".data(using: .utf8)!)
+        )
+        XCTAssertThrowsError(
+            try JSONDecoder().decode(Permissions.self, from: "\"blahblah\"".data(using: .utf8)!)
+        )
+        XCTAssertThrowsError(
+            try JSONDecoder().decode(Permissions.self, from: "0".data(using: .utf8)!)
         )
     }
 

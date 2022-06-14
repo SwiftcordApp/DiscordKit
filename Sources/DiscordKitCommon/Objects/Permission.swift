@@ -100,7 +100,15 @@ public struct Permissions: OptionSet, Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let raw = try container.decode(String.self)
-        self.init(rawValue: UInt64(raw) ?? 0)
+        if raw.isEmpty {
+            self.init(rawValue: 0)
+            return
+        }
+
+        guard let value = UInt64(raw) else {
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Permission is not a valid UInt64")
+        }
+        self.init(rawValue: value)
     }
 
     public func encode(to encoder: Encoder) throws {
