@@ -277,9 +277,9 @@ public extension RobustWebSocket {
             // Only ever start 1 publishing timer
             self?.sendHeartbeat()
 
-            _ = Timer.publish(every: interval, tolerance: 2, on: .main, in: .common)
-                .autoconnect()
-                .sink { _ in self?.sendHeartbeat() }
+            Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { _ in
+                self?.sendHeartbeat()
+            }
             self?.hbActive = true
         }
     }
