@@ -95,9 +95,9 @@ public class DiscordGateway {
         cache = CachedState()
 #if os(macOS)
         cache.objectWillChange.send()
-#endif
 
         socket.close(code: .normalClosure)
+#endif
         onAuthFailure.notify()
     }
 
