@@ -7,8 +7,8 @@
 
 import Foundation
 import os
-import SwiftUI
 import DiscordKitCommon
+import DiscordKitCore
 
 /// Higher-level Gateway manager, mainly for handling and dispatching
 /// Gateway events
@@ -18,11 +18,7 @@ import DiscordKitCommon
 /// since it hides away even more implementation details.
 ///
 /// Conforms to `ObservableObject` for use in SwiftUI projects.
-public class DiscordGateway: ObservableObject, Equatable {
-    public static func == (lhs: DiscordGateway, rhs: DiscordGateway) -> Bool {
-        lhs.cache == rhs.cache
-    }
-
+public class DiscordGateway: ObservableObject {
     // Events
     /// An ``EventDispatch`` that is notified when an event is dispatched
     /// from the Gateway
@@ -32,7 +28,7 @@ public class DiscordGateway: ObservableObject, Equatable {
 	public let onAuthFailure = EventDispatch<Void>()
 
     // WebSocket object
-    @Published public var socket: RobustWebSocket!
+    @Published public var socket: RobustWebSocket?
 
     /// A cache for some data received from the Gateway
     ///
@@ -61,24 +57,32 @@ public class DiscordGateway: ObservableObject, Equatable {
     @Published public var reachable = false
 
     // Logger
-	private let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? DiscordAPI.subsystem, category: "DiscordGateway")
+    private let log = Logger(
+        subsystem: Bundle.main.bundleIdentifier ?? DiscordKitConfig.subsystem,
+        category: "DiscordGateway"
+    )
 
     /// Log out the current user, closing the Gateway socket connection
     ///
     /// This method removes the Discord token from the keychain and
     /// closes the Gateway socket. The socket will _not_ reconnect.
     public func logout() {
+        guard let socket = socket else {
+            log.warning("Cannot log out, socket hasn't been opened. Call connect() first.")
+            return
+        }
+
         log.debug("Logging out on request")
 
         // Remove token from the keychain
-        Keychain.remove(key: "authToken")
+        /*Keychain.remove(key: "authToken")
         // Reset user defaults
         if let bundleID = Bundle.main.bundleIdentifier {
             UserDefaults.standard.removePersistentDomain(forName: bundleID)
-        }
+        }*/
         // Clear cache
         cache = CachedState()
-        objectWillChange.send()
+        cache.objectWillChange.send()
 
         socket.close(code: .normalClosure)
         onAuthFailure.notify()
@@ -86,13 +90,31 @@ public class DiscordGateway: ObservableObject, Equatable {
 
     /// Opens the socket connection with the Gateway
     ///
-    /// Calls ``RobustWebSocket/open()``
+    /// > Important: This method will be called when a token is provided to ``init(token:)``,
+    /// > so there is no need to call this method again.
     ///
-    /// > The socket will be automatically opened when an instance of
-    /// > ``DiscordGateway`` is created, so there is no need to call
-    /// > this method right after initing an instance.
-    public func connect() {
-        socket.open()
+    /// - Parameter token: Token to use to authenticate with the Gateway
+    public func connect(token: String) {
+        socket = RobustWebSocket(token: token)
+        evtListenerID = socket!.onEvent.addHandler { [weak self] (t, d) in
+            self?.handleEvent(t, data: d)
+        }
+        authFailureListenerID = socket!.onAuthFailure.addHandler { [weak self] in
+            self?.onAuthFailure.notify()
+        }
+        connStateChangeListenerID = socket!.onConnStateChange.addHandler { [weak self] (c, r) in
+            self?.connected = c
+            self?.reachable = r
+        }
+        socket!.open()
+    }
+
+    public func send<T: OutgoingGatewayData>(op: GatewayOutgoingOpcodes, data: T) {
+        guard let socket = socket else {
+            log.warning("Not sending data to a non existant socket")
+            return
+        }
+        socket.send(op: op, data: data)
     }
 
     private func handleEvent(_ event: GatewayEvent, data: GatewayData?) {
@@ -138,47 +160,35 @@ public class DiscordGateway: ObservableObject, Equatable {
                 break
         }
 
+        cache.objectWillChange.send()
         onEvent.notify(event: (event, data))
         log.info("Dispatched event <\(event.rawValue, privacy: .public)>")
     }
 
     /// Inits an instance of ``DiscordGateway``
     ///
-    /// Refer to ``RobustWebSocket/init()`` for more details about parameters
-    ///
-    /// - Parameters:
-    ///   - connectionTimeout: The timeout before the connection attempt
-    ///   is aborted. The socket will attempt to reconnect if connection times out.
-    ///   - maxMissedACK: Does not have any effect, included for backward
-    ///   compatibility. The current implementation follows the official
-    ///   Discord client for the missed heartbeat ACK tolerance.
-	public init(connectionTimeout: Double = 5, maxMissedACK: Int = 3) {
-        socket = RobustWebSocket()
-        evtListenerID = socket.onEvent.addHandler { [weak self] (t, d) in
-            self?.handleEvent(t, data: d)
-        }
-        authFailureListenerID = socket.onAuthFailure.addHandler { [weak self] in
-            self?.onAuthFailure.notify()
-        }
-        connStateChangeListenerID = socket.onConnStateChange.addHandler { [weak self] (c, r) in
-            withAnimation {
-                self?.connected = c
-                self?.reachable = r
-            }
+    /// - Parameter token: Optionally provide a Discord token to connect with. If one is provided,
+    /// ``connect(token:)`` will be called. Otherwise, ``connect(token:)`` has to be called
+    /// to set the token and connect.
+    public init(token: String? = nil) {
+        if let token = token {
+            connect(token: token)
         }
     }
 
-    deinit {
+    private func removeHandlers() {
         if let evtListenerID = evtListenerID {
-            _ = socket.onEvent.removeHandler(handler: evtListenerID)
+            _ = socket?.onEvent.removeHandler(handler: evtListenerID)
         }
         if let authFailureListenerID = authFailureListenerID {
-            _ = socket.onAuthFailure.removeHandler(handler: authFailureListenerID)
+            _ = socket?.onAuthFailure.removeHandler(handler: authFailureListenerID)
         }
         if let connStateChangeListenerID = connStateChangeListenerID {
-            _ = socket.onConnStateChange.removeHandler(handler: connStateChangeListenerID)
+            _ = socket?.onConnStateChange.removeHandler(handler: connStateChangeListenerID)
         }
     }
+
+    deinit { removeHandlers() }
 
     // MARK: - Private Event Handlers
 
