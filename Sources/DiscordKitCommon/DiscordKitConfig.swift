@@ -44,7 +44,7 @@ public struct DiscordKitConfig {
     /// Client version that this implementation aims to emulate
     ///
     /// Currently the only missing piece of emulating the official
-    /// desktop client completely is ETK packing/unpacking.
+    /// desktop client completely is ETF packing/unpacking.
     public let parity: ClientParityVersion
 
     /// Base REST endpoint URL

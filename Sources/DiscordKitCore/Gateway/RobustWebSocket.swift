@@ -10,7 +10,6 @@
 import Foundation
 import DiscordKitCommon
 import Reachability
-import FoundationNetworking
 import Logging
 import OpenCombineShim
 
