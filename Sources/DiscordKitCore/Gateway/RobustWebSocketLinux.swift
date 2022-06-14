@@ -14,6 +14,9 @@ import FoundationNetworking
 #endif
 import DiscordKitCommon
 import Logging
+import WebSocketKit
+import NIO
+import NIOWebSocket
 
 public class RobustWebSocket: NSObject {
     /// An ``EventDispatch`` that is notified when an event dispatch
@@ -36,12 +39,14 @@ public class RobustWebSocket: NSObject {
     /// be attempted if/when this happens.
     public let onSessionInvalid = EventDispatch<Void>()
 
-    private let log = Logger(label: DiscordREST.subsystem) //Logger(subsystem: Bundle.main.bundleIdentifier ?? DiscordREST.subsystem, category: "RobustWebSocket")
+    let elg =  MultiThreadedEventLoopGroup(numberOfThreads: 2)
+    private var socket: WebSocket!
+    private let log = Logger(label: DiscordREST.subsystem)
 
     private let queue: OperationQueue
 
-    private let timeout: TimeInterval, maxMsgSize: Int//,
-                //reconnectInterval: (URLSessionWebSocketTask.CloseCode?, Int) -> TimeInterval?
+    private let timeout: TimeInterval, maxMsgSize: Int,
+                reconnectInterval: (WebSocketErrorCode?, Int) -> TimeInterval?
 
     private var attempts = 0, reconnects = -1, awaitingHb: Int = 0,
                 reconnectWhenOnlineAgain = false, explicitlyClosed = false,
@@ -94,15 +99,84 @@ public class RobustWebSocket: NSObject {
     }
 
     // MARK: - (Re)Connection
-    private func reconnect() {
-        // TODO
+    private func reconnect(code: WebSocketErrorCode?) {
+        guard !explicitlyClosed else {
+            attempts = 0
+            return
+        }
+        guard reachable else {
+            reconnectWhenOnlineAgain = true
+            return
+        }
+        guard connTimeout == nil else { return }
+
+        let delay = reconnectInterval(code, attempts)
+        if let delay = delay {
+            log.info("Reconnecting after \(delay)s...")
+            DispatchQueue.main.async { [weak self] in
+                self?.pendingReconnect = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
+                    guard self?.connected != true else {
+                        self?.log.warning("Looks like we're already connected, no need to reconnect")
+                        return
+                    }
+                    guard self?.connTimeout == nil else {
+                        self?.log.warning("Not reconnecting: already attempting a connection")
+                        return
+                    }
+                    self?.log.debug("Attempting reconnection now")
+                    self?.connect()
+                }
+            }
+        }
     }
 
     private func attachSockReceiveListener() {
-        // TODO
+        socket.onText { [weak self] socket, result in
+            // print(result)
+            do {
+                try self?.handleMessage(with: result)
+            }catch {
+                self?.log.warning("Error decoding message: \(error.localizedDescription)")
+            }
+        }
     }
+
     private func connect() {
-        // TODO
+        pendingReconnect = nil
+        awaitingHb = 0
+
+        DispatchQueue.main.async { [weak self] in
+            self?.connTimeout = Timer.scheduledTimer(withTimeInterval: self!.timeout, repeats: false) { [weak self] _ in
+                self?.connTimeout = nil
+                // reachability.stopNotifier()
+                self?.log.warning("Connection timed out after \(self!.timeout)s")
+                self?.forceClose()
+            }
+        }
+
+        Task() {
+            do {
+                var headers = HTTPHeaders()
+                headers.add(name: "User-Agent", value: DiscordREST.userAgent)
+
+                var config = WebSocketClient.Configuration()
+
+                config.maxFrameSize = maxMsgSize
+
+                try await WebSocket.connect(
+                    to: GatewayConfig.default.gateway,
+                    headers: headers,
+                    configuration: config,
+                    on: elg
+                ) { (socket) async in
+                    self.socket = socket
+                }
+            }
+        }
+
+        attempts += 1
+        attachSockReceiveListener()
+
     }
 
     // MARK: - Handlers
@@ -160,7 +234,7 @@ public class RobustWebSocket: NSObject {
                 log.debug("Token not in keychain")
                 // authFailed = true
                 // socket.disconnect(closeCode: 1000)
-                close()//code: .normalClosure)
+                close(code: .normalClosure)
                 onAuthFailure.notify()
                 return
             }
@@ -177,7 +251,7 @@ public class RobustWebSocket: NSObject {
             /// Unfortunately Discord seems to reject the new identify no matter how long I
             /// wait before sending it, so sometimes there will be 2 identify attempts before
             /// the Gateway session is reestablished
-            close()//code: .normalClosure)
+            close(code: .normalClosure)
             DispatchQueue.main.asyncAfter(deadline: .now() + Double.random(in: 1...5)) { [weak self] in
                 self?.log.debug("Attempting to reconnect now")
                 self?.open()
@@ -220,13 +294,14 @@ public class RobustWebSocket: NSObject {
     public init(
         token: String,
         timeout: TimeInterval,
-        maxMessageSize: Int
+        maxMessageSize: Int,
+        reconnectIntClosure: @escaping (WebSocketErrorCode?, Int) -> TimeInterval?
     ) {
         self.timeout = timeout
         self.token = token
         queue = OperationQueue()
         queue.qualityOfService = .utility
-        //reconnectInterval = reconnectIntClosure
+        reconnectInterval = reconnectIntClosure
         maxMsgSize = maxMessageSize
         super.init()
         //session = URLSession(configuration: .default, delegate: self, delegateQueue: queue)
@@ -243,7 +318,12 @@ public class RobustWebSocket: NSObject {
     ///
     /// - Parameter token: Discord token used for authentication
     public convenience init(token: String) {
-        self.init(token: token, timeout: TimeInterval(4), maxMessageSize: 1024*1024*10)
+        self.init(token: token, timeout: TimeInterval(4), maxMessageSize: 1024*1024*10) { code, times in
+            guard code != .policyViolation, code != .unexpectedServerError, times < 10
+            else { return nil }
+
+            return pow(1.4, Double(times)) * 5 - 5
+        }
     }
 }
 
@@ -297,8 +377,23 @@ public extension RobustWebSocket {
     ///   - code: A custom code to close the socket with (defaults to `.abnormalClosure`)
     ///   - shouldReconnect: If reconnection should be attempted after the connection
     ///   is closed. Defaults to `true`
-    func forceClose() {
-        // TODO
+    func forceClose(
+        code: WebSocketErrorCode = .unknown(1006),
+        shouldReconnect: Bool = true
+    ) {
+        log.warning("Forcibly closing connection")
+        Task() {
+            do {
+                try await self.socket.close(code: code)
+            } catch {
+                self.log.error("Socket close error: \(error.localizedDescription)")
+            }
+        }
+        connected = false
+        if shouldReconnect { self.reconnect(code: nil) } else {
+            sessionID = nil
+            seq = nil
+        }
     }
 
     /// Explicitly close the Gateway socket connection
@@ -310,8 +405,21 @@ public extension RobustWebSocket {
     /// called. To reconnect, recreate the ``RobustWebSocket`` instance.
     ///
     /// - Parameter code: The close code to close the socket with.
-    func close() {
-        // TODO
+    func close(code: WebSocketErrorCode) {
+        clearPendingReconnectIfNeeded()
+        reconnectWhenOnlineAgain = false
+        explicitlyClosed = true
+        connected = false
+        sessionID = nil
+        seq = nil
+
+        Task() {
+            do {
+                try await socket.close(code: code)
+            } catch {
+                self.log.error("Socket close error: \(error.localizedDescription)")
+            }
+        }
     }
 
     /// Initiates a Gateway socket connection
@@ -322,7 +430,12 @@ public extension RobustWebSocket {
     /// it has been closed with `close()`. This method has no effect if the socket
     /// is already opened.
     func open() {
-        // TODO
+        guard socket.isClosed else { return }
+        clearPendingReconnectIfNeeded()
+        reconnectWhenOnlineAgain = false
+        explicitlyClosed = false
+
+        connect()
     }
 
     /// Send a outgoing payload to the Gateway
@@ -336,10 +449,27 @@ public extension RobustWebSocket {
     ///   Not called if set to `nil` (defaults to `nil`)
     func send<T: OutgoingGatewayData>(
         op: GatewayOutgoingOpcodes,
-        data: T,
-        completionHandler: ((Error?) -> Void)? = nil
+        data: T//,
+        //completionHandler: ((WebSocket, String) async -> ())? = nil
     ) {
-        // TODO
+        guard connected else { return }
+
+        let sendPayload = GatewayOutgoing(op: op, d: data, s: seq)
+        guard let encoded = try? DiscordREST.encoder().encode(sendPayload)
+        else { return }
+
+        guard let encodedString = String(data: encoded, encoding: .utf8)
+        else { return }
+
+        log.debug("Outgoing Payload: <\(String(describing: op))> \(String(describing: data).hash)) [seq: \(String(describing: self.seq))]")
+
+        Task.init {
+            do {
+                try await socket.send(encodedString)
+            } catch {
+                self.log.error("Socket send error: \(error.localizedDescription)")
+            }
+        }
     }
 }
 #endif

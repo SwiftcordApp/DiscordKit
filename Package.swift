@@ -17,6 +17,8 @@ let package = Package(
         .package(url: "https://github.com/ashleymills/Reachability.swift", from: "5.1.0"),
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
+        .package(url: "https://github.com/vapor/websocket-kit", from: "2.4.1"),
+        .package(url: "https://github.com/apple/swift-nio", from: "2.0.0")
 	],
 	targets: [
         .target(
@@ -24,6 +26,8 @@ let package = Package(
             dependencies: [
                 .product(name: "Reachability", package: "Reachability.swift", condition: .when(platforms: [.macOS])),
                 .product(name: "Logging", package: "swift-log"),
+                .product(name: "WebSocketKit", package: "websocket-kit"),
+                .product(name: "NIO", package: "swift-nio"),
                 .target(name: "DiscordKitCommon")
             ],
             exclude: [
