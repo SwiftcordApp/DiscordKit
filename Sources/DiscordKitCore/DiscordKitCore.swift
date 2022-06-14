@@ -10,9 +10,8 @@ import Logging
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import OpenCombineShim
 
-public class DiscordREST: ObservableObject {
+public class DiscordREST {
     static let subsystem = "com.cryptoalgo.discordapi"
 
     static let log = Logger(label: DiscordREST.subsystem) //Logger(subsystem: Bundle.main.bundleIdentifier ?? DiscordREST.subsystem, category: "DiscordREST")
@@ -38,3 +37,7 @@ public class DiscordREST: ObservableObject {
         self.token = token
     }
 }
+
+#if os(macOS)
+extension DiscordREST: ObservableObject {}
+#endif

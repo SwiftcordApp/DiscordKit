@@ -11,7 +11,7 @@ import Foundation
 import DiscordKitCommon
 import Reachability
 import Logging
-import OpenCombineShim
+import Combine
 
 /// A robust WebSocket that handles resuming, reconnection and heartbeats
 /// with the Discord Gateway
@@ -88,7 +88,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
         didSet { onConnStateChange.notify(event: (sessionOpen, reachable)) }
     }
 
-    fileprivate var hbCancellable: AnyCancellable?
+    fileprivate var hbActive = false
 
     private func clearPendingReconnectIfNeeded() {
         if let reconnectTimer = pendingReconnect {
@@ -393,7 +393,7 @@ public extension RobustWebSocket {
         log.debug("Sending heartbeats every \(interval)s")
         awaitingHb = 0
 
-        guard hbCancellable == nil else { return }
+        guard !hbActive else { return }
 
         // First heartbeat after interval * jitter where jitter is a value from 0-1
         // ~ Discord API docs
@@ -401,13 +401,14 @@ public extension RobustWebSocket {
             deadline: .now() + interval * Double.random(in: 0...1),
             qos: .utility,
             flags: .enforceQoS
-        ) {
+        ) { [weak self] in
             // Only ever start 1 publishing timer
-            self.sendHeartbeat()
+            self?.sendHeartbeat()
 
-            self.hbCancellable = Timer.publish(every: interval, tolerance: 2, on: .main, in: .common)
+            _ = Timer.publish(every: interval, tolerance: 2, on: .main, in: .common)
                 .autoconnect()
-                .sink { _ in self.sendHeartbeat() }
+                .sink { _ in self?.sendHeartbeat() }
+            self?.hbActive = true
         }
     }
 }

@@ -14,9 +14,8 @@ import FoundationNetworking
 #endif
 import DiscordKitCommon
 import Logging
-import OpenCombineShim
 
-public class RobustWebSocket: NSObject, ObservableObject {
+public class RobustWebSocket: NSObject {
     /// An ``EventDispatch`` that is notified when an event dispatch
     /// is received from the Gateway
     public let onEvent = EventDispatch<(GatewayEvent, GatewayData?)>()
@@ -75,7 +74,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
         didSet { onConnStateChange.notify(event: (sessionOpen, reachable)) }
     }
 
-    fileprivate var hbCancellable: AnyCancellable?
+    fileprivate var hbActive = false
 
     private func clearPendingReconnectIfNeeded() {
         if let reconnectTimer = pendingReconnect {
@@ -266,7 +265,7 @@ public extension RobustWebSocket {
         log.debug("Sending heartbeats every \(interval)s")
         awaitingHb = 0
 
-        guard hbCancellable == nil else { return }
+        guard !hbActive else { return }
 
         // First heartbeat after interval * jitter where jitter is a value from 0-1
         // ~ Discord API docs
@@ -274,13 +273,14 @@ public extension RobustWebSocket {
             deadline: .now() + interval * Double.random(in: 0...1),
             qos: .utility,
             flags: .enforceQoS
-        ) {
+        ) { [weak self] in
             // Only ever start 1 publishing timer
-            self.sendHeartbeat()
+            self?.sendHeartbeat()
 
-            self.hbCancellable = Timer.publish(every: interval, tolerance: 2, on: .main, in: .common)
+            _ = Timer.publish(every: interval, tolerance: 2, on: .main, in: .common)
                 .autoconnect()
-                .sink { _ in self.sendHeartbeat() }
+                .sink { _ in self?.sendHeartbeat() }
+            self?.hbActive = true
         }
     }
 }

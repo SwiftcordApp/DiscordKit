@@ -18,7 +18,7 @@ import DiscordKitCore
 /// since it hides away even more implementation details.
 ///
 /// Conforms to `ObservableObject` for use in SwiftUI projects.
-public class DiscordGateway: ObservableObject {
+public class DiscordGateway {
     // Events
     /// An ``EventDispatch`` that is notified when an event is dispatched
     /// from the Gateway
@@ -28,7 +28,7 @@ public class DiscordGateway: ObservableObject {
 	public let onAuthFailure = EventDispatch<Void>()
 
     // WebSocket object
-    @Published public var socket: RobustWebSocket?
+    public var socket: RobustWebSocket?
 
     /// A cache for some data received from the Gateway
     ///
@@ -41,7 +41,11 @@ public class DiscordGateway: ObservableObject {
     ///
     /// > In the future, presence updates and REST API requests will
     /// > also be stored and kept fresh in this cache.
+#if os(macOS)
     @Published public var cache: CachedState = CachedState()
+#else
+    public var cache: CachedState = CachedState()
+#endif
 
     private var evtListenerID: EventDispatch.HandlerIdentifier? = nil,
                 authFailureListenerID: EventDispatch.HandlerIdentifier? = nil,
@@ -50,11 +54,19 @@ public class DiscordGateway: ObservableObject {
     /// If the Gateway socket is connected
     ///
     /// `@Published` proxy of ``RobustWebSocket/sessionOpen``
+#if os(macOS)
     @Published public var connected = false
+#else
+    public var connected = false
+#endif
     /// If the network is reachable (has network connectivity)
     ///
     /// `@Published` proxy of ``RobustWebSocket/reachable``
+#if os(macOS)
     @Published public var reachable = false
+#else
+    public var reachable = false
+#endif
 
     // Logger
     private let log = Logger(
@@ -81,7 +93,9 @@ public class DiscordGateway: ObservableObject {
         }*/
         // Clear cache
         cache = CachedState()
+#if os(macOS)
         cache.objectWillChange.send()
+#endif
 
         socket.close(code: .normalClosure)
         onAuthFailure.notify()
@@ -119,48 +133,49 @@ public class DiscordGateway: ObservableObject {
 
     private func handleEvent(_ event: GatewayEvent, data: GatewayData?) {
         switch (event, data) {
-            case let (.ready, event as ReadyEvt):
-                cache.configure(using: event)
-                log.info("Gateway ready")
+        case let (.ready, event as ReadyEvt):
+            cache.configure(using: event)
+            log.info("Gateway ready")
 
-            // Guild events
-            case let (.guildCreate, guild as Guild):
-                cache.appendOrReplace(guild)
+        // Guild events
+        case let (.guildCreate, guild as Guild):
+            cache.appendOrReplace(guild)
 
-            case let (.guildDelete, guild as GuildUnavailable):
-                cache.remove(guild)
+        case let (.guildDelete, guild as GuildUnavailable):
+            cache.remove(guild)
 
-            case let (.guildUpdate, guild as Guild):
-                handleGuildUpdate(guild)
+        case let (.guildUpdate, guild as Guild):
+            handleGuildUpdate(guild)
 
-            // User updates
-            case let (.userUpdate, currentUser as CurrentUser):
-                cache.user = currentUser
+        // User updates
+        case let (.userUpdate, currentUser as CurrentUser):
+            cache.user = currentUser
 
-            case let (.userSettingsUpdate, settings as UserSettings):
-                cache.mergeOrReplace(settings)
+        case let (.userSettingsUpdate, settings as UserSettings):
+            cache.mergeOrReplace(settings)
 
-            // Channel events
-            case let (.channelCreate, channel as Channel):
-                cache.append(channel)
+        // Channel events
+        case let (.channelCreate, channel as Channel):
+            cache.append(channel)
 
-            case let (.channelDelete, channel as Channel):
-                cache.remove(channel)
+        case let (.channelDelete, channel as Channel):
+            cache.remove(channel)
 
-            case let (.channelUpdate, channel as Channel):
-                cache.replace(channel)
+        case let (.channelUpdate, channel as Channel):
+            cache.replace(channel)
 
-            case let (.messageCreate, message as Message):
-                cache.appendOrReplace(message)
+        case let (.messageCreate, message as Message):
+            cache.appendOrReplace(message)
 
-            case let (.presenceUpdate, update as PresenceUpdate):
-                log.info("Presence update: \(String(describing: update))")
+        case let (.presenceUpdate, update as PresenceUpdate):
+            log.info("Presence update: \(String(describing: update))")
 
-            default:
-                break
+        default: break
         }
 
+#if os(macOS)
         cache.objectWillChange.send()
+#endif
         onEvent.notify(event: (event, data))
         log.info("Dispatched event <\(event.rawValue)>")
     }
@@ -210,3 +225,7 @@ public class DiscordGateway: ObservableObject {
         cache.appendOrReplace(modifiedGuild)
     }
 }
+
+#if os(macOS)
+extension DiscordGateway: ObservableObject {}
+#endif

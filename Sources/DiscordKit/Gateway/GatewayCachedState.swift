@@ -12,7 +12,7 @@ import DiscordKitCommon
 /// A struct for storing cached data from the Gateway
 ///
 /// Used in ``DiscordGateway/cache``.
-public class CachedState: ObservableObject {
+public class CachedState {
     /// Dictionary of guilds the user is in
     ///
     /// > The guild's ID is its key
@@ -129,3 +129,7 @@ public class CachedState: ObservableObject {
         }
     }
 }
+
+#if os(macOS)
+extension CachedState: ObservableObject {}
+#endif
