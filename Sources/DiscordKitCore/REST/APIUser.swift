@@ -9,20 +9,32 @@ import Foundation
 import DiscordKitCommon
 
 public extension DiscordREST {
-    // MARK: Get Current User
-    // GET /users/@me
+    /// Get Current User
+    ///
+    /// `GET /users/@me`
     func getCurrentUser() async -> User? {
         return await getReq(path: "users/@me")
     }
 
-    // MARK: Get User (Get user object from ID)
-    // GET /users/{user.id}
+    /// Get User
+    ///
+    /// `GET /users/{user.id}`
+    ///
+    /// - Parameter user: ID of user to retrieve
     func getUser(user: Snowflake) async -> User? {
         return await getReq(path: "users/\(user)")
     }
 
-    // MARK: Get Profile (Undocumented endpoint!)
-    // GET /users/{user.id}
+    /// Get Profile
+    ///
+    /// `GET /users/{user.id}`
+    /// > Warning:  This is an undocumented endpoint
+    ///
+    /// - Parameters:
+    ///   - user: ID of user to retrieve profile
+    ///   - mutualGuilds: If the user's mutual guilds with the current user should be returned as well
+    ///   - guildID: The ID of the guild the action that triggered profile retrival was carried out in. Pass `nil`
+    ///   if the action was carried out in a DM channel.
     func getProfile(
         user: Snowflake,
         mutualGuilds: Bool = false,
@@ -38,8 +50,9 @@ public extension DiscordREST {
     // MARK: Modify Current User
     // TODO: Patch not yet implemented
 
-    // MARK: Get Current User Guilds
-    // GET /users/@me/guilds
+    /// Get Current User Guilds
+    ///
+    /// `GET /users/@me/guilds`
     func getGuilds(
         before: Snowflake? = nil,
         after: Snowflake? = nil,
@@ -48,9 +61,11 @@ public extension DiscordREST {
         return await getReq(path: "users/@me/guilds")
     }
 
-    // MARK: Get Current User Guild Member
-    // Get guild member object for current user in a guild
-    // GET /users/@me/guilds/{guild.id}/member
+    /// Get Current User Guild Member
+    ///
+    /// `GET /users/@me/guilds/{guild.id}/member`
+    ///
+    /// Get guild member object for current user in a guild
     func getGuildMember(guild: Snowflake) async -> Member? {
         return await getReq(path: "users/@me/guilds/\(guild)/member")
     }
@@ -61,4 +76,16 @@ public extension DiscordREST {
 
     // MARK: Create DM
 
+    /// Log out
+    ///
+    /// `POST /auth/logout`
+    /// > Warning:  This is an undocumented endpoint
+    ///
+    /// - Parameters:
+    ///   - provider: Unknown, always observed to be nil
+    ///   - voipProvider: Unknown, always observed to be nil
+    @discardableResult
+    func logOut(provider: String? = nil, voipProvider: String? = nil) async -> Bool {
+        return await postReq(path: "auth/logout", body: LogOut(provider: provider, voip_provider: voipProvider))
+    }
 }

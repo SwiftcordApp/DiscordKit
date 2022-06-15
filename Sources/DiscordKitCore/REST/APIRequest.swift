@@ -39,7 +39,7 @@ public extension DiscordREST {
         path: String,
         query: [URLQueryItem] = [],
         attachments: [URL] = [],
-        body: String? = nil,
+        body: Data? = nil,
         method: RequestMethod = .get
     ) async throws -> Data? {
         guard let token = token else {
@@ -88,7 +88,7 @@ public extension DiscordREST {
             req.httpBody = DiscordREST.createMultipartBody(with: body, boundary: boundary, attachments: attachments)
         } else if let body = body {
             req.setValue("application/json", forHTTPHeaderField: "content-type")
-            req.httpBody = body.data(using: .utf8)
+            req.httpBody = body
         }
 
         // Make request
@@ -151,12 +151,29 @@ public extension DiscordREST {
         guard let d = try? await makeRequest(
             path: path,
             attachments: attachments,
-            body: p != nil ? String(decoding: p!, as: UTF8.self) : nil,
+            body: p,
             method: .post
         )
         else { return nil }
 
         return try? DiscordREST.decoder().decode(D.self, from: d)
+    }
+    
+    /// Make a `POST` request to the Discord REST API
+    ///
+    /// For endpoints that returns a 204 empty response
+    func postReq<B: Encodable>(
+        path: String,
+        body: B
+    ) async -> Bool {
+        let p = try? DiscordREST.encoder().encode(body)
+        guard (try? await makeRequest(
+            path: path,
+            body: p,
+            method: .post
+        )) != nil
+        else { return false }
+        return true
     }
 
     /// Make a `POST` request to the Discord REST API, for endpoints
