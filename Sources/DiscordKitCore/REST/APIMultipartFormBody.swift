@@ -10,7 +10,7 @@ import DiscordKitCommon
 
 public extension DiscordREST {
     static func createMultipartBody(
-        with payloadJson: String?,
+        with payloadJson: Data?,
         boundary: String,
         attachments: [URL]
     ) -> Data {
@@ -35,7 +35,8 @@ public extension DiscordREST {
         if let payloadJson = payloadJson {
             body.append("--\(boundary)\r\n".data(using: .utf8)!)
             body.append("Content-Disposition: form-data; name=\"payload_json\"\r\nContent-Type: application/json\r\n\r\n".data(using: .utf8)!)
-            body.append("\(payloadJson)\r\n".data(using: .utf8)!)
+            body.append(payloadJson)
+            body.append("\r\n".data(using: .utf8)!)
         }
 
         body.append("--\(boundary)--\r\n".data(using: .utf8)!)
