@@ -87,6 +87,8 @@ public struct Message: Codable, GatewayData, Equatable {
     ///
     /// Up to 2000 characters for non-premium users.
     public var content: String
+    
+    public var parsedContent: [MessagePart] { MessagePart.parseMessage(content, id: id) }
 
     /// When this message was sent
     public let timestamp: Date
@@ -262,4 +264,84 @@ public enum MessageComponentTypes: Int, Codable {
 /// > Warning: This struct is incomplete
 public struct MessageComponent: Codable {
     public let type: MessageComponentTypes
+}
+
+// MARK: Message Parts
+public enum MessagePart: Equatable, Hashable {
+    case text(_ str: String)
+    case emote(_ url: URL, emoteId: String, emoteName: String)
+    case user(_ id: String)
+    case channel(_ id: String)
+    case role(_ id: String)
+    case timestamp(_ timestamp: String, style: String?)
+
+    static func parseMessage(_ message: String, id: Snowflake) -> [MessagePart] {
+        var finalMessage: [MessagePart] = []
+        let regex = try! NSRegularExpression(pattern: #"<(?:a?:\w+:|@!*&*|#)[0-9]+>"#)
+        let nsrange = NSRange(message.startIndex..<message.endIndex, in: message)
+
+        let matches = regex.matches(in: message, options: [], range: nsrange)
+
+        for j in 0..<matches.count {
+            let regexMatch = matches[j]
+            var nextMatch: NSTextCheckingResult? = nil
+            if !(j + 1 > matches.count - 1) {
+                nextMatch = matches[j + 1]
+            }
+
+            for i in 0..<regexMatch.numberOfRanges {
+                let range = Range(regexMatch.range(at: i), in: message)!
+                var nextRange: Range<String.Index>? = nil
+                if let nextMatch = nextMatch {
+                    nextRange = Range(nextMatch.range(at: i), in: message)
+                }
+
+                if finalMessage.count == 0 {
+                    let text = String(message[message.startIndex..<range.lowerBound])
+                    if text.count != 0 {
+                        finalMessage.append(.text(text))
+                    }
+                }
+
+                let match: String = String(message[range])
+
+                if match.starts(with: "<:") {
+                    let emoteName = match.slice(from: "<:", to: ":")!
+                    let emoteId = match.slice(from: "<:\(emoteName):", to: ">")!
+                    finalMessage.append(.emote(URL(string: "https://cdn.discordapp.com/emojis/\(emoteId).png")!, emoteId: emoteId, emoteName: emoteName))
+                }
+
+                if match.starts(with: "<a:") {
+                    let emoteName = match.slice(from: "<a:", to: ":")!
+                    let emoteId = match.slice(from: "<a:\(emoteName):", to: ">")!
+                    finalMessage.append(.emote(URL(string: "https://cdn.discordapp.com/emojis/\(emoteId).gif")!, emoteId: emoteId, emoteName: emoteName))
+                }
+
+                if match.starts(with: "<@") {
+                    if match.starts(with: "<@&") {
+                        let roleId = match.slice(from: "<@&", to: ">")!
+                        finalMessage.append(.role(roleId))
+                    } else {
+                        var userId = match.slice(from: "<@", to: ">")!
+                        if userId.starts(with: "!") {
+                            userId = String(userId[userId.range(of: "!")!.upperBound...])
+                        }
+                        finalMessage.append(.user(userId))
+                    }
+                }
+
+                if match.starts(with: "<#") {
+                    let channelId = match.slice(from: "<#", to: ">")!
+                    finalMessage.append(.channel(channelId))
+                }
+
+                let text = String(message[range.upperBound..<(nextRange?.lowerBound ?? message.endIndex)])
+                if text.count != 0 {
+                    finalMessage.append(.text(text))
+                }
+            }
+        }
+
+        return finalMessage
+    }
 }
