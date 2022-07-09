@@ -83,11 +83,14 @@ public struct Message: Codable, GatewayData, Equatable {
     /// Member properties for this message's author
     public var member: Member?
 
-    /// Contents of the message
+    /// Contents of the message as a raw string value
     ///
     /// Up to 2000 characters for non-premium users.
     public var content: String
     
+    /// Contents of the message, decoded as an array of ``MessagePart``s
+    ///
+    /// Up to 2000 characters for non-premium users.
     public var parsedContent: [MessagePart] { MessagePart.parseMessage(content, id: id) }
 
     /// When this message was sent
@@ -178,6 +181,32 @@ public struct Message: Codable, GatewayData, Equatable {
 
     /// Present  if the message contains stickers
     public var sticker_items: [StickerItem]?
+    
+    public var emojiAndSpacesOnly: Bool {
+        var emoteOnly = true
+        for part in parsedContent {
+            switch part {
+            case .text(let s):
+                if s.containsOnlyEmojiAndSpaces != true {
+                    emoteOnly = false
+                }
+            case .emote(_, _, _):
+                ()
+            case .aniEmote(_, _, _):
+                ()
+            case .user(_):
+                emoteOnly = false
+            case .channel(_):
+                emoteOnly = false
+            case .role(_):
+                emoteOnly = false
+            case .timestamp(_, _):
+                emoteOnly = false
+            }
+        }
+        
+        return emoteOnly
+    }
 }
 
 /// A complete copy of ``Message`` but with most properties marked as Optional
@@ -270,6 +299,7 @@ public struct MessageComponent: Codable {
 public enum MessagePart: Equatable, Hashable {
     case text(_ str: String)
     case emote(_ url: URL, emoteId: String, emoteName: String)
+    case aniEmote(_ url: URL, emoteId: String, emoteName: String)
     case user(_ id: String)
     case channel(_ id: String)
     case role(_ id: String)
@@ -314,7 +344,7 @@ public enum MessagePart: Equatable, Hashable {
                 if match.starts(with: "<a:") {
                     let emoteName = match.slice(from: "<a:", to: ":")!
                     let emoteId = match.slice(from: "<a:\(emoteName):", to: ">")!
-                    finalMessage.append(.emote(URL(string: "https://cdn.discordapp.com/emojis/\(emoteId).gif")!, emoteId: emoteId, emoteName: emoteName))
+                    finalMessage.append(.aniEmote(URL(string: "https://cdn.discordapp.com/emojis/\(emoteId).gif")!, emoteId: emoteId, emoteName: emoteName))
                 }
 
                 if match.starts(with: "<@") {
@@ -340,6 +370,10 @@ public enum MessagePart: Equatable, Hashable {
                     finalMessage.append(.text(text))
                 }
             }
+        }
+        
+        if finalMessage.count == 0 {
+            finalMessage.append(.text(message))
         }
 
         return finalMessage
