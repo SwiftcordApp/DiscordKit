@@ -8,8 +8,6 @@
 import Foundation
 
 public extension DiscordREST {
-    
-    
     /// Get Current User Guild Member
     ///
     /// `GET /invites/{inviteID}`
@@ -22,6 +20,9 @@ public extension DiscordREST {
         withCounts: Bool = true,
         withExpiration: Bool = true
     ) async -> Invite? {
-        return await getReq(path: "invites/\(inviteID)")
+        return await getReq(path: "invites/\(inviteID)", query: [
+            URLQueryItem(name: "with_counts", value: String(withCounts)),
+            URLQueryItem(name: "with_expiration", value: String(withExpiration))
+        ])
     }
 }

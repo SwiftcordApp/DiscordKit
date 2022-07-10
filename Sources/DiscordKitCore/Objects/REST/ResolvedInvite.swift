@@ -13,11 +13,14 @@ public enum InviteTargetType: Int, Codable {
     case embeddedApplication = 2
 }
 
-public struct Invite: Codable {
+/// Invite
+///
+/// Represents a code that when used, adds a user to a guild or group DM channel.
+public struct Invite: Decodable {
     /// The invite code (unique ID)
     public let code: String
     /// The guild this invite is for
-    public let guild: PartialGuild
+    // public let guild: Guild?
     /// The channel this invite is for
     public let channel: Channel?
     /// The type of target for this voice channel invite
@@ -30,12 +33,12 @@ public struct Invite: Codable {
     ///
     /// > Returned from ``DiscordREST/resolveInvite(inviteID:inputValue:withCounts:withExpiration:)``
     /// (`GET /invites/{inviteID}` endpoint) when `with_counts` is true
-    public let approximate_member_count: Int
+    public let approximate_member_count: Int?
     /// Approximate count of total members
     ///
     /// > Returned from ``DiscordREST/resolveInvite(inviteID:inputValue:withCounts:withExpiration:)``)
     /// > (`GET /invites/{inviteID}` endpoint) when `with_counts` is true
-    public let approximate_presence_count: Int
+    public let approximate_presence_count: Int?
     /// The embedded application to open for this voice channel embedded application invite
     public let target_application: PartialApplication?
     /// The expiration date of this invite
