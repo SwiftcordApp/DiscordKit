@@ -54,6 +54,38 @@ public enum MessageType: Int, Codable {
 
 /// Represents a message sent in a channel within Discord
 public class Message: Codable, GatewayData, Equatable {
+    public init(id: Snowflake, channel_id: Snowflake, guild_id: Snowflake? = nil, author: User, member: Member? = nil, content: String, timestamp: Date, edited_timestamp: Date? = nil, tts: Bool, mention_everyone: Bool, mentions: [User], mention_roles: [Snowflake], mention_channels: [ChannelMention]? = nil, attachments: [Attachment], embeds: [Embed], reactions: [Reaction]? = nil, pinned: Bool, webhook_id: Snowflake? = nil, type: MessageType, activity: MessageActivity? = nil, application: Application? = nil, application_id: Snowflake? = nil, message_reference: MessageReference? = nil, flags: Int? = nil, referenced_message: Message? = nil, interaction: MessageInteraction? = nil, thread: Channel? = nil, components: [MessageComponent]? = nil, sticker_items: [StickerItem]? = nil) {
+        self.id = id
+        self.channel_id = channel_id
+        self.guild_id = guild_id
+        self.author = author
+        self.member = member
+        self.content = content
+        self.timestamp = timestamp
+        self.edited_timestamp = edited_timestamp
+        self.tts = tts
+        self.mention_everyone = mention_everyone
+        self.mentions = mentions
+        self.mention_roles = mention_roles
+        self.mention_channels = mention_channels
+        self.attachments = attachments
+        self.embeds = embeds
+        self.reactions = reactions
+        self.pinned = pinned
+        self.webhook_id = webhook_id
+        self.type = type
+        self.activity = activity
+        self.application = application
+        self.application_id = application_id
+        self.message_reference = message_reference
+        self.flags = flags
+        self.referenced_message = referenced_message
+        self.interaction = interaction
+        self.thread = thread
+        self.components = components
+        self.sticker_items = sticker_items
+    }
+
     public static func == (lhs: Message, rhs: Message) -> Bool {
         lhs.id == rhs.id
         && lhs.content == rhs.content
@@ -210,7 +242,7 @@ public struct PartialMessage: Codable, GatewayData {
     public let application_id: Snowflake?
     public let message_reference: MessageReference?
     public let flags: Int?
-    // Recursive properties don't work, so referenced_message can't be here for now
+    public let referenced_message: Message?
     public let interaction: MessageInteraction?
     public let thread: Channel?
     public let components: [MessageComponent]?
