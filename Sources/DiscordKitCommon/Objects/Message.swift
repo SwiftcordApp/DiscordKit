@@ -244,6 +244,13 @@ public struct MessageActivity: Codable {
 
 // MARK: Reference an existing message as a reply
 public struct MessageReference: Codable {
+    public init(message_id: Snowflake? = nil, channel_id: Snowflake? = nil, guild_id: Snowflake? = nil, fail_if_not_exists: Bool? = nil) {
+        self.message_id = message_id
+        self.channel_id = channel_id
+        self.guild_id = guild_id
+        self.fail_if_not_exists = fail_if_not_exists
+    }
+
     public let message_id: Snowflake? // id of the originating message
     public let channel_id: Snowflake? // id of the originating message's channel
     public let guild_id: Snowflake? // id of the originating message's guild
