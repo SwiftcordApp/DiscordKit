@@ -53,7 +53,7 @@ public enum MessageType: Int, Codable {
 }
 
 /// Represents a message sent in a channel within Discord
-public struct Message: Codable, GatewayData, Equatable {
+public class Message: Codable, GatewayData, Equatable {
     public static func == (lhs: Message, rhs: Message) -> Bool {
         lhs.id == rhs.id
         && lhs.content == rhs.content
@@ -163,7 +163,7 @@ public struct Message: Codable, GatewayData, Equatable {
     /// > Currently, it is not possible to distinguish between the field being `nil`
     /// > or the field not being present. This is due to limitations with the built-in
     /// > `Decodable` type.
-    public let referenced_message: PartialMessage?
+    public let referenced_message: Message?
 
     /// Present if the message is a response to an Interaction
     public var interaction: MessageInteraction?
