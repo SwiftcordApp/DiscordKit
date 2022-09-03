@@ -157,12 +157,21 @@ public struct CurrentUser: Codable, GatewayData, Equatable {
 /// > Warning: The user profile endpoint is undocumented, and this struct
 /// > was created purely from reverse engineering and observations.
 public struct UserProfile: Codable, GatewayData {
-    public init(connected_accounts: [Connection], guild_member: Member?, premium_guild_since: Date?, premium_since: Date?, mutual_guilds: [MutualGuild]?, user: User) {
+    public init(
+        connected_accounts: [Connection],
+        guild_member: Member? = nil,
+        premium_guild_since: Date? = nil,
+        premium_since: Date? = nil,
+        premium_type: User.PremiumType? = nil,
+        mutual_guilds: [MutualGuild]? = nil,
+        user: User
+    ) {
         self.connected_accounts = connected_accounts
         self.guild_member = guild_member
         self.premium_guild_since = premium_guild_since
         self.premium_since = premium_since
         self.mutual_guilds = mutual_guilds
+        self.premium_type = premium_type
         self.user = user
     }
 
@@ -170,6 +179,7 @@ public struct UserProfile: Codable, GatewayData {
     public let guild_member: Member?
     public let premium_guild_since: Date?
     public let premium_since: Date?
+    public let premium_type: User.PremiumType?
     public let mutual_guilds: [MutualGuild]?
 
     /// A more complete ``User`` struct, containing the user's bio, among others.
