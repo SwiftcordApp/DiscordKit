@@ -62,22 +62,6 @@ public class DiscordGateway: ObservableObject {
         category: "DiscordGateway"
     )
 
-    /// Log out the current user, closing the Gateway socket connection
-    ///
-    /// This method removes the Discord token from the keychain and
-    /// closes the Gateway socket. The socket will _not_ reconnect.
-    public func logout() {
-        guard let socket = socket else {
-            log.warning("Cannot log out, socket hasn't been opened. Call connect() first.")
-            return
-        }
-
-        log.debug("Logging out on request")
-
-        disconnect()
-        onAuthFailure.notify()
-    }
-
     /// Opens the socket connection with the Gateway
     ///
     /// > Important: This method will be called when a token is provided to ``init(token:)``,
@@ -101,6 +85,7 @@ public class DiscordGateway: ObservableObject {
 
     /// Disconnects from the gateway gracefully
     public func disconnect() {
+        log.debug("Disconnecting on request")
         // Clear cache
         cache = CachedState()
         cache.objectWillChange.send()
