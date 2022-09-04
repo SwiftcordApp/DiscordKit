@@ -50,6 +50,9 @@ public enum MessageType: Int, Codable {
     case threadStarterMsg = 21
     case guildInviteReminder = 22
     case contextMenuCmd = 23
+
+    /// A message detailing an action taken by automod
+    case autoModAct = 24
 }
 
 /// Represents a message sent in a channel within Discord
