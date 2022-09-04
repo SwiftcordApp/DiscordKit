@@ -74,17 +74,7 @@ public class DiscordGateway: ObservableObject {
 
         log.debug("Logging out on request")
 
-        // Remove token from the keychain
-        /*Keychain.remove(key: "authToken")
-        // Reset user defaults
-        if let bundleID = Bundle.main.bundleIdentifier {
-            UserDefaults.standard.removePersistentDomain(forName: bundleID)
-        }*/
-        // Clear cache
-        cache = CachedState()
-        cache.objectWillChange.send()
-
-        socket.close(code: .normalClosure)
+        disconnect()
         onAuthFailure.notify()
     }
 
@@ -107,6 +97,14 @@ public class DiscordGateway: ObservableObject {
             self?.reachable = r
         }
         socket!.open()
+    }
+
+    /// Disconnects from the gateway gracefully
+    public func disconnect() {
+        // Clear cache
+        cache = CachedState()
+        cache.objectWillChange.send()
+        socket?.close(code: .normalClosure)
     }
 
     public func send<T: OutgoingGatewayData>(op: GatewayOutgoingOpcodes, data: T) {
