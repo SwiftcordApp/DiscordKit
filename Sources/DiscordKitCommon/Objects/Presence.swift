@@ -13,6 +13,13 @@ public struct Presence: GatewayData {
     public let status: PresenceStatus
     public let client_status: PresenceClientStatus
     public let activities: [Activity]
+    
+    public init(update: PresenceUpdate) {
+        user_id = update.user.id
+        status = update.status
+        client_status = update.client_status
+        activities = update.activities
+    }
 }
 
 public enum PresenceStatus: String, Codable {

@@ -39,9 +39,13 @@ public class DiscordGateway: ObservableObject {
     /// Refer to ``CachedState`` for more details about the data in
     /// this cache.
     ///
-    /// > In the future, presence updates and REST API requests will
-    /// > also be stored and kept fresh in this cache.
+    /// > In the future, REST API requests will also be stored and kept fresh in this cache.
     @Published public var cache: CachedState = CachedState()
+
+    /// An array of presences, kept updated as long as the Gateway connection is active
+    ///
+    /// Contains a dict of user presences, keyed by their respective user IDs
+    @Published public var presences: [Snowflake: Presence] = [:]
 
     private var evtListenerID: EventDispatch.HandlerIdentifier? = nil,
                 authFailureListenerID: EventDispatch.HandlerIdentifier? = nil,
@@ -61,6 +65,11 @@ public class DiscordGateway: ObservableObject {
         subsystem: Bundle.main.bundleIdentifier ?? DiscordKitConfig.subsystem,
         category: "DiscordGateway"
     )
+
+    // Event subscribing state
+    private var subscribedGuildID: Snowflake?
+    private var subscribedMemberIDs: [Snowflake] = []
+    private var subscribedTypingGuildIDs: [Snowflake] = [] // Guild IDs already subscribed to for typing events
 
     /// Opens the socket connection with the Gateway
     ///
@@ -100,52 +109,41 @@ public class DiscordGateway: ObservableObject {
         socket.send(op: op, data: data)
     }
 
-    private func handleEvent(_ event: GatewayEvent, data: GatewayData?) {
-        switch (event, data) {
-            case let (.ready, event as ReadyEvt):
-                cache.configure(using: event)
-                log.info("Gateway ready")
-
-            // Guild events
-            case let (.guildCreate, guild as Guild):
-                cache.appendOrReplace(guild)
-
-            case let (.guildDelete, guild as GuildUnavailable):
-                cache.remove(guild)
-
-            case let (.guildUpdate, guild as Guild):
-                handleGuildUpdate(guild)
-
-            // User updates
-            case let (.userUpdate, currentUser as CurrentUser):
-                cache.user = currentUser
-
-            case let (.userSettingsUpdate, settings as UserSettings):
-                cache.mergeOrReplace(settings)
-
-            // Channel events
-            case let (.channelCreate, channel as Channel):
-                cache.append(channel)
-
-            case let (.channelDelete, channel as Channel):
-                cache.remove(channel)
-
-            case let (.channelUpdate, channel as Channel):
-                cache.replace(channel)
-
-            case let (.messageCreate, message as Message):
-                cache.appendOrReplace(message)
-
-            case let (.presenceUpdate, update as PresenceUpdate):
-                log.info("Presence update: \(String(describing: update))")
-
-            default:
-                break
+    /// Subscribe to guild events or member updates
+    ///
+    /// Either subscribes to typing events from members in a guild, or to presence updates from particular members
+    ///
+    /// > Unsubscribing from events from previous guilds are automatically handled
+    ///
+    /// - Parameters:
+    ///  - id: ID of guild to subscribe to
+    ///  - memberID: additional member ID to subscribe to
+    public func subscribeGuildEvents(id: Snowflake, memberID: Snowflake? = nil) {
+        if let memberID = memberID {
+            if subscribedGuildID != id { subscribedMemberIDs.removeAll() }
+            subscribedMemberIDs.append(memberID)
+            send(
+                op: .subscribeGuildEvents,
+                data: SubscribeGuildEvts(guild_id: id, members: subscribedMemberIDs)
+            )
+            // Unsubscribe from events from previous guild after subscribing to the new guild
+            // as per official client behaviour. It makes more sense to do it in the opposite order,
+            // but who am I to judge.
+            if let previousGuild = subscribedGuildID {
+                send(
+                    op: .subscribeGuildEvents,
+                    data: SubscribeGuildEvts(guild_id: previousGuild, members: [])
+                )
+            }
+            subscribedGuildID = id
+        } else if !subscribedTypingGuildIDs.contains(id) {
+            // Subscribe to typing events from members in the guild if we haven't already
+            send(
+                op: .subscribeGuildEvents,
+                data: SubscribeGuildEvts(guild_id: id, typing: true)
+            )
+            subscribedTypingGuildIDs.append(id)
         }
-
-        cache.objectWillChange.send()
-        onEvent.notify(event: (event, data))
-        log.info("Dispatched event <\(event.rawValue, privacy: .public)>")
     }
 
     /// Inits an instance of ``DiscordGateway``
@@ -196,5 +194,61 @@ public class DiscordGateway: ObservableObject {
         modifiedGuild.guild_scheduled_events = existingGuild.guild_scheduled_events
 
         cache.appendOrReplace(modifiedGuild)
+    }
+
+    private func handleEvent(_ event: GatewayEvent, data: GatewayData?) {
+        switch (event, data) {
+        case let (.ready, event as ReadyEvt):
+            cache.configure(using: event)
+            log.info("Gateway ready")
+            
+        case let (.readySupplemental, evt as ReadySuppEvt):
+            presences.removeAll()
+            let flatPresences = evt.merged_presences.guilds.flatMap { $0 } + evt.merged_presences.friends
+            for presence in flatPresences {
+                presences.updateValue(presence, forKey: presence.user_id)
+            }
+            
+            // Guild events
+        case let (.guildCreate, guild as Guild):
+            cache.appendOrReplace(guild)
+            
+        case let (.guildDelete, guild as GuildUnavailable):
+            cache.remove(guild)
+            
+        case let (.guildUpdate, guild as Guild):
+            handleGuildUpdate(guild)
+            
+            // User updates
+        case let (.userUpdate, currentUser as CurrentUser):
+            cache.user = currentUser
+            
+        case let (.userSettingsUpdate, settings as UserSettings):
+            cache.mergeOrReplace(settings)
+            
+            // Channel events
+        case let (.channelCreate, channel as Channel):
+            cache.append(channel)
+            
+        case let (.channelDelete, channel as Channel):
+            cache.remove(channel)
+            
+        case let (.channelUpdate, channel as Channel):
+            cache.replace(channel)
+            
+        case let (.messageCreate, message as Message):
+            cache.appendOrReplace(message)
+            
+        case let (.presenceUpdate, update as PresenceUpdate):
+            presences.updateValue(Presence(update: update), forKey: update.user.id)
+            log.debug("Updating presence for user ID: \(update.user.id)")
+            
+        default:
+            break
+        }
+        
+        cache.objectWillChange.send()
+        onEvent.notify(event: (event, data))
+        log.info("Dispatched event <\(event.rawValue, privacy: .public)>")
     }
 }
