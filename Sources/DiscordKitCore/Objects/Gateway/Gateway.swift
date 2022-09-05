@@ -40,6 +40,7 @@ public struct GatewayIncoming: Decodable {
             // Cue the long switch case to parse every single event
             switch t {
             case .ready: d = try values.decode(ReadyEvt.self, forKey: .d)
+            case .readySupplemental: d = try values.decode(ReadySuppEvt.self, forKey: .d)
             case .resumed: d = nil
             case .channelCreate, .channelUpdate, .channelDelete, .threadCreate, .threadUpdate, .threadDelete:
                 d = try values.decode(Channel.self, forKey: .d)

@@ -7,9 +7,12 @@
 
 import Foundation
 
-// TODO: Fill this in
-public struct Presence: Codable {
-
+/// User presences sent in the ``GatewayEvent/readySupplemental`` event
+public struct Presence: GatewayData {
+    public let user_id: Snowflake
+    public let status: PresenceStatus
+    public let client_status: PresenceClientStatus
+    public let activities: [Activity]
 }
 
 public enum PresenceStatus: String, Codable {
@@ -43,7 +46,7 @@ public struct PartialPresenceUpdate: GatewayData {
 }
 
 public struct PresenceClientStatus: Codable, GatewayData {
-    public let desktop: String?
-    public let mobile: String?
-    public let web: String?
+    public let desktop: PresenceStatus?
+    public let mobile: PresenceStatus?
+    public let web: PresenceStatus?
 }
