@@ -129,7 +129,7 @@ public class DiscordGateway: ObservableObject {
             // Unsubscribe from events from previous guild after subscribing to the new guild
             // as per official client behaviour. It makes more sense to do it in the opposite order,
             // but who am I to judge.
-            if let previousGuild = subscribedGuildID {
+            if subscribedGuildID != id, let previousGuild = subscribedGuildID {
                 send(
                     op: .subscribeGuildEvents,
                     data: SubscribeGuildEvts(guild_id: previousGuild, members: [])
@@ -143,6 +143,13 @@ public class DiscordGateway: ObservableObject {
                 data: SubscribeGuildEvts(guild_id: id, typing: true)
             )
             subscribedTypingGuildIDs.append(id)
+        }
+    }
+
+    /// Request for member presence if not already available
+    public func requestPresence(id: Snowflake, memberID: Snowflake) {
+        if presences[memberID] == nil {
+            subscribeGuildEvents(id: id, memberID: memberID)
         }
     }
 
