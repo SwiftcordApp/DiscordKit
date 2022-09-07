@@ -27,8 +27,15 @@ public extension RobustWebSocket {
             compress: false,
             large_threshold: nil,
             shard: nil,
-            presence: nil,
-            capabilities: 0b11111101 // TODO: Reverse engineer this
+            presence: GatewayPresenceUpdate(since: 0, activities: [], status: .online, afk: false),
+            client_state: ClientState( // Just a dummy client_state
+                guild_hashes: GuildHashes(),
+                highest_last_message_id: "0",
+                read_state_version: 0,
+                user_guild_settings_version: -1,
+                user_settings_version: -1
+            ),
+            capabilities: 0b1111111101 // TODO: Reverse engineer this
         )
     }
 

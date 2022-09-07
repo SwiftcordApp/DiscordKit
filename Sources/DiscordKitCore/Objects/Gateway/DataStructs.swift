@@ -64,6 +64,23 @@ struct GatewayConnProperties: OutgoingGatewayData {
     let client_build_number: Int?
 }
 
+/// Current client state, sent with the ``GatewayIdentify`` payload
+///
+/// > Warning: This should only be sent in identify payloads for user accounts. Bot accounts don't need this!
+struct ClientState: OutgoingGatewayData {
+    let guild_hashes: GuildHashes
+    let highest_last_message_id: Snowflake
+    let read_state_version: Int
+    let user_guild_settings_version: Int
+    let user_settings_version: Int
+}
+/// Placeholder struct for `guild_hashes` in `client_state`
+///
+/// This is currently empty, and simply serves as a placeholder.
+struct GuildHashes: OutgoingGatewayData {
+
+}
+
 /// Gateway Heartbeat
 ///
 /// Sent when establishing a new session with the Gateway, to identify the client.
@@ -95,7 +112,8 @@ struct GatewayIdentify: OutgoingGatewayData {
     let large_threshold: Int? // Value between 50 and 250, total number of members where the gateway will stop sending offline members in the guild member list
     let shard: [Int]? // Array of two integers (shard_id, num_shards)
     let presence: GatewayPresenceUpdate?
-    let capabilities: Int // Hardcode this to 253
+    let client_state: ClientState?
+    let capabilities: Int
 }
 
 /// Gateway Resume

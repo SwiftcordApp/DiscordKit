@@ -16,9 +16,16 @@ public protocol OutgoingGatewayData: Encodable {}
 ///
 /// > Outgoing Gateway data struct for opcode 3
 public struct GatewayPresenceUpdate: OutgoingGatewayData {
+    public init(since: Int, activities: [ActivityOutgoing], status: PresenceStatus, afk: Bool) {
+        self.since = since
+        self.activities = activities
+        self.status = status
+        self.afk = afk
+    }
+
     public let since: Int // Unix time (in milliseconds) of when the client went idle, or null if the client is not idle
     public let activities: [ActivityOutgoing]
-    public let status: String
+    public let status: PresenceStatus
     public let afk: Bool
 }
 

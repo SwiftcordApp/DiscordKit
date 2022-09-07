@@ -13,7 +13,14 @@ public struct Presence: GatewayData {
     public let status: PresenceStatus
     public let client_status: PresenceClientStatus
     public let activities: [Activity]
-    
+
+    public init(userID: Snowflake, status: PresenceStatus, clientStatus: PresenceClientStatus, activities: [Activity]) {
+        self.user_id = userID
+        self.status = status
+        self.client_status = clientStatus
+        self.activities = activities
+    }
+
     public init(update: PresenceUpdate) {
         user_id = update.user.id
         status = update.status
@@ -53,6 +60,12 @@ public struct PartialPresenceUpdate: GatewayData {
 }
 
 public struct PresenceClientStatus: Codable, GatewayData {
+    public init(desktop: PresenceStatus? = nil, mobile: PresenceStatus? = nil, web: PresenceStatus? = nil) {
+        self.desktop = desktop
+        self.mobile = mobile
+        self.web = web
+    }
+
     public let desktop: PresenceStatus?
     public let mobile: PresenceStatus?
     public let web: PresenceStatus?

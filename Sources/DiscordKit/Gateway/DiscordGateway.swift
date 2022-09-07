@@ -203,57 +203,76 @@ public class DiscordGateway: ObservableObject {
         cache.appendOrReplace(modifiedGuild)
     }
 
+    private func handleProtoUpdate(proto: String) {
+        let settings: Discord_UserSettings
+        do {
+            settings = try Discord_UserSettings(serializedData: Data(base64Encoded: proto)!)
+        } catch {
+            log.error("Proto decode error! \(error)")
+            return
+        }
+        // Update current user presence
+        if let currentID = cache.user?.id {
+            presences[currentID] = Presence(protoStatus: settings.status, id: currentID)
+            log.debug("Updated presence for current user to ")
+        } else {
+            log.error("User ID is unset in cache!")
+        }
+    }
     private func handleEvent(_ event: GatewayEvent, data: GatewayData?) {
         switch (event, data) {
         case let (.ready, event as ReadyEvt):
             cache.configure(using: event)
-            log.info("Gateway ready")
-            
-        case let (.readySupplemental, evt as ReadySuppEvt):
             presences.removeAll()
+            if let proto = event.user_settings_proto {
+                handleProtoUpdate(proto: proto)
+            } else { log.warning("No user settings proto, is this a bot account?") }
+            log.info("Gateway ready")
+
+        case let (.readySupplemental, evt as ReadySuppEvt):
             let flatPresences = evt.merged_presences.guilds.flatMap { $0 } + evt.merged_presences.friends
             for presence in flatPresences {
                 presences.updateValue(presence, forKey: presence.user_id)
             }
-            
+
             // Guild events
         case let (.guildCreate, guild as Guild):
             cache.appendOrReplace(guild)
-            
+
         case let (.guildDelete, guild as GuildUnavailable):
             cache.remove(guild)
-            
+
         case let (.guildUpdate, guild as Guild):
             handleGuildUpdate(guild)
-            
+
             // User updates
         case let (.userUpdate, currentUser as CurrentUser):
             cache.user = currentUser
-            
+
         case let (.userSettingsUpdate, settings as UserSettings):
             cache.mergeOrReplace(settings)
-            
+
             // Channel events
         case let (.channelCreate, channel as Channel):
             cache.append(channel)
-            
+
         case let (.channelDelete, channel as Channel):
             cache.remove(channel)
-            
+
         case let (.channelUpdate, channel as Channel):
             cache.replace(channel)
-            
+
         case let (.messageCreate, message as Message):
             cache.appendOrReplace(message)
-            
+
         case let (.presenceUpdate, update as PresenceUpdate):
             presences.updateValue(Presence(update: update), forKey: update.user.id)
             log.debug("Updating presence for user ID: \(update.user.id)")
-            
+
         default:
             break
         }
-        
+
         cache.objectWillChange.send()
         onEvent.notify(event: (event, data))
         log.info("Dispatched event <\(event.rawValue, privacy: .public)>")
