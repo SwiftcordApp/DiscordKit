@@ -53,10 +53,28 @@ public struct Activity: GatewayData {
 }
 
 public struct ActivityOutgoing: OutgoingGatewayData {
+    public init(name: String, type: ActivityType, url: String? = nil, created_at: Int? = nil, timestamps: ActivityTimestamp? = nil, application_id: Snowflake? = nil, details: String? = nil, state: String? = nil, emoji: ActivityEmoji? = nil, party: ActivityParty? = nil, assets: ActivityAssets? = nil, secrets: ActivitySecrets? = nil, instance: Bool? = nil, flags: Int? = nil, buttons: [ActivityButton]? = nil) {
+        self.name = name
+        self.type = type
+        self.url = url
+        self.created_at = created_at
+        self.timestamps = timestamps
+        self.application_id = application_id
+        self.details = details
+        self.state = state
+        self.emoji = emoji
+        self.party = party
+        self.assets = assets
+        self.secrets = secrets
+        self.instance = instance
+        self.flags = flags
+        self.buttons = buttons
+    }
+    
     public let name: String
     public let type: ActivityType
     public let url: String?
-    public let created_at: Int // Unix timestamp (in milliseconds) of when the activity was added to the user's session
+    public let created_at: Int? // Unix timestamp (in milliseconds) of when the activity was added to the user's session
     public let timestamps: ActivityTimestamp?
     public let application_id: Snowflake?
     public let details: String?
