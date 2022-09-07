@@ -49,6 +49,9 @@ jobs:
         run: |
           git add ./docs/
           git commit -m "Update Documentation Site"
+          
+      - name: Reset Git token
+        run: rm ~/.git-credentials
       
       - name: Push changes
         uses: ad-m/github-push-action@master
