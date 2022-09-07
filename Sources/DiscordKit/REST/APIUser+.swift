@@ -16,10 +16,10 @@ public extension DiscordREST {
     @discardableResult
     func updateSettingsProto(
         proto: Data,
-        id: Int = 1 // Always 1 for now
+        type: Int = 1 // Always 1 for now
     ) async -> Bool {
         return await patchReq(
-            path: "users/@me/settings-proto/\(id)",
+            path: "users/@me/settings-proto/\(type)",
             body: UserSettingsProtoUpdate(settings: proto.base64EncodedString())
         )
     }

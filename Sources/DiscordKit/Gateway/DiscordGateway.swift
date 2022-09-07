@@ -251,6 +251,17 @@ public class DiscordGateway: ObservableObject {
 
         case let (.userSettingsUpdate, settings as UserSettings):
             cache.mergeOrReplace(settings)
+            
+        case let (.userSettingsProtoUpdate, protoUpdate as GatewaySettingsProtoUpdate):
+            guard !protoUpdate.partial else {
+                log.warning("Cannot handle partial proto update yet")
+                break
+            }
+            guard protoUpdate.settings.type == 1 else {
+                log.warning("Parsing of proto type other than 1 not supported")
+                break
+            }
+            handleProtoUpdate(proto: protoUpdate.settings.proto)
 
             // Channel events
         case let (.channelCreate, channel as Channel):
