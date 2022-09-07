@@ -31,23 +31,25 @@ jobs:
         uses: devbotsxyz/xcode-select@v1.1.0
         with:
           version: 13.3.1
-      
-      - name: Merge changes from main into gh-pages
-        run: |
-          git fetch --unshallow
-          git checkout gh-pages
-          git pull
-          git merge --no-ff main -m "Auto-merge main into gh-pages"
-      
+        
       - name: Generate DocC
-        run: swift package --allow-writing-to-directory ./docs/ generate-documentation --target DiscordKit --disable-indexing --transform-for-static-hosting --hosting-base-path DiscordKit --output-path ./docs/
+        run: mkdir -p $TMPDIR/docs/ && 
+             swift package --allow-writing-to-directory $TMPDIR/docs/
+               generate-documentation --target DiscordKit --disable-indexing --transform-for-static-hosting
+               --hosting-base-path DiscordKit --output-path $TMPDIR/docs/
+               
+      - name: Copy docs build into gh-pages branch
+        run: |
+          git checkout gh-pages
+          rm -Rf *
+          rsync -aI $TMPDIR/docs . 
         
       - name: Add .nojekyll file
         run: touch ./docs/.nojekyll
         
       - name: Commit updated DocC
         run: |
-          git add ./docs/
+          git add .
           git commit -m "Update Documentation Site"
           
       - name: Reset Git token
