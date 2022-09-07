@@ -72,7 +72,9 @@ public extension DiscordREST {
 
     // MARK: Leave Guild
     // DELETE /users/@me/guilds/{guild.id}
-    // TODO: Delete not yet implemented
+    func leaveGuild(guild: Snowflake) async -> Bool {
+        return await deleteReq(path: guild)
+    }
 
     // MARK: Create DM
 

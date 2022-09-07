@@ -192,4 +192,22 @@ public extension DiscordREST {
     func deleteReq(path: String) async -> Bool {
         return (try? await makeRequest(path: path, method: .delete)) != nil
     }
+
+    /// Make a `PATCH` request to the Discord REST API
+    ///
+    /// Getting the response from PATCH requests aren't implemented
+    /// as their response is usually not required
+    func patchReq<B: Encodable>(
+        path: String,
+        body: B
+    ) async -> Bool {
+        let p = try? DiscordREST.encoder().encode(body)
+        guard (try? await makeRequest(
+            path: path,
+            body: p,
+            method: .patch
+        )) != nil
+        else { return false }
+        return true
+    }
 }

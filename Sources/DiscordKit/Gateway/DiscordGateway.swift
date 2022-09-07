@@ -208,7 +208,7 @@ public class DiscordGateway: ObservableObject {
         do {
             settings = try Discord_UserSettings(serializedData: Data(base64Encoded: proto)!)
         } catch {
-            log.error("Proto decode error! \(error)")
+            log.error("Proto decode error! \(String(describing: error))")
             return
         }
         // Update current user presence
