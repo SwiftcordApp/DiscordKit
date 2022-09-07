@@ -17,6 +17,8 @@ jobs:
     runs-on: macos-12
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       
       - name: Init submodules
         env:
@@ -40,9 +42,7 @@ jobs:
                
       - name: Copy docs build into gh-pages branch
         run: |
-          git fetch --unshallow
-          git checkout gh-pages
-          git pull
+          git checkout -f gh-pages
           rm -Rf *
           rsync -aI $TMPDIR/docs . 
         
