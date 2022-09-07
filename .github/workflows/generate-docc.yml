@@ -8,12 +8,24 @@ on:
 
 permissions: 
   write-all
+  
+env:
+  GH_USER: cryptoAlgorithm
 
 jobs:
   generate_DocC:
     runs-on: macos-12
     steps:
       - uses: actions/checkout@v3
+      
+      - name: Init submodules
+        env:
+          TOKEN: ${{ secrets.GH_TOKEN }}
+          USER: ${{ env.GH_USER }}
+        run: |
+          git config --system credential.helper store
+          echo "https://$USER:$TOKEN@github.com" > ~/.git-credentials
+          git submodule update --init
       
       - name: Xcode Select
         uses: devbotsxyz/xcode-select@v1.1.0
