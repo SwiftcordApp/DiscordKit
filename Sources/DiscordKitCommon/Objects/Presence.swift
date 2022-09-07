@@ -34,6 +34,7 @@ public enum PresenceStatus: String, Codable {
     case dnd = "dnd"
     case online = "online"
     case offline = "offline"
+    case invisible = "invisible"
 }
 
 public struct PresenceUser: Codable, GatewayData {
