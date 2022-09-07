@@ -67,14 +67,6 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       
-      - name: Init submodules
-        env:
-          TOKEN: ${{ secrets.GH_TOKEN }}
-          USER: ${{ env.GH_USER }}
-        run: |
-          git config --system credential.helper store
-          echo "https://$USER:$TOKEN@github.com" > ~/.git-credentials
-          git submodule update --init
-
+      # Don't need submodules for linting
       - name: SwiftLint
         uses: norio-nomura/action-swiftlint@3.2.1
