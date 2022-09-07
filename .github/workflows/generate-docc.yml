@@ -40,7 +40,9 @@ jobs:
                
       - name: Copy docs build into gh-pages branch
         run: |
+          git fetch --unshallow
           git checkout gh-pages
+          git pull
           rm -Rf *
           rsync -aI $TMPDIR/docs . 
         
