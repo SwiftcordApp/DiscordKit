@@ -21,7 +21,7 @@ public struct UserSettings: Decodable, GatewayData, Equatable {
     public let guild_positions: [Snowflake]?
 
     /// Guild folders
-    public let guild_folders: [GuildFolder]?
+    public let guild_folders: [GuildFolderItem]?
 
     /// If the new inline attachment upload experience is enabled
     public let inline_attachment_media: Bool?

@@ -39,13 +39,19 @@ public class DiscordGateway: ObservableObject {
     /// Refer to ``CachedState`` for more details about the data in
     /// this cache.
     ///
-    /// > In the future, REST API requests will also be stored and kept fresh in this cache.
+    /// > New properties will not be added to the ``CachedState`` class
+    /// > since it doesn't seem to play well with SwiftUI, causing all sorts of
+    /// > stale UI issues (i.e. the UI not updating even with )
     @Published public var cache: CachedState = CachedState()
 
     /// An array of presences, kept updated as long as the Gateway connection is active
     ///
     /// Contains a dict of user presences, keyed by their respective user IDs
     @Published public var presences: [Snowflake: Presence] = [:]
+
+    /// An array of guild folders
+    @Published public var guildFolders: [GuildFolderItem] = []
+    @Published public var guildPositions: [Snowflake] = []
 
     private var evtListenerID: EventDispatch.HandlerIdentifier? = nil,
                 authFailureListenerID: EventDispatch.HandlerIdentifier? = nil,
@@ -217,6 +223,14 @@ public class DiscordGateway: ObservableObject {
             log.debug("Updated presence for current user to ")
         } else {
             log.error("User ID is unset in cache!")
+        }
+        // Update guild folders
+        guildFolders = settings.guildFolders.folders.map {
+            .init(
+                name: $0.hasName ? $0.name.value : nil,
+                guild_ids: $0.guildIds.map({ id in String(id) }),
+                color: $0.hasColor ? Int($0.color.value) : nil
+            )
         }
     }
     private func handleEvent(_ event: GatewayEvent, data: GatewayData?) {
