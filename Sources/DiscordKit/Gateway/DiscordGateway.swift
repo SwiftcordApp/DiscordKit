@@ -51,7 +51,6 @@ public class DiscordGateway: ObservableObject {
 
     /// An array of guild folders
     @Published public var guildFolders: [GuildFolderItem] = []
-    @Published public var guildPositions: [Snowflake] = []
 
     private var evtListenerID: EventDispatch.HandlerIdentifier? = nil,
                 authFailureListenerID: EventDispatch.HandlerIdentifier? = nil,
@@ -227,6 +226,7 @@ public class DiscordGateway: ObservableObject {
         // Update guild folders
         guildFolders = settings.guildFolders.folders.map {
             .init(
+                id: $0.hasID ? String($0.id.value) : nil,
                 name: $0.hasName ? $0.name.value : nil,
                 guild_ids: $0.guildIds.map({ id in String(id) }),
                 color: $0.hasColor ? Int($0.color.value) : nil
