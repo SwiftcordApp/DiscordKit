@@ -70,7 +70,25 @@ public struct ActivityOutgoing: OutgoingGatewayData {
         self.flags = flags
         self.buttons = buttons
     }
-    
+
+    public init(from activity: Activity) {
+        self.name = activity.name
+        self.type = activity.type
+        self.url = activity.url
+        self.created_at = activity.created_at
+        self.timestamps = activity.timestamps
+        self.application_id = activity.application_id
+        self.details = activity.details
+        self.state = activity.state
+        self.emoji = activity.emoji
+        self.party = activity.party
+        self.assets = activity.assets
+        self.secrets = activity.secrets
+        self.instance = activity.instance
+        self.flags = activity.flags
+        self.buttons = nil
+    }
+
     public let name: String
     public let type: ActivityType
     public let url: String?
