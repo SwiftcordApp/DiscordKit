@@ -41,7 +41,7 @@ public class DiscordGateway: ObservableObject {
     ///
     /// > New properties will not be added to the ``CachedState`` class
     /// > since it doesn't seem to play well with SwiftUI, causing all sorts of
-    /// > stale UI issues (i.e. the UI not updating even with )
+    /// > stale UI issues (i.e. stale UI)
     @Published public var cache: CachedState = CachedState()
 
     /// An array of presences, kept updated as long as the Gateway connection is active
@@ -51,6 +51,11 @@ public class DiscordGateway: ObservableObject {
 
     /// An array of guild folders
     @Published public var guildFolders: [GuildFolderItem] = []
+
+    /// An array of the current user's DMs
+    ///
+    /// Includes both single DMs and group DMs
+    @Published public var privateChannels: [Channel] = []
 
     private var evtListenerID: EventDispatch.HandlerIdentifier? = nil,
                 authFailureListenerID: EventDispatch.HandlerIdentifier? = nil,
