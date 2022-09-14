@@ -91,7 +91,7 @@ public class CachedState: ObservableObject {
             return
         }
 
-        guilds[channel.guild_id!]?.channels?[channelIndex] = channel
+        guilds[guildID]?.channels?[channelIndex] = channel
     }
 
     // MARK: Messages

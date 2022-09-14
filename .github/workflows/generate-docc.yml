@@ -6,9 +6,9 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-permissions: 
+permissions:
   write-all
-  
+
 env:
   GH_USER: cryptoAlgorithm
 
@@ -19,7 +19,10 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      
+
+      - uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: Init submodules
         env:
           TOKEN: ${{ secrets.GH_TOKEN }}
@@ -28,37 +31,34 @@ jobs:
           git config --system credential.helper store
           echo "https://$USER:$TOKEN@github.com" > ~/.git-credentials
           git submodule update --init
-      
+
       - name: Xcode Select
         uses: devbotsxyz/xcode-select@v1.1.0
         with:
           version: 13.3.1
-        
+
       - name: Generate DocC
-        run: mkdir -p $TMPDIR/docs/ && 
+        run: mkdir -p $TMPDIR/docs/ &&
              swift package --allow-writing-to-directory $TMPDIR/docs/
                generate-documentation --target DiscordKit --disable-indexing --transform-for-static-hosting
                --hosting-base-path DiscordKit --output-path $TMPDIR/docs/
-               
+
       - name: Copy docs build into gh-pages branch
         run: |
           git checkout -f gh-pages
           rm -Rf *
-          rsync -aI $TMPDIR/docs . 
-        
+          rsync -aI $TMPDIR/docs .
+
       - name: Add .nojekyll file
         run: touch ./docs/.nojekyll
-        
+
       - name: Commit updated DocC
         run: |
           git add .
           git commit -m "Update Documentation Site"
-          
-      - name: Reset Git token
-        run: rm ~/.git-credentials
-      
+
       - name: Push changes
         uses: ad-m/github-push-action@master
-        with: 
+        with:
          github_token: ${{ secrets.GITHUB_TOKEN }}
          branch: gh-pages
