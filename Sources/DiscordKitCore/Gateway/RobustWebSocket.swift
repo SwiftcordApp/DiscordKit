@@ -61,6 +61,9 @@ public class RobustWebSocket: NSObject, ObservableObject {
 
     internal let token: String
 
+    /// The gateway close codes that signal a fatal error, and reconnection shouldn't be attempted
+    private static let fatalCloseCodes = [4004] + Array(4010...4014)
+
     /// If the Gateway socket is connected
     ///
     /// This is set to `true` immediately after the socket connection
@@ -123,9 +126,18 @@ public class RobustWebSocket: NSObject, ObservableObject {
             log.warning("Already reconnecting, not reconnecting")
             return
         }
+        guard !Self.fatalCloseCodes.contains(code?.rawValue ?? -1) else {
+            log.error("Gateway closed with fatal close code! Cannot reconnect")
+            onAuthFailure.notify()
+            close(code: .normalClosure)
+            return
+        }
         invalidateConnTimeout(reason: "Attemping a reconnection")
 
         attempts += 1
+        // Probably impossible to resume, update the listeners accordingly
+        if attempts > 7 { onSessionInvalid.notify() }
+
         let delay = reconnectInterval(code, attempts)
         if let delay = delay {
             log.info("Retrying connection in \(delay)s, attempt \(String(self.attempts))")
@@ -134,6 +146,8 @@ public class RobustWebSocket: NSObject, ObservableObject {
                     self?.connect()
                 }
             }
+        } else {
+            log.warning("Not reconnecting: reconnectInterval callback returned nil")
         }
     }
 
@@ -340,7 +354,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
     /// - Parameter token: Discord token used for authentication
     public convenience init(token: String) {
         self.init(token: token, timeout: TimeInterval(4), maxMessageSize: 1024*1024*10) { code, times in
-            guard code != .policyViolation, code != .internalServerError else { return nil }
+            guard code != .policyViolation, code != .internalServerError, code?.rawValue != 4004 else { return nil }
 
             return min(pow(2, Double(times))*1.1 + 1.6, 60)
         }
