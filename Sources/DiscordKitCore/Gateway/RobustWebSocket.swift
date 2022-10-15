@@ -249,12 +249,12 @@ public class RobustWebSocket: NSObject, ObservableObject {
             onHello()
             // Start heartbeating and send identify
             guard let d = decoded.d as? GatewayHello else { return }
-            log.debug("[HELLO] heartbeat interval: \(d.heartbeat_interval, privacy: .public)s")
+            log.debug("[HELLO] heartbeat interval: \(d.heartbeat_interval, privacy: .public)")
             startHeartbeating(interval: Double(d.heartbeat_interval) / 1000.0)
 
             // Check if we're attempting to and can resume
-            if canResume, let sessionID = sessionID, let seq = seq {
-                log.info("[RESUME] Resuming session \(sessionID), seq: \(seq)")
+            if canResume, let sessionID = sessionID {
+                log.info("[RESUME] Resuming session \(sessionID, privacy: .public), seq: \(String(describing: self.seq), privacy: .public)")
                 guard let resume = getResume(seq: seq, sessionID: sessionID)
                 else { return }
                 send(op: .resume, data: resume)

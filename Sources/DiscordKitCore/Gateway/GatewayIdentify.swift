@@ -48,7 +48,7 @@ public extension RobustWebSocket {
     ///
     /// - Returns: A `GatewayResume` struct, or nil if the Discord token is
     /// not present in the keychain
-    internal func getResume(seq: Int, sessionID: String) -> GatewayResume? {
+    internal func getResume(seq: Int?, sessionID: String) -> GatewayResume? {
         return GatewayResume(
             token: token,
             session_id: sessionID,

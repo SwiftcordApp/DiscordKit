@@ -124,5 +124,5 @@ struct GatewayIdentify: OutgoingGatewayData {
 public struct GatewayResume: OutgoingGatewayData {
     public let token: String
     public let session_id: String
-    public let seq: Int // Last sequence number received
+    @NullEncodable public var seq: Int? // Last sequence number received
 }
