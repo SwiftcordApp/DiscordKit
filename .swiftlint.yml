@@ -8,6 +8,9 @@ opt_in_rules:
 force_cast: warning
 force_try: warning
 
+excluded:
+  - Sources/DiscordKit/protos
+
 identifier_name:
   min_length:
     warning: 3
