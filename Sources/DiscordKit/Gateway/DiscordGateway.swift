@@ -9,7 +9,6 @@ import Foundation
 import os
 import DiscordKitCommon
 import DiscordKitCore
-import Protos
 
 /// Higher-level Gateway manager, mainly for handling and dispatching
 /// Gateway events
@@ -293,7 +292,7 @@ public class DiscordGateway: ObservableObject {
         case let (.channelUpdate, channel as Channel):
             cache.replace(channel)
 
-        case let (.messageCreate, message as Message):
+        case let (.messageCreate, message as DiscordKitCommon.Message):
             cache.appendOrReplace(message)
 
         case let (.presenceUpdate, update as PresenceUpdate):
