@@ -36,7 +36,7 @@ public class DecompressionEngine {
         status = compression_stream_init(&stream, COMPRESSION_STREAM_DECODE, COMPRESSION_ZLIB)
 
         guard status != COMPRESSION_STATUS_ERROR else {
-            DecompressionEngine.log.critical("Couldn't init compression stream!")
+            Self.log.critical("Couldn't init compression stream!")
             return
         }
     }
@@ -92,7 +92,6 @@ public extension DecompressionEngine {
         var decompressed = Data(), srcChunk: Data?
 
         defer {
-            DecompressionEngine.log.debug("Decompressed \(initialSize)B -> \(decompressed.count, privacy: .public)B")
             decompressing = false
             destinationBufferPointer.deallocate()
         }

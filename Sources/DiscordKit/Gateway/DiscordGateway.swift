@@ -224,7 +224,7 @@ public class DiscordGateway: ObservableObject {
         // Update current user presence
         if let currentID = cache.user?.id {
             presences[currentID] = Presence(protoStatus: settings.status, id: currentID)
-            log.debug("Updated presence for current user to ")
+            log.debug("Updated presence for current user to \(self.presences[currentID]?.status.rawValue ?? "nil", privacy: .public)")
         } else {
             log.error("User ID is unset in cache!")
         }
@@ -246,7 +246,7 @@ public class DiscordGateway: ObservableObject {
             if let proto = event.user_settings_proto {
                 handleProtoUpdate(proto: proto)
             } else { log.warning("No user settings proto, is this a bot account?") }
-            log.info("Gateway ready")
+            log.info("[READY] Gateway wrapper ready")
 
         case let (.readySupplemental, evt as ReadySuppEvt):
             let flatPresences = evt.merged_presences.guilds.flatMap { $0 } + evt.merged_presences.friends
@@ -254,7 +254,7 @@ public class DiscordGateway: ObservableObject {
                 presences.updateValue(presence, forKey: presence.user_id)
             }
 
-            // Guild events
+        // Guild events
         case let (.guildCreate, guild as Guild):
             cache.appendOrReplace(guild)
 
@@ -297,7 +297,7 @@ public class DiscordGateway: ObservableObject {
 
         case let (.presenceUpdate, update as PresenceUpdate):
             presences.updateValue(Presence(update: update), forKey: update.user.id)
-            log.debug("Updating presence for user ID: \(update.user.id)")
+            log.debug("Updating presence for user ID: \(update.user.id, privacy: .public)")
 
         default:
             break
@@ -305,6 +305,6 @@ public class DiscordGateway: ObservableObject {
 
         cache.objectWillChange.send()
         onEvent.notify(event: (event, data))
-        log.info("Dispatched event <\(event.rawValue, privacy: .public)>")
+        log.debug("[EVENT] Dispatched event <\(event.rawValue, privacy: .public)>")
     }
 }
