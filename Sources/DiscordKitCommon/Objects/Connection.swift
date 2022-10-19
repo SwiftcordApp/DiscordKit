@@ -13,7 +13,7 @@ public enum ConnectionVisibility: Int, Codable {
 }
 
 // Note: purely by observation
-public enum ConnectionType: String, Codable {
+public enum ConnectionType: String {
     case steam = "steam"
     case youtube = "youtube"
     case spotify = "spotify"
@@ -26,6 +26,12 @@ public enum ConnectionType: String, Codable {
     case battleNet = "battlenet"
     case playstation = "playstation"
     case leagueOfLegends = "leagueoflegends"
+    case unknown
+}
+extension ConnectionType: Codable {
+    public init(from decoder: Decoder) throws {
+        self = try Self(rawValue: decoder.singleValueContainer().decode(RawValue.self)) ?? .unknown
+    }
 }
 
 // Connections with external accounts (e.g. Reddit, YouTube, Steam etc.)
