@@ -7,6 +7,7 @@
 
 import Foundation
 import DiscordKitCommon
+import Protos
 
 extension Presence {
     init(protoStatus: StatusSettings, id: Snowflake) {

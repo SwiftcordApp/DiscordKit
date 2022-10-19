@@ -24,7 +24,8 @@ let package = Package(
             dependencies: [
                 .product(name: "Reachability", package: "Reachability.swift", condition: .when(platforms: [.macOS])),
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
-                .target(name: "DiscordKitCommon")
+                .target(name: "DiscordKitCommon"),
+                .target(name: "Protos")
             ],
             exclude: [
                 "REST/README.md",
@@ -38,6 +39,10 @@ let package = Package(
 		.target(
             name: "DiscordKitCommon",
             exclude: ["Objects/README.md"]
+        ),
+        .binaryTarget(
+            name: "Protos",
+            path: "./Sources/DIscordKit/protos/Protos.xcframework"
         ),
         .testTarget(name: "DiscordKitCommonTests", dependencies: ["DiscordKitCommon"])
 	],
