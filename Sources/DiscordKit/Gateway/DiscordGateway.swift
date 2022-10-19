@@ -9,6 +9,7 @@ import Foundation
 import os
 import DiscordKitCommon
 import DiscordKitCore
+import Protos
 
 /// Higher-level Gateway manager, mainly for handling and dispatching
 /// Gateway events
