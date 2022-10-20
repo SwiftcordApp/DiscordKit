@@ -1,3 +1,0 @@
-[submodule "Sources/DiscordKit/Proto"]
-	path = Sources/DiscordKit/Proto
-	url = git@github.com:SwiftcordApp/protos.git
