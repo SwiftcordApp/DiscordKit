@@ -211,6 +211,9 @@ public class Message: Codable, GatewayData, Equatable {
 
     /// Present  if the message contains stickers
     public var sticker_items: [StickerItem]?
+
+    /// Present if the message is a call in DM
+    public var call: CallMessageComponent?
 }
 
 /// A complete copy of ``Message`` but with most properties marked as Optional
@@ -304,4 +307,11 @@ public enum MessageComponentTypes: Int, Codable {
 /// > Warning: This struct is incomplete
 public struct MessageComponent: Codable {
     public let type: MessageComponentTypes
+}
+
+/// Call message component
+/// Representation of a call message shown in DMs
+public struct CallMessageComponent: Codable {
+    public let participants: [String] // If there's a missed call there will be only 1 participant.
+    public let ended_timestamp: Date? // If there's an active call, this will be nil
 }
