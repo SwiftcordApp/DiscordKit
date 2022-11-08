@@ -8,13 +8,13 @@
 import Foundation
 import os
 
-public class DiscordREST: ObservableObject {
+public class DiscordREST {
     static let subsystem = "com.cryptoalgo.discordapi"
 
     static let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? DiscordREST.subsystem, category: "DiscordREST")
     // How empty, everything is broken into smaller files (for now xD)
 
-    static var session: URLSession = {
+    static let session: URLSession = {
         // Create URL Session Configuration
         let configuration = URLSessionConfiguration.default
 

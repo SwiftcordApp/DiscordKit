@@ -46,9 +46,11 @@ public class RobustWebSocket: NSObject, ObservableObject {
     /// be attempted if/when this happens.
     public let onSessionInvalid = EventDispatch<Void>()
 
-    private var session: URLSession!, socket: URLSessionWebSocketTask!,
-                decompressor: DecompressionEngine!
-	private let reachability = try! Reachability(), log = Logger(subsystem: Bundle.main.bundleIdentifier ?? DiscordREST.subsystem, category: "RobustWebSocket")
+    private var session: URLSession!, socket: URLSessionWebSocketTask!, decompressor: DecompressionEngine!
+	private let reachability = try! Reachability()
+
+    // Logger instance
+    private static let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? DiscordREST.subsystem, category: "RobustWebSocket")
 
     private let queue: OperationQueue
 
@@ -100,7 +102,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
 
     private func invalidateConnTimeout(reason: String = "") {
         if let timer = connTimeout {
-            log.debug("Invalidating conn timeout, reason: \(reason)")
+            Self.log.debug("Invalidating conn timeout, reason: \(reason)")
             timer.invalidate()
             connTimeout = nil
         }
@@ -115,19 +117,19 @@ public class RobustWebSocket: NSObject, ObservableObject {
     private func reconnect(code: URLSessionWebSocketTask.CloseCode?) {
         guard !explicitlyClosed else { return }
         guard connTimeout == nil else {
-            log.warning("Reconnection in progress, not reconnecting")
+            Self.log.warning("Reconnection in progress, not reconnecting")
             return
         }
         guard !connected else {
-            log.warning("Already connected, not reconnecting")
+            Self.log.warning("Already connected, not reconnecting")
             return
         }
         guard pendingReconnect == nil else {
-            log.warning("Already reconnecting, not reconnecting")
+            Self.log.warning("Already reconnecting, not reconnecting")
             return
         }
         guard !Self.fatalCloseCodes.contains(code?.rawValue ?? -1) else {
-            log.error("Gateway closed with fatal close code! Cannot reconnect")
+            Self.log.error("Gateway closed with fatal close code! Cannot reconnect")
             onAuthFailure.notify()
             close(code: .normalClosure)
             return
@@ -140,14 +142,14 @@ public class RobustWebSocket: NSObject, ObservableObject {
 
         let delay = reconnectInterval(code, attempts)
         if let delay = delay {
-            log.info("Retrying connection in \(delay)s, attempt \(String(self.attempts))")
+            Self.log.info("Retrying connection in \(delay)s, attempt \(String(self.attempts))")
             DispatchQueue.main.async { [weak self] in
                 self?.pendingReconnect = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
                     self?.connect()
                 }
             }
         } else {
-            log.warning("Not reconnecting: reconnectInterval callback returned nil")
+            Self.log.warning("Not reconnecting: reconnectInterval callback returned nil")
         }
     }
 
@@ -161,17 +163,17 @@ public class RobustWebSocket: NSObject, ObservableObject {
                     case .data(let data):
                         if let decompressed = self?.decompressor.push_data(data) {
                             try self?.handleMessage(with: decompressed)
-                        } else { self?.log.debug("Data has not ended yet") }
+                        } else { Self.log.debug("Data has not ended yet") }
                     case .string(let str): try self?.handleMessage(with: str)
-                    @unknown default: self?.log.warning("Unknown sock message case!")
+                    @unknown default: Self.log.warning("Unknown sock message case!")
                     }
                 } catch {
-                    self?.log.warning("Error decoding message: \(error.localizedDescription, privacy: .public)")
+                    Self.log.warning("Error decoding message: \(error.localizedDescription, privacy: .public)")
                 }
                 self?.attachSockReceiveListener()
             case .failure(let error):
                 // If an error is encountered here, the connection is probably broken
-                self?.log.error("Error when receiving: \(error.localizedDescription, privacy: .public)")
+                Self.log.error("Error when receiving: \(error.localizedDescription, privacy: .public)")
                 self?.forceClose()
             }
         }
@@ -179,11 +181,11 @@ public class RobustWebSocket: NSObject, ObservableObject {
     private func connect() {
         guard !explicitlyClosed else { return }
         if socket?.state == .running {
-            log.warning("Closing existing socket connection")
+            Self.log.warning("Closing existing socket connection")
             socket.cancel()
         }
 
-        log.info("[CONNECT] \(GatewayConfig.default.gateway), version: \(GatewayConfig.default.version)")
+        Self.log.info("[CONNECT] \(GatewayConfig.default.gateway), version: \(GatewayConfig.default.version)")
         pendingReconnect = nil
 
         var gatewayReq = URLRequest(url: URL(string: GatewayConfig.default.gateway)!)
@@ -197,9 +199,9 @@ public class RobustWebSocket: NSObject, ObservableObject {
                 self?.connTimeout = nil
                 guard self?.connected != true else { return }
                 // reachability.stopNotifier()
-                self?.log.warning("Connection timed out after \(self!.timeout)s")
+                Self.log.warning("Connection timed out after \(self!.timeout)s")
                 self?.forceClose()
-                self?.log.info("[RECONNECT] Preemptively attempting reconnection")
+                Self.log.info("[RECONNECT] Preemptively attempting reconnection")
                 self?.reconnect(code: nil)
             }
         }
@@ -215,10 +217,9 @@ public class RobustWebSocket: NSObject, ObservableObject {
 
     // MARK: - Handlers
     private func handleMessage(with message: String) throws {
-        /*
-         For debugging JSON decoding errors, how wonderful!
-        do {
-            try JSONDecoder().decode(GatewayIncoming.self, from: message.data(using: .utf8)!)
+        // For debugging JSON decoding errors, how wonderful!
+        /* do {
+            try DiscordREST.decoder.decode(GatewayIncoming.self, from: message.data(using: .utf8)!)
             // process data
         } catch let DecodingError.dataCorrupted(context) {
             print(context)
@@ -231,41 +232,43 @@ public class RobustWebSocket: NSObject, ObservableObject {
         } catch let DecodingError.typeMismatch(type, context)  {
             print("Type '\(type)' mismatch:", context.debugDescription)
             print("codingPath:", context.codingPath)
+            print(message)
+            return
         } catch {
             print("error: ", error)
-        }*/
+        } */
 
         guard let msgData = message.data(using: .utf8) else { return }
-		let decoded = try DiscordREST.decoder().decode(GatewayIncoming.self, from: msgData)
+		let decoded = try DiscordREST.decoder.decode(GatewayIncoming.self, from: msgData)
 
         if let sequence = decoded.s { seq = sequence }
 
         switch decoded.op {
         case .heartbeat:
-            log.debug("Sending expedited heartbeat as requested")
+            Self.log.debug("[HEARTBEAT] Sending expedited heartbeat as requested")
             send(op: .heartbeat, data: GatewayHeartbeat(seq))
         case .heartbeatAck: hbTimeout?.invalidate()
         case .hello:
             onHello()
             // Start heartbeating and send identify
             guard let d = decoded.d as? GatewayHello else { return }
-            log.debug("[HELLO] heartbeat interval: \(d.heartbeat_interval, privacy: .public)")
+            Self.log.debug("[HELLO] heartbeat interval: \(d.heartbeat_interval, privacy: .public)")
             startHeartbeating(interval: Double(d.heartbeat_interval) / 1000.0)
 
             // Check if we're attempting to and can resume
             if canResume, let sessionID = sessionID {
-                log.info("[RESUME] Resuming session \(sessionID, privacy: .public), seq: \(String(describing: self.seq), privacy: .public)")
+                Self.log.info("[RESUME] Resuming session \(sessionID, privacy: .public), seq: \(String(describing: self.seq), privacy: .public)")
                 guard let resume = getResume(seq: seq, sessionID: sessionID)
                 else { return }
                 send(op: .resume, data: resume)
                 return
             }
-            log.debug("[IDENTIFY]")
+            Self.log.debug("[IDENTIFY]")
             // Send identify
             seq = nil // Clear sequence #
             // isReconnecting = false // Resuming failed/not attempted
             guard let identify = getIdentify() else {
-                log.debug("Token not in keychain")
+                Self.log.debug("Token not in keychain")
                 // authFailed = true
                 // socket.disconnect(closeCode: 1000)
                 close(code: .normalClosure)
@@ -277,7 +280,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
             // Check if the session can be resumed
             let shouldResume = (decoded.primitiveData as? Bool) ?? false
             if !shouldResume {
-                log.warning("Session is invalid, reconnecting without resuming")
+                Self.log.warning("Session is invalid, reconnecting without resuming")
                 onSessionInvalid.notify()
                 canResume = false
             }
@@ -287,13 +290,13 @@ public class RobustWebSocket: NSObject, ObservableObject {
             /// the Gateway session is reestablished
             close(code: .normalClosure)
             DispatchQueue.main.asyncAfter(deadline: .now() + Double.random(in: 1...5)) { [weak self] in
-                self?.log.debug("Attempting to reconnect now")
+                Self.log.debug("Attempting to reconnect now")
                 self?.open()
             }
             // attemptReconnect(resume: shouldResume)
         case .dispatchEvent:
             guard let type = decoded.t else {
-                log.warning("Event has nil type")
+                Self.log.warning("Event has nil type")
                 return
             }
             switch type {
@@ -308,7 +311,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
             }
             onEvent.notify(event: (type, decoded.d))
         case .reconnect:
-            log.warning("Gateway-requested reconnect: disconnecting and reconnecting immediately")
+            Self.log.warning("Gateway-requested reconnect: disconnecting and reconnecting immediately")
             forceClose()
         }
     }
@@ -364,7 +367,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
 // MARK: - WebSocketTask delegate functions
 extension RobustWebSocket: URLSessionWebSocketDelegate {
     public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
-        log.info("[CONNECTED]")
+        Self.log.info("[CONNECTED]")
     }
 
     public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
@@ -372,11 +375,11 @@ extension RobustWebSocket: URLSessionWebSocketDelegate {
         reconnect(code: closeCode)
         // didCloseConnection?()
         // didReceive(event: .disconnected("", UInt16(closeCode.rawValue)))
-        log.warning("[WS CLOSED] closeCode: \(closeCode.rawValue)")
+        Self.log.warning("[WS CLOSED] closeCode: \(closeCode.rawValue)")
     }
 
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        log.error("[WS CLOSED] closed with error: \(error?.localizedDescription ?? "no error description")")
+        Self.log.error("[WS CLOSED] closed with error: \(error?.localizedDescription ?? "no error description")")
         connected = false
         reconnect(code: nil)
     }
@@ -387,17 +390,17 @@ public extension RobustWebSocket {
     private func setupReachability() {
         reachability.whenReachable = { [weak self] _ in
             self?.reachable = true
-            self?.log.info("Reset backoff for reason: connection is reachable")
+            Self.log.info("Reset backoff for reason: connection is reachable")
             self?.clearPendingReconnectIfNeeded()
             self?.attempts = 0
             self?.reconnect(code: nil)
         }
         reachability.whenUnreachable = { [weak self] _ in
             self?.reachable = false
-            self?.log.info("Connection unreachable, sending expedited heartbeat")
+            Self.log.info("Connection unreachable, sending expedited heartbeat")
             self?.sendHeartbeat(4*4)
         }
-        do { try reachability.startNotifier() } catch { log.error("Starting reachability notifier failed!") }
+        do { try reachability.startNotifier() } catch { Self.log.error("Starting reachability notifier failed!") }
     }
 }
 
@@ -406,31 +409,31 @@ public extension RobustWebSocket {
     @objc private func sendHeartbeat(_ interval: TimeInterval) {
         guard connected else { return }
         if let hbTimeout = hbTimeout, hbTimeout.isValid {
-            log.warning("Skipping sending heartbeat - already waiting for one")
+            Self.log.warning("Skipping sending heartbeat - already waiting for one")
             return
         }
 
-        log.debug("[HEARTBEAT] Sending heartbeat")
+        Self.log.debug("[HEARTBEAT] Sending heartbeat")
         send(op: .heartbeat, data: GatewayHeartbeat(seq))
 
         hbTimeout?.invalidate()
         DispatchQueue.main.async { [weak self] in
             self?.hbTimeout = Timer.scheduledTimer(withTimeInterval: interval * 0.25, repeats: false) { [weak self] _ in
-                self?.log.warning("[HEARTBEAT] Force-closing connection, reason: socket timed out")
+                Self.log.warning("[HEARTBEAT] Force-closing connection, reason: socket timed out")
                 self?.forceClose()
             }
         }
     }
 
     private func startHeartbeating(interval: TimeInterval) {
-        log.debug("Sending heartbeats every \(interval)s")
+        Self.log.debug("Sending heartbeats every \(interval)s")
 
         if let hbCancellable = hbCancellable {
-            log.debug("Cancelling existing heartbeat timer")
+            Self.log.debug("Cancelling existing heartbeat timer")
             hbCancellable.cancel()
         }
         if let hbTimeout = hbTimeout {
-            log.debug("Cancelling existing hbTimeout timer")
+            Self.log.debug("Cancelling existing hbTimeout timer")
             hbTimeout.invalidate()
         }
 
@@ -467,7 +470,7 @@ public extension RobustWebSocket {
         code: URLSessionWebSocketTask.CloseCode = .abnormalClosure,
         shouldReconnect: Bool = true
     ) {
-        log.warning("Forcibly closing connection")
+        Self.log.warning("Forcibly closing connection")
         socket.cancel(with: code, reason: nil)
         connected = false
         /*if shouldReconnect {
@@ -531,13 +534,13 @@ public extension RobustWebSocket {
         guard connected else { return }
 
         let sendPayload = GatewayOutgoing(op: op, d: data, s: seq)
-        guard let encoded = try? DiscordREST.encoder().encode(sendPayload)
+        guard let encoded = try? DiscordREST.encoder.encode(sendPayload)
         else { return }
 
-        log.debug("Outgoing Payload: <\(String(describing: op), privacy: .public)> \(String(describing: data), privacy: .sensitive(mask: .hash)) [seq: \(String(describing: self.seq), privacy: .public)]")
+        Self.log.debug("Outgoing Payload: <\(String(describing: op), privacy: .public)> \(String(describing: data), privacy: .sensitive(mask: .hash)) [seq: \(String(describing: self.seq), privacy: .public)]")
 
-        socket.send(.data(encoded), completionHandler: completionHandler ?? { [weak self] err in
-            if let err = err { self?.log.error("Socket send error: \(err.localizedDescription, privacy: .public)") }
+        socket.send(.data(encoded), completionHandler: completionHandler ?? { err in
+            if let err = err { Self.log.error("Socket send error: \(err.localizedDescription, privacy: .public)") }
         })
     }
 }

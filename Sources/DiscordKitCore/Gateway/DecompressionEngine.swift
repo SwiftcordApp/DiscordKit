@@ -71,7 +71,6 @@ public class DecompressionEngine {
 
 public extension DecompressionEngine {
     fileprivate func decompress(_ data: Data) -> Data {
-        let initialSize = data.count
         guard !decompressing else {
             DecompressionEngine.log.warning("Another decompression is currently taking place, skipping")
             return Data()

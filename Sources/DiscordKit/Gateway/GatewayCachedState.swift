@@ -99,12 +99,7 @@ public class CachedState: ObservableObject {
     /// Appends or replaces  the given message within the appropriate channel.
     /// - Parameter message: The message to append.
     func appendOrReplace(_ message: Message) {
-        if let guild = message.guild_id,
-           let idx = guilds[guild]?
-           .channels?
-           .firstIndex(where: { $0.id == message.channel_id }) {
-            guilds[guild]?.channels?[idx].last_message_id = message.id
-        } else if let idx = dms.firstIndex(where: { $0.id == message.channel_id }) {
+        if let idx = dms.firstIndex(where: { $0.id == message.channel_id }) {
             dms[idx].last_message_id = message.id
         }
     }

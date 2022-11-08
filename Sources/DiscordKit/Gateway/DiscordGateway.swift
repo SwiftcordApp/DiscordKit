@@ -28,7 +28,7 @@ public class DiscordGateway: ObservableObject {
 	public let onAuthFailure = EventDispatch<Void>()
 
     // WebSocket object
-    @Published public var socket: RobustWebSocket?
+    public var socket: RobustWebSocket?
 
     /// A cache for some data received from the Gateway
     ///

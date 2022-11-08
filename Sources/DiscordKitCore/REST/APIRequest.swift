@@ -74,9 +74,9 @@ public extension DiscordREST {
 
         req.setValue(Locale.englishUS.rawValue, forHTTPHeaderField: "x-discord-locale")
         req.setValue("bugReporterEnabled", forHTTPHeaderField: "x-debug-options")
-        guard let superEncoded = try? DiscordREST.encoder().encode(DiscordREST.getSuperProperties())
+        guard let superEncoded = try? DiscordREST.encoder.encode(DiscordREST.getSuperProperties())
         else {
-            DiscordREST.log.error("Couldn't encode super properties, something is seriously wrong")
+            Self.log.error("Couldn't encode super properties, something is seriously wrong")
             return nil
         }
         req.setValue(superEncoded.base64EncodedString(), forHTTPHeaderField: "x-super-properties")
@@ -123,7 +123,7 @@ public extension DiscordREST {
             guard let d = try? await makeRequest(path: path, query: query)
             else { return nil }
 
-            return try DiscordREST.decoder().decode(T.self, from: d)
+            return try DiscordREST.decoder.decode(T.self, from: d)
         } catch let DecodingError.dataCorrupted(context) {
             print(context.debugDescription)
         } catch let DecodingError.keyNotFound(key, context) {
@@ -147,7 +147,7 @@ public extension DiscordREST {
         body: B? = nil,
         attachments: [URL] = []
     ) async -> D? {
-        let p = body != nil ? try? DiscordREST.encoder().encode(body) : nil
+        let p = body != nil ? try? DiscordREST.encoder.encode(body) : nil
         guard let d = try? await makeRequest(
             path: path,
             attachments: attachments,
@@ -156,7 +156,7 @@ public extension DiscordREST {
         )
         else { return nil }
 
-        return try? DiscordREST.decoder().decode(D.self, from: d)
+        return try? DiscordREST.decoder.decode(D.self, from: d)
     }
     
     /// Make a `POST` request to the Discord REST API
@@ -166,7 +166,7 @@ public extension DiscordREST {
         path: String,
         body: B
     ) async -> Bool {
-        let p = try? DiscordREST.encoder().encode(body)
+        let p = try? DiscordREST.encoder.encode(body)
         guard (try? await makeRequest(
             path: path,
             body: p,
@@ -201,7 +201,7 @@ public extension DiscordREST {
         path: String,
         body: B
     ) async -> Bool {
-        let p = try? DiscordREST.encoder().encode(body)
+        let p = try? DiscordREST.encoder.encode(body)
         guard (try? await makeRequest(
             path: path,
             body: p,
