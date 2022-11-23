@@ -25,11 +25,24 @@ public struct ClientParityVersion {
     let electronVersion: String
 }
 
+public enum PropertiesOS: String, Codable {
+    case macOS = "Mac OS X"
+    case linux
+
+    public static var current: Self {
+        #if os(macOS)
+            .macOS
+        #else
+            .linux
+        #endif
+    }
+}
+
 /// Connection properties used to construct client info that is sent
 /// in the ``GatewayIdentify`` payload
 public struct GatewayConnProperties: OutgoingGatewayData {
     public init(
-        os: String,
+        os: PropertiesOS = .current,
         browser: String,
         device: String? = nil,
         release_channel: String? = nil,
@@ -52,8 +65,10 @@ public struct GatewayConnProperties: OutgoingGatewayData {
 
     /// OS the client is running on
     ///
-    /// Always `Mac OS X`
-    let os: String
+    /// This should be set according to the OS the library is running on
+    ///
+    /// - Seealso: ``PropertiesOS``
+    let os: PropertiesOS
 
     /// Browser name
     ///
@@ -198,7 +213,6 @@ public struct DiscordKitConfig {
         let machine = withUnsafePointer(to: systemInfo.machine) { parseUname(ptr: $0) }
 
         return GatewayConnProperties(
-            os: "Mac OS X",
             browser: "Discord Client",
             release_channel: releaseCh.rawValue,
             client_version: clientVersion,
