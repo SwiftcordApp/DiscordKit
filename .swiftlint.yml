@@ -19,4 +19,7 @@ identifier_name:
     warning: 40
     error: 50
   allowed_symbols: ["_"]
+cyclomatic_complexity:
+  ignores_case_statements: true
+
 reporter: "xcode" # reporter type (xcode, json, csv, checkstyle, junit, html, emoji, sonarqube, markdown)
