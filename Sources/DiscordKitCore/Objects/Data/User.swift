@@ -118,11 +118,11 @@ public struct CurrentUser: Codable, GatewayData, Equatable {
 
     /// The user's purchased flags
     ///
-    /// Temporarily removed to prevent decoding errors.
+    /// Temporarily changed to a string to prevent decoding errors.
     ///
     /// > Experiment: If anyone figures out the possible values and function of
     /// > this property, please make a PR with relevant changes :D
-    // public let purchased_flags: User.PremiumType?
+    public let purchased_flags: String?
 
     /// If this user is a premium (nitro) user
     public let premium: Bool

@@ -8,9 +8,9 @@
 import Foundation
 
 public enum IntegrationType: String, Codable {
-    case youtube = "youtube"
-    case twitch = "twitch"
-    case discord = "discord"
+    case youtube
+    case twitch
+    case discord
 }
 
 public enum InteractionExpireBehaviour: Int, Codable {
