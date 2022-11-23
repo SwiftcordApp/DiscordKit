@@ -67,14 +67,14 @@ public extension DiscordREST {
         // req.setValue("?0", forHTTPHeaderField: "sec-ch-ua-mobile") // The day this runs on iOS...
         // req.setValue("macOS", forHTTPHeaderField: "sec-ch-ua-platform") // We only run on macOS
         // The top 2 headers are only sent when running in browsers
-        req.setValue(DiscordREST.userAgent, forHTTPHeaderField: "user-agent")
+        req.setValue(DiscordKitConfig.default.userAgent, forHTTPHeaderField: "user-agent")
         req.setValue("cors", forHTTPHeaderField: "sec-fetch-mode")
         req.setValue("same-origin", forHTTPHeaderField: "sec-fetch-site")
         req.setValue("empty", forHTTPHeaderField: "sec-fetch-dest")
 
         req.setValue(Locale.englishUS.rawValue, forHTTPHeaderField: "x-discord-locale")
         req.setValue("bugReporterEnabled", forHTTPHeaderField: "x-debug-options")
-        guard let superEncoded = try? DiscordREST.encoder.encode(DiscordREST.getSuperProperties())
+        guard let superEncoded = try? DiscordREST.encoder.encode(DiscordKitConfig.default.properties)
         else {
             Self.log.error("Couldn't encode super properties, something is seriously wrong")
             return nil

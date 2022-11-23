@@ -25,7 +25,7 @@ import Combine
 ///
 /// > Use ``DiscordGateway`` instead of this class - it uses ``RobustWebSocket``
 /// > underlyingly and is higher-level for more ease of use.
-public class RobustWebSocket: NSObject, ObservableObject {
+public class RobustWebSocket: NSObject {
     /// An ``EventDispatch`` that is notified when an event dispatch
     /// is received from the Gateway
     public let onEvent = EventDispatch<(GatewayEvent, GatewayData?)>()
@@ -52,16 +52,26 @@ public class RobustWebSocket: NSObject, ObservableObject {
     // Logger instance
     private static let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? DiscordREST.subsystem, category: "RobustWebSocket")
 
-    private let queue: OperationQueue
+    // Operation queue for the URLSessionWebSocketTask
+    private let queue: OperationQueue = {
+        let queue = OperationQueue()
+        queue.qualityOfService = .utility
+        return queue
+    }()
 
-    private let timeout: TimeInterval, maxMsgSize: Int,
-                reconnectInterval: (URLSessionWebSocketTask.CloseCode?, Int) -> TimeInterval?
+    private let timeout: TimeInterval, maxMsgSize: Int
     private var attempts = 0, reconnects = -1,
                 explicitlyClosed = false,
                 seq: Int? = nil, canResume = false, sessionID: String? = nil,
                 pendingReconnect: Timer? = nil, connTimeout: Timer? = nil
 
+    // MARK: - Configuration
+    internal let intents: Intents?
     internal let token: String
+    private let reconnectInterval: ReconnectDelayClosure
+
+    /// If this gateway connection is using a bot account
+    public var isBot: Bool { intents != nil }
 
     /// The gateway close codes that signal a fatal error, and reconnection shouldn't be attempted
     private static let fatalCloseCodes = [4004] + Array(4010...4014)
@@ -71,13 +81,13 @@ public class RobustWebSocket: NSObject, ObservableObject {
     /// This is set to `true` immediately after the socket connection
     /// is established, but the connection is most likely not ready.
     /// No events will be received until ``sessionOpen`` is `true`.
-    private(set) var connected = false {
+    private(set) final var connected = false {
         didSet { if !connected { sessionOpen = false }}
     }
     /// If the network is reachable (has network connectivity)
     ///
     /// ``onConnStateChange`` is notified when this changes.
-    public var reachable = false {
+    public final var reachable = false {
         didSet { onConnStateChange.notify(event: (sessionOpen, reachable)) }
     }
     /// If a session with the Gateway is established
@@ -86,7 +96,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
     /// The socket is then considered "fully opened" once this is `true`.
     ///
     /// ``onConnStateChange`` is notified when this changes.
-    public var sessionOpen = false {
+    public final var sessionOpen = false {
         didSet { onConnStateChange.notify(event: (sessionOpen, reachable)) }
     }
 
@@ -190,7 +200,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
 
         var gatewayReq = URLRequest(url: URL(string: GatewayConfig.default.gateway)!)
         // The difference in capitalisation is intentional
-		gatewayReq.setValue(DiscordREST.userAgent, forHTTPHeaderField: "User-Agent")
+        gatewayReq.setValue(DiscordKitConfig.default.userAgent, forHTTPHeaderField: "User-Agent")
         socket = session.webSocketTask(with: gatewayReq)
         socket!.maximumMessageSize = maxMsgSize
 
@@ -218,7 +228,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
     // MARK: - Handlers
     private func handleMessage(with message: String) throws {
         // For debugging JSON decoding errors, how wonderful!
-        /* do {
+        do {
             try DiscordREST.decoder.decode(GatewayIncoming.self, from: message.data(using: .utf8)!)
             // process data
         } catch let DecodingError.dataCorrupted(context) {
@@ -236,7 +246,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
             return
         } catch {
             print("error: ", error)
-        } */
+        }
 
         guard let msgData = message.data(using: .utf8) else { return }
 		let decoded = try DiscordREST.decoder.decode(GatewayIncoming.self, from: msgData)
@@ -263,14 +273,11 @@ public class RobustWebSocket: NSObject, ObservableObject {
                 send(op: .resume, data: resume)
                 return
             }
-            Self.log.debug("[IDENTIFY]")
+            Self.log.debug("[IDENTIFY] intents: \(self.intents?.rawValue.description ?? "not applicable")")
             // Send identify
             seq = nil // Clear sequence #
-            // isReconnecting = false // Resuming failed/not attempted
             guard let identify = getIdentify() else {
-                Self.log.debug("Token not in keychain")
-                // authFailed = true
-                // socket.disconnect(closeCode: 1000)
+                Self.log.debug("Could not get identify")
                 close(code: .normalClosure)
                 onAuthFailure.notify()
                 return
@@ -280,7 +287,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
             // Check if the session can be resumed
             let shouldResume = (decoded.primitiveData as? Bool) ?? false
             if !shouldResume {
-                Self.log.warning("Session is invalid, reconnecting without resuming")
+                Self.log.warning("[RECONNECT] Session is invalid, reconnecting without resuming")
                 onSessionInvalid.notify()
                 canResume = false
             }
@@ -290,7 +297,7 @@ public class RobustWebSocket: NSObject, ObservableObject {
             /// the Gateway session is reestablished
             close(code: .normalClosure)
             DispatchQueue.main.asyncAfter(deadline: .now() + Double.random(in: 1...5)) { [weak self] in
-                Self.log.debug("Attempting to reconnect now")
+                Self.log.debug("[RECONNECT] Attempting to reconnect now")
                 self?.open()
             }
             // attemptReconnect(resume: shouldResume)
@@ -318,9 +325,12 @@ public class RobustWebSocket: NSObject, ObservableObject {
 
     // MARK: - Initializers
 
-    /// Inits an instance of ``RobustWebSocket`` with provided parameters
+    /// Inits an instance of ``RobustWebSocket`` with provided parameters or defaults
     ///
-    /// A convenience init is also provided that uses reasonable defaults instead.
+    /// Defaults are also provided for some parameters:
+    /// - Connection timeout: 4s
+    /// - Maximum socket payload size: 10MiB
+    /// - Reconnection delay: `1.4^reconnectionTimes * 5 - 5`
     ///
     /// - Parameters:
     ///   - token: Discord token used for authentication
@@ -329,40 +339,29 @@ public class RobustWebSocket: NSObject, ObservableObject {
     ///   - maxMessageSize: The maximum outgoing and incoming payload size for the socket.
     ///   - reconnectIntClosure: A closure called with `(closecode, reconnectionTimes)`
     ///   used to determine the reconnection delay.
+    ///   - intents: Gateway intents to send in identify payload, should be set to nil for user accounts.
     public init(
         token: String,
-        timeout: TimeInterval,
-        maxMessageSize: Int,
-        reconnectIntClosure: @escaping (URLSessionWebSocketTask.CloseCode?, Int) -> TimeInterval?
+        timeout: TimeInterval = 4,
+        maxMessageSize: Int = 1024*1024*10, // 10MB
+        reconnectIntClosure: @escaping ReconnectDelayClosure = { code, times in
+            guard code != .policyViolation, code != .internalServerError, code?.rawValue != 4004 else { return nil }
+            return min(pow(2, Double(times))*1.1 + 1.6, 60)
+        },
+        intents: Intents? = nil
     ) {
         self.timeout = timeout
         self.token = token
-        queue = OperationQueue()
-        queue.qualityOfService = .utility
+        self.intents = intents
         reconnectInterval = reconnectIntClosure
         maxMsgSize = maxMessageSize
         super.init()
         session = URLSession(configuration: .default, delegate: self, delegateQueue: queue)
         connect()
     }
-
-    /// Inits an instance of ``RobustWebSocket`` with all parameters set
-    /// to reasonable defaults.
-    ///
-    /// The following are the default parameters:
-    /// - Connection timeout: 4s
-    /// - Maximum socket payload size: 10MiB
-    /// - Reconnection delay: `1.4^reconnectionTimes * 5 - 5`
-    ///
-    /// - Parameter token: Discord token used for authentication
-    public convenience init(token: String) {
-        self.init(token: token, timeout: TimeInterval(4), maxMessageSize: 1024*1024*10) { code, times in
-            guard code != .policyViolation, code != .internalServerError, code?.rawValue != 4004 else { return nil }
-
-            return min(pow(2, Double(times))*1.1 + 1.6, 60)
-        }
-    }
 }
+
+public typealias ReconnectDelayClosure = (URLSessionWebSocketTask.CloseCode?, Int) -> TimeInterval?
 
 // MARK: - WebSocketTask delegate functions
 extension RobustWebSocket: URLSessionWebSocketDelegate {
@@ -466,7 +465,7 @@ public extension RobustWebSocket {
     ///   - code: A custom code to close the socket with (defaults to `.abnormalClosure`)
     ///   - shouldReconnect: If reconnection should be attempted after the connection
     ///   is closed. Defaults to `true`
-    func forceClose(
+    final func forceClose(
         code: URLSessionWebSocketTask.CloseCode = .abnormalClosure,
         shouldReconnect: Bool = true
     ) {
@@ -491,7 +490,7 @@ public extension RobustWebSocket {
     /// called. To reconnect, recreate the ``RobustWebSocket`` instance.
     ///
     /// - Parameter code: The close code to close the socket with.
-    func close(code: URLSessionWebSocketTask.CloseCode) {
+    final func close(code: URLSessionWebSocketTask.CloseCode) {
         clearPendingReconnectIfNeeded()
         explicitlyClosed = true
         connected = false
@@ -509,7 +508,7 @@ public extension RobustWebSocket {
     /// the init method, and can be used to explicitly open the connection after
     /// it has been closed with `close()`. This method has no effect if the socket
     /// is already opened.
-    func open() {
+    final func open() {
         guard socket.state != .running else { return }
         clearPendingReconnectIfNeeded()
         explicitlyClosed = false
@@ -526,7 +525,7 @@ public extension RobustWebSocket {
     ///   - data: A outgoing data struct that conforms to OutgoingGatewayData
     ///   - completionHandler: Called when the send completes, with an error if any.
     ///   Not called if set to `nil` (defaults to `nil`)
-    func send<T: OutgoingGatewayData>(
+    final func send<T: OutgoingGatewayData>(
         op: GatewayOutgoingOpcodes,
         data: T,
         completionHandler: ((Error?) -> Void)? = nil

@@ -10,7 +10,8 @@ let package = Package(
     ],
 	products: [
         .library(name: "DiscordKitCore", targets: ["DiscordKitCore"]),
-		.library(name: "DiscordKit", targets: ["DiscordKit"]),
+		.library(name: "DiscordKit", targets: ["DiscordKit"]), // User-oriented module, simplifies use of API for UI apps
+        .library(name: "DiscordKitBot", targets: ["DiscordKitBot"]), // Bot-oriented module, for use in bots
 		.library(name: "DiscordKitCommon", targets: ["DiscordKitCommon"]),
 	],
 	dependencies: [
@@ -34,6 +35,13 @@ let package = Package(
 		.target(
             name: "DiscordKit",
             dependencies: [.target(name: "DiscordKitCore")]
+        ),
+        .target(
+            name: "DiscordKitBot",
+            dependencies: [
+                .target(name: "DiscordKitCore"),
+                .target(name: "DiscordKitCommon")
+            ]
         ),
 		.target(
             name: "DiscordKitCommon",
