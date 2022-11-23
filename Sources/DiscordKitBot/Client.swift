@@ -26,6 +26,10 @@ public final class Client {
 
     public init(intents: Intents = .unprivileged) {
         self.intents = intents
+        // Override default config for bots
+        DiscordKitConfig.default = .init(
+            properties: .init(os: "Mac OS X", browser: DiscordKitConfig.libraryName, device: DiscordKitConfig.libraryName)
+        )
     }
 
     deinit {

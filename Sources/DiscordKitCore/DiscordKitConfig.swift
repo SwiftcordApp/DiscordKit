@@ -28,6 +28,28 @@ public struct ClientParityVersion {
 /// Connection properties used to construct client info that is sent
 /// in the ``GatewayIdentify`` payload
 public struct GatewayConnProperties: OutgoingGatewayData {
+    public init(
+        os: String,
+        browser: String,
+        device: String? = nil,
+        release_channel: String? = nil,
+        client_version: String? = nil,
+        os_version: String? = nil,
+        os_arch: String? = nil,
+        system_locale: String? = nil,
+        client_build_number: Int? = nil
+    ) {
+        self.os = os
+        self.browser = browser
+        self.device = device
+        self.release_channel = release_channel
+        self.client_version = client_version
+        self.os_version = os_version
+        self.os_arch = os_arch
+        self.system_locale = system_locale
+        self.client_build_number = client_build_number
+    }
+
     /// OS the client is running on
     ///
     /// Always `Mac OS X`
@@ -42,6 +64,11 @@ public struct GatewayConnProperties: OutgoingGatewayData {
     /// > ``DiscordAPI/getSuperProperties()`` method. Customisability
     /// > might be added in a future release.
     let browser: String
+
+    /// Device (for bots)
+    ///
+    /// This should be set to the name of the device for bots, or left nil for user accounts.
+    let device: String?
 
     /// Release channel of target official client
     ///
@@ -111,8 +138,9 @@ public struct DiscordKitConfig {
     //public let token: String
 
     // MARK: Configuration constants
+    public static let libraryName = "DiscordKit"
     /// DiscordKit subsystem constant
-    public static let subsystem = "com.cryptoalgo.DiscordKit"
+    public static let subsystem = "com.cryptoalgo.\(libraryName)"
     public static let discordKitBuild = 1
 
     /// Populate struct values with provided parameters
