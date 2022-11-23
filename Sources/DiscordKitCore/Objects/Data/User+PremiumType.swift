@@ -21,14 +21,14 @@ public extension User {
 
         public var description: String {
             switch self {
-                case .none:
-                    return "None"
+            case .none:
+                return "None"
 
-                case .nitroClassic:
-                    return "Nitro Classic"
+            case .nitroClassic:
+                return "Nitro Classic"
 
-                case .nitro:
-                    return "Nitro"
+            case .nitro:
+                return "Nitro"
             }
         }
     }
