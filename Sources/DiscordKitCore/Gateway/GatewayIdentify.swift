@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import DiscordKitCommon
 
 public extension RobustWebSocket {
     /// Returns a `GatewayIdentify` struct for identification

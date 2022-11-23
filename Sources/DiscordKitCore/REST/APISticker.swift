@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import DiscordKitCommon
 
 public extension DiscordREST {
     // MARK: Get Sticker

@@ -7,7 +7,6 @@
 
 import Foundation
 import os
-import DiscordKitCommon
 import DiscordKitCore
 
 /// Higher-level Gateway manager, mainly for handling and dispatching

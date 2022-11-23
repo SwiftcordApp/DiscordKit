@@ -1,12 +1,11 @@
 //
-//  File.swift
+//  ResolvedInvite.swift
 //  
 //
 //  Created by Vincent Kwok on 10/7/22.
 //
 
 import Foundation
-import DiscordKitCommon
 
 public enum InviteTargetType: Int, Codable {
     case stream = 1

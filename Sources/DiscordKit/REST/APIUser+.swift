@@ -7,7 +7,6 @@
 
 import Foundation
 import DiscordKitCore
-import DiscordKitCommon
 
 public extension DiscordREST {
     /// Update user settings proto

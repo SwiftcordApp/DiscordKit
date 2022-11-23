@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import DiscordKitCommon
 
 /// A Discord message, with convenience methods
 ///
