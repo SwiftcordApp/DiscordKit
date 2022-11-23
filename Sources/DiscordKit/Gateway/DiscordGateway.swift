@@ -291,7 +291,7 @@ public class DiscordGateway: ObservableObject {
         case let (.channelUpdate, channel as Channel):
             cache.replace(channel)
 
-        case let (.messageCreate, message as DiscordKitCommon.Message):
+        case let (.messageCreate, message as Message):
             cache.appendOrReplace(message)
 
         case let (.presenceUpdate, update as PresenceUpdate):
