@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  DiscordREST.swift
 //  
 //
 //  Created by Vincent Kwok on 5/6/22.
