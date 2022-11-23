@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import DiscordKitCore
 
 extension Presence {
     init(protoStatus: StatusSettings, id: Snowflake) {
