@@ -53,7 +53,12 @@ public final class Client {
     }
 
     private func handleEvent(_ evt: GatewayEvent, data: GatewayData?) {
-        
+        switch evt {
+        case .ready:
+            NotificationCenter.default.post(name: .ready, object: nil)
+        default:
+            break
+        }
     }
 }
 
