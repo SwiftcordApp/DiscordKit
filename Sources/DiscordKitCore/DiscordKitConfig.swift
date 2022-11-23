@@ -107,8 +107,13 @@ public struct DiscordKitConfig {
     /// Gateway WebSocket URL
     public let gateway: String
 
+    /// The token to use to authenticate with both the Discord REST and Gateway APIs
+    //public let token: String
+
+    // MARK: Configuration constants
     /// DiscordKit subsystem constant
     public static let subsystem = "com.cryptoalgo.DiscordKit"
+    public static let discordKitBuild = 1
 
     /// Populate struct values with provided parameters
     public init(

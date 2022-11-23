@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import DiscordKitCommon
 import Reachability
 import OSLog
 import Combine
@@ -195,10 +194,10 @@ public class RobustWebSocket: NSObject {
             socket.cancel()
         }
 
-        Self.log.info("[CONNECT] \(GatewayConfig.default.gateway), version: \(GatewayConfig.default.version)")
+        Self.log.info("[CONNECT] \(DiscordKitConfig.default.gateway), version: \(DiscordKitConfig.default.version)")
         pendingReconnect = nil
 
-        var gatewayReq = URLRequest(url: URL(string: GatewayConfig.default.gateway)!)
+        var gatewayReq = URLRequest(url: URL(string: DiscordKitConfig.default.gateway)!)
         // The difference in capitalisation is intentional
         gatewayReq.setValue(DiscordKitConfig.default.userAgent, forHTTPHeaderField: "User-Agent")
         socket = session.webSocketTask(with: gatewayReq)

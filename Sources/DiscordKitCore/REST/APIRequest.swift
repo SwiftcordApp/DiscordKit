@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import DiscordKitCommon
 
 /// Utility wrappers for easy request-making
 public extension DiscordREST {
@@ -49,7 +48,7 @@ public extension DiscordREST {
 
         DiscordREST.log.debug("\(method.rawValue): \(path)")
 
-        guard var apiURL = URL(string: GatewayConfig.default.restBase) else { return nil }
+        guard var apiURL = URL(string: DiscordKitConfig.default.restBase) else { return nil }
         apiURL.appendPathComponent(path, isDirectory: false)
 
         // Add query params (if any)
@@ -61,7 +60,7 @@ public extension DiscordREST {
         var req = URLRequest(url: reqURL)
         req.httpMethod = method.rawValue
         req.setValue(token, forHTTPHeaderField: "authorization")
-        req.setValue(GatewayConfig.default.baseURL, forHTTPHeaderField: "origin")
+        req.setValue(DiscordKitConfig.default.baseURL, forHTTPHeaderField: "origin")
 
         // These headers are to match headers present in actual requests from the official client
         // req.setValue("?0", forHTTPHeaderField: "sec-ch-ua-mobile") // The day this runs on iOS...

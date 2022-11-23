@@ -1,12 +1,11 @@
 //
-//  File.swift
+//  Presence+.swift
 //  
 //
 //  Created by Vincent Kwok on 7/9/22.
 //
 
 import Foundation
-import DiscordKitCommon
 
 extension Presence {
     init(protoStatus: StatusSettings, id: Snowflake) {

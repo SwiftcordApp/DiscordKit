@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import DiscordKitCommon
 
 let iso8601 = { () -> ISO8601DateFormatter in
     let fmt = ISO8601DateFormatter()

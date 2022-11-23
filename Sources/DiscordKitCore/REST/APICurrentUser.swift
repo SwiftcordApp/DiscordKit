@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import DiscordKitCommon
 
 /// API endpoints for everything related to the current user only
 /// Most (all) endpoints here aren't documented and were found

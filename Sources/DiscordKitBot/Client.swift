@@ -8,7 +8,6 @@
 import Foundation
 import Combine
 import DiscordKitCore
-import DiscordKitCommon
 
 /// The main client class for bots to interact with Discord's API
 public final class Client {
