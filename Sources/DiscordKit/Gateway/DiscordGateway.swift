@@ -56,9 +56,9 @@ public class DiscordGateway: ObservableObject {
     /// Includes both single DMs and group DMs
     @Published public var privateChannels: [Channel] = []
 
-    private var evtListenerID: EventDispatch.HandlerIdentifier? = nil,
-                authFailureListenerID: EventDispatch.HandlerIdentifier? = nil,
-                connStateChangeListenerID: EventDispatch.HandlerIdentifier? = nil
+    private var evtListenerID: EventDispatch.HandlerIdentifier?,
+                authFailureListenerID: EventDispatch.HandlerIdentifier?,
+                connStateChangeListenerID: EventDispatch.HandlerIdentifier?
 
     /// If the Gateway socket is connected
     ///
