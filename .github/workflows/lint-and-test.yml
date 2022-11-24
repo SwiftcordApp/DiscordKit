@@ -5,6 +5,7 @@ env:
 
 on:
   push:
+    branches: [ main ] # Running on every branch causes double runs for PR commits
   pull_request:
 
   # Allows you to run this workflow manually from the Actions tab
