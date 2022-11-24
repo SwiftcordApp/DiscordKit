@@ -24,7 +24,7 @@ public struct GatewayPresenceUpdate: OutgoingGatewayData {
         self.status = status
         self.afk = afk
     }
-    
+
     public let since: Int // Unix time (in milliseconds) of when the client went idle, or null if the client is not idle
     public let activities: [ActivityOutgoing]
     public let status: PresenceStatus
@@ -42,7 +42,7 @@ public struct GatewayVoiceStateUpdate: OutgoingGatewayData, GatewayData {
     public let self_mute: Bool
     public let self_deaf: Bool
     public let self_video: Bool?
-    
+
     public init(guild_id: Snowflake?, channel_id: Snowflake?, self_mute: Bool, self_deaf: Bool, self_video: Bool?) {
         self.guild_id = guild_id
         self.channel_id = channel_id
@@ -50,7 +50,7 @@ public struct GatewayVoiceStateUpdate: OutgoingGatewayData, GatewayData {
         self.self_deaf = self_deaf
         self.self_video = self_video
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         // Encoding containers directly so nil optionals get encoded as "null" and not just removed
@@ -98,7 +98,7 @@ public struct SubscribeGuildEvts: OutgoingGatewayData {
     public let activities: Bool?
     public let threads: Bool?
     public let members: [Snowflake]?
-    
+
     public init(guild_id: Snowflake, typing: Bool? = nil, activities: Bool? = nil, threads: Bool? = nil, members: [Snowflake]? = nil) {
         self.guild_id = guild_id
         self.typing = typing
@@ -107,7 +107,6 @@ public struct SubscribeGuildEvts: OutgoingGatewayData {
         self.members = members
     }
 }
-
 
 /// Current client state, sent with the ``GatewayIdentify`` payload
 ///

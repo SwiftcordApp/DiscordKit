@@ -35,9 +35,9 @@ public extension DiscordREST {
         id: Snowflake,
         msgID: Snowflake
     ) async -> Message? {
-        guard let m = await getChannelMsgs(id: id, limit: 1, around: msgID), !m.isEmpty
+        guard let message = await getChannelMsgs(id: id, limit: 1, around: msgID), !message.isEmpty
         else { return nil }
-        return m[0]
+        return message[0]
     }
 
     // MARK: Create Channel Message

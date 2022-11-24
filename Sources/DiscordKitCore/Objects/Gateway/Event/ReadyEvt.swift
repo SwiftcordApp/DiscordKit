@@ -9,6 +9,7 @@ import Foundation
 
 /// The ready event palyoad for user accounts
 public struct ReadyEvt: Decodable, GatewayData {
+    // swiftlint:disable:next identifier_name
     public let v: Int
     public let user: CurrentUser
     public let users: [User]
@@ -23,6 +24,7 @@ public struct ReadyEvt: Decodable, GatewayData {
 
 /// The ready event payload for bot accounts
 public struct BotReadyEvt: Decodable, GatewayData {
+    // swiftlint:disable:next identifier_name
     public let v: Int
     public let user: User
     public let guilds: [GuildUnavailable]
