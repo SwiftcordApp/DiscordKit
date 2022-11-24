@@ -18,7 +18,7 @@ public enum InviteTargetType: Int, Codable {
 public struct Invite: Decodable {
     /// The invite code (unique ID)
     public let code: String
-    /// The guild this invite is for
+    // The guild this invite is for
     // public let guild: Guild?
     /// The channel this invite is for
     public let channel: Channel?

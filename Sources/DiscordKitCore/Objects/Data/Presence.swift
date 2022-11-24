@@ -30,11 +30,11 @@ public struct Presence: GatewayData {
 }
 
 public enum PresenceStatus: String, Codable {
-    case idle = "idle"
-    case dnd = "dnd"
-    case online = "online"
-    case offline = "offline"
-    case invisible = "invisible"
+    case idle
+    case dnd
+    case online
+    case offline
+    case invisible
 }
 
 public struct PresenceUser: Codable, GatewayData {
