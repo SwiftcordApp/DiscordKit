@@ -15,16 +15,18 @@ public extension DiscordREST {
     ) -> Data {
         var body = Data()
 
-        for (n, attachment) in attachments.enumerated() {
-            let name = try! attachment.resourceValues(forKeys: [URLResourceKey.nameKey]).name!
+        for (num, attachment) in attachments.enumerated() {
+            guard let name = try? attachment.resourceValues(forKeys: [URLResourceKey.nameKey]).name else {
+                continue
+            }
             guard let attachmentData = try? Data(contentsOf: attachment) else {
-                DiscordREST.log.error("Could not get data of attachment #\(n)")
+                DiscordREST.log.error("Could not get data of attachment #\(num)")
                 continue
             }
 
 			body.append("--\(boundary)\r\n".data(using: .utf8)!)
             body.append(
-                "Content-Disposition: form-data; name=\"files[\(n)]\"; filename=\"\(name)\"\r\n".data(using: .utf8)!
+                "Content-Disposition: form-data; name=\"files[\(num)]\"; filename=\"\(name)\"\r\n".data(using: .utf8)!
             )
             body.append("Content-Type: \(attachment.mimeType)\r\n\r\n".data(using: .utf8)!)
             body.append(attachmentData)

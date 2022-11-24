@@ -8,8 +8,8 @@
 import Foundation
 
 public enum UITheme: String, Codable {
-    case dark = "dark"
-    case light = "light"
+    case dark
+    case light
 }
 
 public struct UserSettings: Decodable, GatewayData, Equatable {

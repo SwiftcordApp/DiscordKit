@@ -119,10 +119,10 @@ public extension DiscordREST {
     ) async -> T? {
         // This helps debug JSON decoding errors
         do {
-            guard let d = try? await makeRequest(path: path, query: query)
+            guard let respData = try? await makeRequest(path: path, query: query)
             else { return nil }
 
-            return try DiscordREST.decoder.decode(T.self, from: d)
+            return try DiscordREST.decoder.decode(T.self, from: respData)
         } catch let DecodingError.dataCorrupted(context) {
             print(context.debugDescription)
         } catch let DecodingError.keyNotFound(key, context) {
@@ -146,18 +146,18 @@ public extension DiscordREST {
         body: B? = nil,
         attachments: [URL] = []
     ) async -> D? {
-        let p = body != nil ? try? DiscordREST.encoder.encode(body) : nil
-        guard let d = try? await makeRequest(
+        let payload = body != nil ? try? DiscordREST.encoder.encode(body) : nil
+        guard let respData = try? await makeRequest(
             path: path,
             attachments: attachments,
-            body: p,
+            body: payload,
             method: .post
         )
         else { return nil }
 
-        return try? DiscordREST.decoder.decode(D.self, from: d)
+        return try? DiscordREST.decoder.decode(D.self, from: respData)
     }
-    
+
     /// Make a `POST` request to the Discord REST API
     ///
     /// For endpoints that returns a 204 empty response
@@ -165,10 +165,10 @@ public extension DiscordREST {
         path: String,
         body: B
     ) async -> Bool {
-        let p = try? DiscordREST.encoder.encode(body)
+        let payload = try? DiscordREST.encoder.encode(body)
         guard (try? await makeRequest(
             path: path,
-            body: p,
+            body: payload,
             method: .post
         )) != nil
         else { return false }
@@ -200,10 +200,10 @@ public extension DiscordREST {
         path: String,
         body: B
     ) async -> Bool {
-        let p = try? DiscordREST.encoder.encode(body)
+        let payload = try? DiscordREST.encoder.encode(body)
         guard (try? await makeRequest(
             path: path,
-            body: p,
+            body: payload,
             method: .patch
         )) != nil
         else { return false }

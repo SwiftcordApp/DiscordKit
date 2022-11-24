@@ -9,6 +9,6 @@ import Foundation
 
 public struct Reaction: Codable {
     public let count: Int
-    public let me: Bool
+    public let me: Bool // swiftlint:disable:this identifier_name
     public let emoji: Emoji
 }

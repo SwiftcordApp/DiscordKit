@@ -238,7 +238,7 @@ public class RobustWebSocket: NSObject {
         } catch let DecodingError.valueNotFound(value, context) {
             print("Value '\(value)' not found:", context.debugDescription)
             print("codingPath:", context.codingPath)
-        } catch let DecodingError.typeMismatch(type, context)  {
+        } catch let DecodingError.typeMismatch(type, context) {
             print("Type '\(type)' mismatch:", context.debugDescription)
             print("codingPath:", context.codingPath)
             print(message)
@@ -250,26 +250,26 @@ public class RobustWebSocket: NSObject {
         guard let msgData = message.data(using: .utf8) else { return }
 		let decoded = try DiscordREST.decoder.decode(GatewayIncoming.self, from: msgData)
 
-        if let sequence = decoded.s { seq = sequence }
+        if let sequence = decoded.seq { seq = sequence }
 
-        switch decoded.op {
+        switch decoded.opcode {
         case .heartbeat:
             Self.log.debug("[HEARTBEAT] Sending expedited heartbeat as requested")
-            send(op: .heartbeat, data: GatewayHeartbeat(seq))
+            send(.heartbeat, data: GatewayHeartbeat(seq))
         case .heartbeatAck: hbTimeout?.invalidate()
         case .hello:
             onHello()
             // Start heartbeating and send identify
-            guard let d = decoded.d as? GatewayHello else { return }
-            Self.log.debug("[HELLO] heartbeat interval: \(d.heartbeat_interval, privacy: .public)")
-            startHeartbeating(interval: Double(d.heartbeat_interval) / 1000.0)
+            guard let data = decoded.data as? GatewayHello else { return }
+            Self.log.debug("[HELLO] heartbeat interval: \(data.heartbeat_interval, privacy: .public)")
+            startHeartbeating(interval: Double(data.heartbeat_interval) / 1000.0)
 
             // Check if we're attempting to and can resume
             if canResume, let sessionID = sessionID {
                 Self.log.info("[RESUME] Resuming session \(sessionID, privacy: .public), seq: \(String(describing: self.seq), privacy: .public)")
                 guard let resume = getResume(seq: seq, sessionID: sessionID)
                 else { return }
-                send(op: .resume, data: resume)
+                send(.resume, data: resume)
                 return
             }
             Self.log.debug("[IDENTIFY] intents: \(self.intents?.rawValue.description ?? "not applicable")")
@@ -281,7 +281,7 @@ public class RobustWebSocket: NSObject {
                 onAuthFailure.notify()
                 return
             }
-            send(op: .identify, data: identify)
+            send(.identify, data: identify)
         case .invalidSession:
             // Check if the session can be resumed
             let shouldResume = (decoded.primitiveData as? Bool) ?? false
@@ -301,21 +301,21 @@ public class RobustWebSocket: NSObject {
             }
             // attemptReconnect(resume: shouldResume)
         case .dispatchEvent:
-            guard let type = decoded.t else {
+            guard let type = decoded.type else {
                 Self.log.warning("Event has nil type")
                 return
             }
             switch type {
             case .ready:
-                guard let d = decoded.d as? ReadyEvt else { return }
-                sessionID = d.session_id
+                guard let data = decoded.data as? ReadyEvt else { return }
+                sessionID = data.session_id
                 canResume = true
                 fallthrough
             case .resumed:
                 sessionOpen = true
             default: break
             }
-            onEvent.notify(event: (type, decoded.d))
+            onEvent.notify(event: (type, decoded.data))
         case .reconnect:
             Self.log.warning("Gateway-requested reconnect: disconnecting and reconnecting immediately")
             forceClose()
@@ -412,7 +412,7 @@ public extension RobustWebSocket {
         }
 
         Self.log.debug("[HEARTBEAT] Sending heartbeat")
-        send(op: .heartbeat, data: GatewayHeartbeat(seq))
+        send(.heartbeat, data: GatewayHeartbeat(seq))
 
         hbTimeout?.invalidate()
         DispatchQueue.main.async { [weak self] in
@@ -525,17 +525,17 @@ public extension RobustWebSocket {
     ///   - completionHandler: Called when the send completes, with an error if any.
     ///   Not called if set to `nil` (defaults to `nil`)
     final func send<T: OutgoingGatewayData>(
-        op: GatewayOutgoingOpcodes,
+        _ opcode: GatewayOutgoingOpcodes,
         data: T,
         completionHandler: ((Error?) -> Void)? = nil
     ) {
         guard connected else { return }
 
-        let sendPayload = GatewayOutgoing(op: op, d: data, s: seq)
+        let sendPayload = GatewayOutgoing(opcode: opcode, data: data, seq: seq)
         guard let encoded = try? DiscordREST.encoder.encode(sendPayload)
         else { return }
 
-        Self.log.debug("Outgoing Payload: <\(String(describing: op), privacy: .public)> \(String(describing: data), privacy: .sensitive(mask: .hash)) [seq: \(String(describing: self.seq), privacy: .public)]")
+        Self.log.debug("Outgoing Payload: <\(String(describing: opcode), privacy: .public)> \(String(describing: data), privacy: .sensitive(mask: .hash)) [seq: \(String(describing: self.seq), privacy: .public)]")
 
         socket.send(.data(encoded), completionHandler: completionHandler ?? { err in
             if let err = err { Self.log.error("Socket send error: \(err.localizedDescription, privacy: .public)") }

@@ -42,7 +42,7 @@ public enum PropertiesOS: String, Codable {
 /// in the ``GatewayIdentify`` payload
 public struct GatewayConnProperties: OutgoingGatewayData {
     public init(
-        os: PropertiesOS = .current,
+        os: PropertiesOS = .current, // swiftlint:disable:this identifier_name
         browser: String,
         device: String? = nil,
         release_channel: String? = nil,
@@ -68,7 +68,7 @@ public struct GatewayConnProperties: OutgoingGatewayData {
     /// This should be set according to the OS the library is running on
     ///
     /// - Seealso: ``PropertiesOS``
-    let os: PropertiesOS
+    let os: PropertiesOS // swiftlint:disable:this identifier_name
 
     /// Browser name
     ///
@@ -150,7 +150,7 @@ public struct DiscordKitConfig {
     public let gateway: String
 
     /// The token to use to authenticate with both the Discord REST and Gateway APIs
-    //public let token: String
+    // public let token: String
 
     // MARK: Configuration constants
     public static let libraryName = "DiscordKit"

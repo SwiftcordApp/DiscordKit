@@ -130,9 +130,7 @@ public extension DecompressionEngine {
                 // stream.dst_size before the call (here bufferSize), and stream.dst_size after the call.
                 let count = bufferSize - stream.dst_size
 
-                let outputData = Data(bytesNoCopy: destinationBufferPointer,
-                                      count: count,
-                                      deallocator: .none)
+                let outputData = Data(bytesNoCopy: destinationBufferPointer, count: count, deallocator: .none)
                 decompressed.append(contentsOf: outputData)
 
                 // Reset the stream to receive the next batch of output.

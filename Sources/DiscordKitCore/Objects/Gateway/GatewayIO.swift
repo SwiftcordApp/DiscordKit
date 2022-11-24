@@ -10,86 +10,93 @@ import Foundation
 // MARK: - Main Gateway Sending/Receiving Structs
 
 public struct GatewayIncoming: Decodable {
-    public let op: GatewayIncomingOpcodes
-    public var d: GatewayData?
-    public let s: Int? // Sequence #
-    public let t: GatewayEvent?
+    public let opcode: GatewayIncomingOpcodes
+    public var data: GatewayData?
+    public let seq: Int? // Sequence #
+    public let type: GatewayEvent?
     public var primitiveData: Any?
 
     private enum CodingKeys: String, CodingKey {
-        case op
-        case d
-        case s
-        case t
+        case opcode = "op"
+        case data = "d"
+        case seq = "s"
+        case type = "t"
    }
 
-    // swiftlint:disable cyclomatic_complexity
+    // Nothing I can do here too, really.
+    // swiftlint:disable:next function_body_length
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
-        let action = try values.decode(GatewayIncomingOpcodes.self, forKey: .op)
+        let action = try values.decode(GatewayIncomingOpcodes.self, forKey: .opcode)
 
-        op = action
-        s = try values.decodeIfPresent(Int.self, forKey: .s)
-        t = try values.decodeIfPresent(GatewayEvent.self, forKey: .t)
+        opcode = action
+        seq = try values.decodeIfPresent(Int.self, forKey: .seq)
+        type = try values.decodeIfPresent(GatewayEvent.self, forKey: .type)
 
         switch action {
-        case .hello: d = try values.decode(GatewayHello.self, forKey: .d)
-        case .invalidSession: primitiveData = try values.decode(Bool.self, forKey: .d) // Parse data as bool
+        case .hello: data = try values.decode(GatewayHello.self, forKey: .data)
+        case .invalidSession: primitiveData = try values.decode(Bool.self, forKey: .data) // Parse data as bool
         case .dispatchEvent:
             // Cue the long switch case to parse every single event
-            switch t {
-            case .ready: d = try values.decode(ReadyEvt.self, forKey: .d)
-            case .readySupplemental: d = try values.decode(ReadySuppEvt.self, forKey: .d)
-            case .resumed: d = nil
+            switch type {
+            case .ready: data = try values.decode(ReadyEvt.self, forKey: .data)
+            case .readySupplemental: data = try values.decode(ReadySuppEvt.self, forKey: .data)
+            case .resumed: data = nil
             case .channelCreate, .channelUpdate, .channelDelete, .threadCreate, .threadUpdate, .threadDelete:
-                d = try values.decode(Channel.self, forKey: .d)
-            case .channelPinUpdate: d = try values.decode(ChannelPinsUpdate.self, forKey: .d)
+                data = try values.decode(Channel.self, forKey: .data)
+            case .channelPinUpdate: data = try values.decode(ChannelPinsUpdate.self, forKey: .data)
 
-            case .threadListSync: d = try values.decode(ThreadListSync.self, forKey: .d)
-            case .threadMemberUpdate: d = try values.decode(ThreadMember.self, forKey: .d)
-            case .threadMembersUpdate: d = try values.decode(ThreadMembersUpdate.self, forKey: .d)
+            case .threadListSync: data = try values.decode(ThreadListSync.self, forKey: .data)
+            case .threadMemberUpdate: data = try values.decode(ThreadMember.self, forKey: .data)
+            case .threadMembersUpdate: data = try values.decode(ThreadMembersUpdate.self, forKey: .data)
 
-            case .guildUpdate, .guildCreate: d = try values.decode(Guild.self, forKey: .d)
-            case .guildDelete: d = try values.decode(GuildUnavailable.self, forKey: .d)
-            case .guildBanAdd, .guildBanRemove: d = try values.decode(GuildBan.self, forKey: .d)
-            case .guildEmojisUpdate: d = try values.decode(GuildEmojisUpdate.self, forKey: .d)
-            case .guildStickersUpdate: d = try values.decode(GuildStickersUpdate.self, forKey: .d)
-            case .guildIntegrationsUpdate: d = try values.decode(GuildIntegrationsUpdate.self, forKey: .d)
-            case .guildMemberAdd: d = try values.decode(Member.self, forKey: .d)
-            case .guildMemberRemove: d = try values.decode(GuildMemberRemove.self, forKey: .d)
-            case .guildMemberUpdate: d = try values.decode(GuildMemberUpdate.self, forKey: .d)
-            case .guildRoleCreate: d = try values.decode(GuildRoleEvt.self, forKey: .d)
-            case .guildRoleUpdate: d = try values.decode(GuildRoleEvt.self, forKey: .d)
-            case .guildRoleDelete: d = try values.decode(GuildRoleDelete.self, forKey: .d)
-            case .guildSchEvtCreate, .guildSchEvtUpdate, .guildSchEvtDelete: d = try values.decode(GuildScheduledEvent.self, forKey: .d)
-            case .guildSchEvtUserAdd, .guildSchEvtUserRemove: d = try values.decode(GuildSchEvtUserEvt.self, forKey: .d)
+            case .guildUpdate, .guildCreate: data = try values.decode(Guild.self, forKey: .data)
+            case .guildDelete: data = try values.decode(GuildUnavailable.self, forKey: .data)
+            case .guildBanAdd, .guildBanRemove: data = try values.decode(GuildBan.self, forKey: .data)
+            case .guildEmojisUpdate: data = try values.decode(GuildEmojisUpdate.self, forKey: .data)
+            case .guildStickersUpdate: data = try values.decode(GuildStickersUpdate.self, forKey: .data)
+            case .guildIntegrationsUpdate: data = try values.decode(GuildIntegrationsUpdate.self, forKey: .data)
+            case .guildMemberAdd: data = try values.decode(Member.self, forKey: .data)
+            case .guildMemberRemove: data = try values.decode(GuildMemberRemove.self, forKey: .data)
+            case .guildMemberUpdate: data = try values.decode(GuildMemberUpdate.self, forKey: .data)
+            case .guildRoleCreate: data = try values.decode(GuildRoleEvt.self, forKey: .data)
+            case .guildRoleUpdate: data = try values.decode(GuildRoleEvt.self, forKey: .data)
+            case .guildRoleDelete: data = try values.decode(GuildRoleDelete.self, forKey: .data)
+            case .guildSchEvtCreate, .guildSchEvtUpdate, .guildSchEvtDelete: data = try values.decode(GuildScheduledEvent.self, forKey: .data)
+            case .guildSchEvtUserAdd, .guildSchEvtUserRemove: data = try values.decode(GuildSchEvtUserEvt.self, forKey: .data)
 
                 // More events go here
-            case .messageCreate: d = try values.decode(Message.self, forKey: .d)
-            case .messageUpdate: d = try values.decode(PartialMessage.self, forKey: .d)
-            case .messageDelete: d = try values.decode(MessageDelete.self, forKey: .d)
-            case .messageACK: d = try values.decode(MessageACKEvt.self, forKey: .d)
-            case .messageDeleteBulk: d = try values.decode(MessageDeleteBulk.self, forKey: .d)
-            case .presenceUpdate: d = try values.decode(PresenceUpdate.self, forKey: .d)
+            case .messageCreate: data = try values.decode(Message.self, forKey: .data)
+            case .messageUpdate: data = try values.decode(PartialMessage.self, forKey: .data)
+            case .messageDelete: data = try values.decode(MessageDelete.self, forKey: .data)
+            case .messageACK: data = try values.decode(MessageACKEvt.self, forKey: .data)
+            case .messageDeleteBulk: data = try values.decode(MessageDeleteBulk.self, forKey: .data)
+            case .presenceUpdate: data = try values.decode(PresenceUpdate.self, forKey: .data)
                 // Add the remaining like 100 events
 
-            case .userUpdate: d = try values.decode(CurrentUser.self, forKey: .d)
-            case .typingStart: d = try values.decode(TypingStart.self, forKey: .d)
+            case .userUpdate: data = try values.decode(CurrentUser.self, forKey: .data)
+            case .typingStart: data = try values.decode(TypingStart.self, forKey: .data)
 
                 // User-specific events
-            case .channelUnreadUpdate: d = try values.decode(ChannelUnreadUpdate.self, forKey: .d)
-            case .userSettingsUpdate: d = try values.decode(UserSettings.self, forKey: .d)
-            case .userSettingsProtoUpdate: d = try values.decode(GatewaySettingsProtoUpdate.self, forKey: .d)
-            default: d = nil
+            case .channelUnreadUpdate: data = try values.decode(ChannelUnreadUpdate.self, forKey: .data)
+            case .userSettingsUpdate: data = try values.decode(UserSettings.self, forKey: .data)
+            case .userSettingsProtoUpdate: data = try values.decode(GatewaySettingsProtoUpdate.self, forKey: .data)
+            default: data = nil
             }
         default:
-            d = nil
+            data = nil
         }
     }
 }
 
 public struct GatewayOutgoing<T: OutgoingGatewayData>: Encodable {
-    public let op: GatewayOutgoingOpcodes
-    public let d: T?
-    public let s: Int? // Sequence #
+    enum CodingKeys: String, CodingKey {
+        case opcode = "op"
+        case data = "d"
+        case seq = "s"
+    }
+
+    public let opcode: GatewayOutgoingOpcodes
+    public let data: T?
+    public let seq: Int? // Sequence #
 }

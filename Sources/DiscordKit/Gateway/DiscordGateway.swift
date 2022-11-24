@@ -88,15 +88,15 @@ public class DiscordGateway: ObservableObject {
     /// - Parameter token: Token to use to authenticate with the Gateway
     public func connect(token: String) {
         socket = RobustWebSocket(token: token)
-        evtListenerID = socket!.onEvent.addHandler { [weak self] (t, d) in
-            self?.handleEvent(t, data: d)
+        evtListenerID = socket!.onEvent.addHandler { [weak self] (type, data) in
+            self?.handleEvent(type, data: data)
         }
         authFailureListenerID = socket!.onAuthFailure.addHandler { [weak self] in
             self?.onAuthFailure.notify()
         }
-        connStateChangeListenerID = socket!.onConnStateChange.addHandler { [weak self] (c, r) in
-            self?.connected = c
-            self?.reachable = r
+        connStateChangeListenerID = socket!.onConnStateChange.addHandler { [weak self] (connected, reachable) in
+            self?.connected = connected
+            self?.reachable = reachable
         }
         socket!.open()
     }
@@ -110,12 +110,12 @@ public class DiscordGateway: ObservableObject {
         socket?.close(code: .normalClosure)
     }
 
-    public func send<T: OutgoingGatewayData>(op: GatewayOutgoingOpcodes, data: T) {
+    public func send<T: OutgoingGatewayData>(_ opcode: GatewayOutgoingOpcodes, data: T) {
         guard let socket = socket else {
             log.warning("Not sending data to a non existant socket")
             return
         }
-        socket.send(op: op, data: data)
+        socket.send(opcode, data: data)
     }
 
     /// Subscribe to guild events or member updates
@@ -132,7 +132,7 @@ public class DiscordGateway: ObservableObject {
             if subscribedGuildID != id { subscribedMemberIDs.removeAll() }
             subscribedMemberIDs.append(memberID)
             send(
-                op: .subscribeGuildEvents,
+                .subscribeGuildEvents,
                 data: SubscribeGuildEvts(guild_id: id, members: subscribedMemberIDs)
             )
             // Unsubscribe from events from previous guild after subscribing to the new guild
@@ -140,7 +140,7 @@ public class DiscordGateway: ObservableObject {
             // but who am I to judge.
             if subscribedGuildID != id, let previousGuild = subscribedGuildID {
                 send(
-                    op: .subscribeGuildEvents,
+                    .subscribeGuildEvents,
                     data: SubscribeGuildEvts(guild_id: previousGuild, members: [])
                 )
             }
@@ -148,7 +148,7 @@ public class DiscordGateway: ObservableObject {
         } else if !subscribedTypingGuildIDs.contains(id) {
             // Subscribe to typing events from members in the guild if we haven't already
             send(
-                op: .subscribeGuildEvents,
+                .subscribeGuildEvents,
                 data: SubscribeGuildEvts(guild_id: id, typing: true)
             )
             subscribedTypingGuildIDs.append(id)
@@ -254,22 +254,17 @@ public class DiscordGateway: ObservableObject {
             }
 
         // Guild events
-        case let (.guildCreate, guild as Guild):
-            cache.appendOrReplace(guild)
+        case let (.guildCreate, guild as Guild): cache.appendOrReplace(guild)
 
-        case let (.guildDelete, guild as GuildUnavailable):
-            cache.remove(guild)
+        case let (.guildDelete, guild as GuildUnavailable): cache.remove(guild)
 
-        case let (.guildUpdate, guild as Guild):
-            handleGuildUpdate(guild)
+        case let (.guildUpdate, guild as Guild): handleGuildUpdate(guild)
 
             // User updates
-        case let (.userUpdate, currentUser as CurrentUser):
-            cache.user = currentUser
+        case let (.userUpdate, currentUser as CurrentUser): cache.user = currentUser
 
-        case let (.userSettingsUpdate, settings as UserSettings):
-            cache.mergeOrReplace(settings)
-            
+        case let (.userSettingsUpdate, settings as UserSettings): cache.mergeOrReplace(settings)
+
         case let (.userSettingsProtoUpdate, protoUpdate as GatewaySettingsProtoUpdate):
             guard !protoUpdate.partial else {
                 log.warning("Cannot handle partial proto update yet")
@@ -282,24 +277,19 @@ public class DiscordGateway: ObservableObject {
             handleProtoUpdate(proto: protoUpdate.settings.proto)
 
             // Channel events
-        case let (.channelCreate, channel as Channel):
-            cache.append(channel)
+        case let (.channelCreate, channel as Channel): cache.append(channel)
 
-        case let (.channelDelete, channel as Channel):
-            cache.remove(channel)
+        case let (.channelDelete, channel as Channel): cache.remove(channel)
 
-        case let (.channelUpdate, channel as Channel):
-            cache.replace(channel)
+        case let (.channelUpdate, channel as Channel): cache.replace(channel)
 
-        case let (.messageCreate, message as Message):
-            cache.appendOrReplace(message)
+        case let (.messageCreate, message as Message): cache.appendOrReplace(message)
 
         case let (.presenceUpdate, update as PresenceUpdate):
             presences.updateValue(Presence(update: update), forKey: update.user.id)
             log.debug("Updating presence for user ID: \(update.user.id, privacy: .public)")
 
-        default:
-            break
+        default: break
         }
 
         cache.objectWillChange.send()

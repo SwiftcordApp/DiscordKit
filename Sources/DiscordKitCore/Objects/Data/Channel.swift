@@ -14,7 +14,7 @@ public enum VideoQualityMode: Int, Codable {
 
 public enum ChannelType: Int, Codable {
     case text = 0
-    case dm = 1
+    case dm = 1 // swiftlint:disable:this identifier_name
     case voice = 2
     case groupDM = 3
     case category = 4
