@@ -1,18 +1,21 @@
 # DiscordKit
 
-The Discord API implementation that powers [Swiftcord](https://github.com/SwiftcordApp/Swiftcord)
+![Discord](https://img.shields.io/discord/964741354112577557?style=for-the-badge)
 
-This implementation has fully functional REST and Gateway
-support, but is mainly geared towards human accounts and not bots.
+The Discord API implementation that powers [Swiftcord](https://github.com/SwiftcordApp/Swiftcord),
+a native Discord client for macOS also written in Swift.
 
-**If you like DiscordKit, please give it a ⭐ star! It helps motivate
+A (mainly) fully functional Discord API library written from scratch fully in Swift!
+Currently only supports user accounts, bot support coming soon. Check out the
+[`bot-support`](https://github.com/SwiftcordApp/DiscordKit/tree/bot-support) branch
+and SwiftcordApp/DiscordKit#18 for a quick peep into what we've been up to ;D
+
+**If you like DiscordKit, please give it a ⭐ star, or consider sponsoring! It helps motivate
 me to continue developing it**
 
-## Check out [Swiftcord](https://github.com/SwiftcordApp/Swiftcord) for an example of a project that uses DiscordKit!
+## Documentation
 
-### Join the Swiftcord Discord server [here](https://discord.gg/he7n6MGDXS)!
-
-### WIP Developer Documentation is available [here](https://swiftcordapp.github.io/DiscordKit/documentation/discordkit/).
+WIP Developer Documentation is available [here](https://swiftcordapp.github.io/DiscordKit/documentation/discordkit/).
 
 ## Platform Support
 
