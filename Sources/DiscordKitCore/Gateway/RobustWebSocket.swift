@@ -61,8 +61,8 @@ public class RobustWebSocket: NSObject {
     private let timeout: TimeInterval, maxMsgSize: Int
     private var attempts = 0, reconnects = -1,
                 explicitlyClosed = false,
-                seq: Int? = nil, canResume = false, sessionID: String? = nil,
-                pendingReconnect: Timer? = nil, connTimeout: Timer? = nil
+                seq: Int?, canResume = false, sessionID: String?,
+                pendingReconnect: Timer?, connTimeout: Timer?
 
     // MARK: - Configuration
     internal let intents: Intents?
@@ -290,10 +290,10 @@ public class RobustWebSocket: NSObject {
                 onSessionInvalid.notify()
                 canResume = false
             }
-            /// Close the connection immediately and reconnect after 1-5s, as per Discord docs
-            /// Unfortunately Discord seems to reject the new identify no matter how long I
-            /// wait before sending it, so sometimes there will be 2 identify attempts before
-            /// the Gateway session is reestablished
+            // Close the connection immediately and reconnect after 1-5s, as per Discord docs
+            // Unfortunately Discord seems to reject the new identify no matter how long I
+            // wait before sending it, so sometimes there will be 2 identify attempts before
+            // the Gateway session is reestablished
             close(code: .normalClosure)
             DispatchQueue.main.asyncAfter(deadline: .now() + Double.random(in: 1...5)) { [weak self] in
                 Self.log.debug("[RECONNECT] Attempting to reconnect now")

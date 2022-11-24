@@ -12,8 +12,11 @@ public extension DiscordREST {
     ///
     /// `GET /invites/{inviteID}`
     ///
-    ///https://canary.discord.com/api/v9/invites/dosjopkqwef?inputValue=dosjopkqwef&with_counts=true&with_expiration=true
     /// Get guild member object for current user in a guild
+    ///
+    /// > Example URL:
+    /// >
+    /// > `https://canary.discord.com/api/v9/invites/dosjopkqwef?inputValue=dosjopkqwef&with_counts=true&with_expiration=true`
     func resolveInvite(
         inviteID: String,
         inputValue: String,

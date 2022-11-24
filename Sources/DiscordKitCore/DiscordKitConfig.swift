@@ -149,7 +149,7 @@ public struct DiscordKitConfig {
     /// Gateway WebSocket URL
     public let gateway: String
 
-    /// The token to use to authenticate with both the Discord REST and Gateway APIs
+    // The token to use to authenticate with both the Discord REST and Gateway APIs
     // public let token: String
 
     // MARK: Configuration constants
