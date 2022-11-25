@@ -7,7 +7,7 @@
 
 import Foundation
 import Compression
-import OSLog
+import Logging
 
 /// Decompresses `zlib-stream`-compressed payloads received
 /// from the Gateway
@@ -23,7 +23,7 @@ import OSLog
 public class DecompressionEngine {
     private static let ZLIB_SUFFIX = Data([0x00, 0x00, 0xff, 0xff]), BUFFER_SIZE = 32_768
 
-	private static let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? DiscordREST.subsystem, category: "DecompressionEngine")
+	private static let log = Logger(label: "DecompressionEngine", level: nil)
     private var buf = Data(), stream: compression_stream, status: compression_status,
                 decompressing = false
 
@@ -58,13 +58,13 @@ public class DecompressionEngine {
         buf.append(data)
 
         guard buf.count >= 4, buf.suffix(4) == DecompressionEngine.ZLIB_SUFFIX else {
-            DecompressionEngine.log.debug("Appending to buf, current buf len: \(self.buf.count, privacy: .public)")
+            Self.log.debug("Appending to buf", metadata: ["buf.count": "\(buf.count)"])
             return nil
         }
 
         let output = decompress(buf)
-
         buf.removeAll()
+
         return String(decoding: output, as: UTF8.self)
     }
 }
@@ -72,7 +72,7 @@ public class DecompressionEngine {
 public extension DecompressionEngine {
     fileprivate func decompress(_ data: Data) -> Data {
         guard !decompressing else {
-            DecompressionEngine.log.warning("Another decompression is currently taking place, skipping")
+            Self.log.warning("Another decompression is currently taking place, skipping")
             return Data()
         }
         decompressing = true
@@ -114,12 +114,10 @@ public extension DecompressionEngine {
 
             // Perform compression or decompression.
             if let srcChunk = srcChunk {
-                let count = srcChunk.count
-
                 srcChunk.withUnsafeBytes {
                     let baseAddress = $0.bindMemory(to: UInt8.self).baseAddress!
 
-                    stream.src_ptr = baseAddress.advanced(by: count - stream.src_size)
+                    stream.src_ptr = baseAddress.advanced(by: $0.count - stream.src_size)
                     status = compression_stream_process(&stream, flags)
                 }
             }
@@ -136,11 +134,16 @@ public extension DecompressionEngine {
                 // Reset the stream to receive the next batch of output.
                 stream.dst_ptr = destinationBufferPointer
                 stream.dst_size = bufferSize
-            case COMPRESSION_STATUS_ERROR: return decompressed
-                // This "error" happens when decompression is done, what a hack
+            case COMPRESSION_STATUS_ERROR: break // This "error" occurs when decompression is done, what a hack
             default: break
             }
         } while status == COMPRESSION_STATUS_OK
+
+        Self.log.warning("Decompressed data", metadata: [
+            "original.count": "\(buf.count)",
+            "decompressed.count": "\(decompressed.count)"
+        ])
+
         return decompressed
     }
 }
