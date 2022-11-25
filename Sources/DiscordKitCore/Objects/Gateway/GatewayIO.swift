@@ -24,6 +24,7 @@ public struct GatewayIncoming: Decodable {
         case type = "t"
     }
 
+    /// An enum representing possible payloads
     public enum Data {
         // MARK: - Gateway lifecycle
         /// Invalid session payload
