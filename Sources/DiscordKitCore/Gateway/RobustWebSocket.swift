@@ -227,7 +227,7 @@ public class RobustWebSocket: NSObject {
     // MARK: - Handlers
     private func handleMessage(with message: String) throws {
         // For debugging JSON decoding errors, how wonderful!
-        do {
+        /* do {
             try DiscordREST.decoder.decode(GatewayIncoming.self, from: message.data(using: .utf8)!)
             // process data
         } catch let DecodingError.dataCorrupted(context) {
@@ -245,24 +245,23 @@ public class RobustWebSocket: NSObject {
             return
         } catch {
             print("error: ", error)
-        }
+        } */
 
         guard let msgData = message.data(using: .utf8) else { return }
 		let decoded = try DiscordREST.decoder.decode(GatewayIncoming.self, from: msgData)
 
         if let sequence = decoded.seq { seq = sequence }
 
-        switch decoded.opcode {
+        switch decoded.data {
         case .heartbeat:
             Self.log.debug("[HEARTBEAT] Sending expedited heartbeat as requested")
             send(.heartbeat, data: GatewayHeartbeat(seq))
         case .heartbeatAck: hbTimeout?.invalidate()
-        case .hello:
+        case .hello(let hello):
             onHello()
             // Start heartbeating and send identify
-            guard let data = decoded.data as? GatewayHello else { return }
-            Self.log.debug("[HELLO] heartbeat interval: \(data.heartbeat_interval, privacy: .public)")
-            startHeartbeating(interval: Double(data.heartbeat_interval) / 1000.0)
+            Self.log.debug("[HELLO] heartbeat interval: \(hello.heartbeat_interval, privacy: .public)")
+            startHeartbeating(interval: Double(hello.heartbeat_interval) / 1000.0)
 
             // Check if we're attempting to and can resume
             if canResume, let sessionID = sessionID {
@@ -282,9 +281,8 @@ public class RobustWebSocket: NSObject {
                 return
             }
             send(.identify, data: identify)
-        case .invalidSession:
+        case .invalidSession(canResume: let shouldResume):
             // Check if the session can be resumed
-            let shouldResume = (decoded.primitiveData as? Bool) ?? false
             if !shouldResume {
                 Self.log.warning("[RECONNECT] Session is invalid, reconnecting without resuming")
                 onSessionInvalid.notify()
@@ -300,25 +298,22 @@ public class RobustWebSocket: NSObject {
                 self?.open()
             }
             // attemptReconnect(resume: shouldResume)
-        case .dispatchEvent:
-            guard let type = decoded.type else {
-                Self.log.warning("Event has nil type")
-                return
-            }
-            switch type {
-            case .ready:
-                guard let data = decoded.data as? ReadyEvt else { return }
-                sessionID = data.session_id
-                canResume = true
-                fallthrough
-            case .resumed:
-                sessionOpen = true
-            default: break
-            }
-            onEvent.notify(event: (type, decoded.data))
+        case .userReady(let ready):
+            sessionID = ready.session_id
+            canResume = true
+            sessionOpen = true
+        case .botReady(let ready):
+            sessionID = ready.session_id
+            canResume = true
+            Self.log.trace("[READY] session: \(ready.session_id)")
+            fallthrough
+        case .resumed:
+            sessionOpen = true
+            //onEvent.notify(event: (type, decoded.data))
         case .reconnect:
             Self.log.warning("Gateway-requested reconnect: disconnecting and reconnecting immediately")
             forceClose()
+        default: break
         }
     }
 
