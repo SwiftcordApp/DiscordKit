@@ -27,7 +27,7 @@ import Logging
 public class RobustWebSocket: NSObject {
     /// An ``EventDispatch`` that is notified when an event dispatch
     /// is received from the Gateway
-    public let onEvent = EventDispatch<(GatewayEvent, GatewayData?)>()
+    public let onEvent = EventDispatch<GatewayIncoming.Data>()
 
     /// An ``EventDispatch`` that is notified when the gateway closes
     /// with an auth failure, or when the token is not present
@@ -324,6 +324,10 @@ public class RobustWebSocket: NSObject {
             Self.log.warning("Gateway-requested reconnect: disconnecting and reconnecting immediately")
             forceClose()
         default: break
+        }
+
+        if decoded.opcode == .dispatchEvent {
+            onEvent.notify(event: decoded.data)
         }
     }
 

@@ -48,24 +48,17 @@ public final class Client {
     public func login(token: String) {
         rest = .init(token: token)
         gateway = .init(token: token, intents: intents)
-        evtHandlerID = gateway?.onEvent.addHandler { [weak self] (event, data) in
-            self?.handleEvent(event, data: data)
+        evtHandlerID = gateway?.onEvent.addHandler { [weak self] data in
+            self?.handleEvent(data)
         }
         RunLoop.main.run()
     }
 
-    private func handleEvent(_ evt: GatewayEvent, data: GatewayData?) {
-        switch evt {
-        case .ready:
-            NotificationCenter.default.post(name: .ready, object: nil)
-        default:
-            break
-        }
-    }
-}
-
-// Gateway API
-extension Client {
+    /// Disconnect from the gateway, undoes ``login(token:)``
+    ///
+    /// Request that the gateway connection be gracefully closed. Also destroys
+    /// the REST hander. Following this call, none of the APIs would function. Subsequently,
+    /// connection can be restored by calling ``login(token:)`` again.
     public func disconnect() {
         // Remove event listeners and gracefully disconnect from Gateway
         gateway?.close(code: .normalClosure)
@@ -74,6 +67,18 @@ extension Client {
         gateway = nil
         rest = nil
     }
+}
 
+// Gateway API
+extension Client {
     public var isReady: Bool { gateway?.sessionOpen == true }
+
+    private func handleEvent(_ data: GatewayIncoming.Data) {
+        switch data {
+        case .botReady(_):
+            NotificationCenter.default.post(name: .ready, object: nil)
+        default:
+            break
+        }
+    }
 }
