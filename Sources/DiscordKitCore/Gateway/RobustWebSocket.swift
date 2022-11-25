@@ -49,7 +49,7 @@ public class RobustWebSocket: NSObject {
 	private let reachability = try! Reachability()
 
     // Logger instance
-    private static let log = Logger(label: "RobustWebSocket", level: .trace)
+    private static let log = Logger(label: "RobustWebSocket", level: nil)
 
     // Operation queue for the URLSessionWebSocketTask
     private let queue: OperationQueue = {
@@ -153,7 +153,7 @@ public class RobustWebSocket: NSObject {
         if let delay = delay {
             Self.log.info("Retrying connection", metadata: [
                 "connectIn": "\(delay)",
-                "attempt": "\(self.attempts)"
+                "attempt": "\(attempts)"
             ])
             DispatchQueue.main.async { [weak self] in
                 self?.pendingReconnect = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
@@ -215,7 +215,7 @@ public class RobustWebSocket: NSObject {
                 self?.connTimeout = nil
                 guard self?.connected != true else { return }
                 // reachability.stopNotifier()
-                Self.log.warning("Connection timed out", metadata: ["timeout": "\(self!.timeout)"])
+                Self.log.warning("Connection timed out", metadata: ["timeout": "\(self?.timeout ?? -1)"])
                 self?.forceClose()
                 Self.log.info("[RECONNECT] Preemptively attempting reconnection")
                 self?.reconnect(code: nil)
@@ -281,7 +281,7 @@ public class RobustWebSocket: NSObject {
                 send(.resume, data: resume)
                 return
             }
-            Self.log.info("[IDENTIFY]", metadata: ["intents": "\(self.intents?.rawValue.description ?? "none")"])
+            Self.log.info("[IDENTIFY]", metadata: ["intents": "\(intents?.rawValue.description ?? "none")"])
             // Send identify
             seq = nil // Clear sequence #
             guard let identify = getIdentify() else {
@@ -412,7 +412,7 @@ public extension RobustWebSocket {
     @objc private func sendHeartbeat(_ interval: TimeInterval) {
         guard connected else { return }
         if let hbTimeout = hbTimeout, hbTimeout.isValid {
-            Self.log.warning("Skipping sending heartbeat - already waiting for one")
+            Self.log.warning("Skipping sending heartbeat",  metadata: ["reason": "already waiting for one"])
             return
         }
 
@@ -422,7 +422,7 @@ public extension RobustWebSocket {
         hbTimeout?.invalidate()
         DispatchQueue.main.async { [weak self] in
             self?.hbTimeout = Timer.scheduledTimer(withTimeInterval: interval * 0.25, repeats: false) { [weak self] _ in
-                Self.log.warning("[HEARTBEAT] Force-closing connection, reason: socket timed out")
+                Self.log.warning("[HEARTBEAT] Force-closing connection", metadata: ["reason": "socket timed out"])
                 self?.forceClose()
             }
         }
@@ -543,7 +543,7 @@ public extension RobustWebSocket {
         Self.log.trace("Outgoing Payload", metadata: [
             "opcode": "\(opcode)",
             "data": "\(data)",
-            "seq": "\(self.seq ?? -1)"
+            "seq": "\(seq ?? -1)"
         ])
 
         socket.send(.data(encoded), completionHandler: completionHandler ?? { err in

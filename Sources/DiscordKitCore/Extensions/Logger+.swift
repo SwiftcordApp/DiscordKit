@@ -10,8 +10,14 @@ import Logging
 
 extension Logger {
     /// Create a Logger instance at a specific log level
-    init(label: String, level: Level) {
+    init(label: String, level: Level?) {
         self.init(label: label)
-        logLevel = level
+        if let level = level {
+            logLevel = level
+        } else {
+#if DEBUG
+            logLevel = .trace
+#endif
+        }
     }
 }
