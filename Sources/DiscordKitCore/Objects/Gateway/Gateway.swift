@@ -8,8 +8,6 @@
 import Foundation
 
 /*
- Contains structs to decode JSON sent back by Gateway. May not
- include a complete list of data structs for all opcodes/events,
  but enough for what this app needs to do.
  */
 

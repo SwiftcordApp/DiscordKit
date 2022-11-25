@@ -24,6 +24,8 @@ public final class Client {
     // MARK: Configuration Members
     public let intents: Intents
 
+    // public let event: EventDispatcher
+
     public init(intents: Intents = .unprivileged) {
         self.intents = intents
         // Override default config for bots
