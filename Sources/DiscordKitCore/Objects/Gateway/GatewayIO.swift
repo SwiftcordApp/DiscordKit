@@ -102,7 +102,39 @@ public struct GatewayIncoming: Decodable {
         ///
         /// - Parameter channelPinsUpdate: Some information about the updated pin
         case channelPinUpdate(ChannelPinsUpdate)
-        
+
+        // MARK: - Messages
+        /// Message create event
+        ///
+        /// This event would be dispatched when a message is sent.
+        ///
+        /// - Parameter message: Created message
+        case messageCreate(Message)
+        /// Message update event
+        ///
+        /// This event would be dispatched when a message is edited, among other actions.
+        ///
+        /// - Parameter partialMessage: Partial message with the message `id` and updated fields
+        case messageUpdate(PartialMessage)
+        /// Message delete event
+        ///
+        /// - Parameter messageDelete: Information about the deleted message
+        case messageDelete(MessageDelete)
+        /// Bulk message delete event
+        ///
+        /// This can only be dispatched in response to bulk deletes by bots and the system,
+        /// and cannot be initiated by users.
+        ///
+        /// - Parameter messageDeleteBulk: Information about the bulk-deleted messages
+        case messageDeleteBulk(MessageDeleteBulk)
+        /// Message read ACK event
+        ///
+        /// Sent to update message reading state. This is to acknowledge messages read
+        /// from other clients.
+        ///
+        /// - Parameter messageACKEvt: Information about the acknowledged messages
+        case messageACK(MessageACKEvt)
+
         /// Handling this payload/event isn't implemented yet
         case unknown
     }
@@ -164,13 +196,15 @@ public struct GatewayIncoming: Decodable {
             case .guildRoleDelete: data = try values.decode(GuildRoleDelete.self, forKey: .data)
             case .guildSchEvtCreate, .guildSchEvtUpdate, .guildSchEvtDelete: data = try values.decode(GuildScheduledEvent.self, forKey: .data)
             case .guildSchEvtUserAdd, .guildSchEvtUserRemove: data = try values.decode(GuildSchEvtUserEvt.self, forKey: .data)
-
+*/
                 // More events go here
-            case .messageCreate: data = try values.decode(Message.self, forKey: .data)
-            case .messageUpdate: data = try values.decode(PartialMessage.self, forKey: .data)
-            case .messageDelete: data = try values.decode(MessageDelete.self, forKey: .data)
-            case .messageACK: data = try values.decode(MessageACKEvt.self, forKey: .data)
-            case .messageDeleteBulk: data = try values.decode(MessageDeleteBulk.self, forKey: .data)
+            // MARK: Messages
+            case .messageCreate: data = .messageCreate(try values.decode(Message.self, forKey: .data))
+            case .messageUpdate: data = .messageUpdate(try values.decode(PartialMessage.self, forKey: .data))
+            case .messageDelete: data = .messageDelete(try values.decode(MessageDelete.self, forKey: .data))
+            case .messageDeleteBulk: data = .messageDeleteBulk(try values.decode(MessageDeleteBulk.self, forKey: .data))
+            case .messageACK: data = .messageACK(try values.decode(MessageACKEvt.self, forKey: .data))
+/*
             case .presenceUpdate: data = try values.decode(PresenceUpdate.self, forKey: .data)
                 // Add the remaining like 100 events
 
