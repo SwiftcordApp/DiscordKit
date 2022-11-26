@@ -59,7 +59,7 @@ public extension DiscordREST {
         // Create URLRequest and set headers
         var req = URLRequest(url: reqURL)
         req.httpMethod = method.rawValue
-        req.setValue(token, forHTTPHeaderField: "authorization")
+        req.setValue(DiscordKitConfig.default.isBot ? "Bot \(token)" : token, forHTTPHeaderField: "authorization")
         req.setValue(DiscordKitConfig.default.baseURL, forHTTPHeaderField: "origin")
 
         // These headers are to match headers present in actual requests from the official client
