@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import os
+import Logging
 import DiscordKitCore
 
 /// Higher-level Gateway manager, mainly for handling and dispatching
@@ -21,7 +21,7 @@ public class DiscordGateway: ObservableObject {
     // Events
     /// An ``EventDispatch`` that is notified when an event is dispatched
     /// from the Gateway
-	public let onEvent = EventDispatch<(GatewayEvent, GatewayData?)>()
+    public let onEvent = EventDispatch<GatewayIncoming.Data>()
 
     /// Proxies ``RobustWebSocket/onAuthFailure``
 	public let onAuthFailure = EventDispatch<Void>()
@@ -71,8 +71,8 @@ public class DiscordGateway: ObservableObject {
 
     // Logger
     private let log = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? DiscordKitConfig.subsystem,
-        category: "DiscordGateway"
+        label: "DiscordGateway",
+        level: nil
     )
 
     // Event subscribing state
@@ -88,8 +88,8 @@ public class DiscordGateway: ObservableObject {
     /// - Parameter token: Token to use to authenticate with the Gateway
     public func connect(token: String) {
         socket = RobustWebSocket(token: token)
-        evtListenerID = socket!.onEvent.addHandler { [weak self] (type, data) in
-            self?.handleEvent(type, data: data)
+        evtListenerID = socket!.onEvent.addHandler { [weak self] data in
+            self?.handleEvent(data)
         }
         authFailureListenerID = socket!.onAuthFailure.addHandler { [weak self] in
             self?.onAuthFailure.notify()
@@ -223,7 +223,9 @@ public class DiscordGateway: ObservableObject {
         // Update current user presence
         if let currentID = cache.user?.id {
             presences[currentID] = Presence(protoStatus: settings.status, id: currentID)
-            log.debug("Updated presence for current user to \(self.presences[currentID]?.status.rawValue ?? "nil", privacy: .public)")
+            log.debug("Updated presence for current user", metadata: [
+                "newPresence": "\(self.presences[currentID]?.status.rawValue ?? "nil")"]
+            )
         } else {
             log.error("User ID is unset in cache!")
         }
@@ -237,9 +239,9 @@ public class DiscordGateway: ObservableObject {
             )
         }
     }
-    private func handleEvent(_ event: GatewayEvent, data: GatewayData?) {
-        switch (event, data) {
-        case let (.ready, event as ReadyEvt):
+    private func handleEvent(_ data: GatewayIncoming.Data) {
+        switch data {
+        case .userReady(let event):
             cache.configure(using: event)
             presences.removeAll()
             if let proto = event.user_settings_proto {
@@ -247,25 +249,23 @@ public class DiscordGateway: ObservableObject {
             } else { log.warning("No user settings proto, is this a bot account?") }
             log.info("[READY] Gateway wrapper ready")
 
-        case let (.readySupplemental, evt as ReadySuppEvt):
+        case .readySupplemental(let evt):
             let flatPresences = evt.merged_presences.guilds.flatMap { $0 } + evt.merged_presences.friends
             for presence in flatPresences {
                 presences.updateValue(presence, forKey: presence.user_id)
             }
 
         // Guild events
-        case let (.guildCreate, guild as Guild): cache.appendOrReplace(guild)
+        case .guildCreate(let guild): cache.appendOrReplace(guild)
 
-        case let (.guildDelete, guild as GuildUnavailable): cache.remove(guild)
+        case .guildDelete(let guild): cache.remove(guild)
 
-        case let (.guildUpdate, guild as Guild): handleGuildUpdate(guild)
+        case .guildUpdate(let guild): handleGuildUpdate(guild)
 
-            // User updates
-        case let (.userUpdate, currentUser as CurrentUser): cache.user = currentUser
+        // User updates
+        case .userUpdate(let currentUser): cache.user = currentUser
 
-        case let (.userSettingsUpdate, settings as UserSettings): cache.mergeOrReplace(settings)
-
-        case let (.userSettingsProtoUpdate, protoUpdate as GatewaySettingsProtoUpdate):
+        case .settingsProtoUpdate(let protoUpdate):
             guard !protoUpdate.partial else {
                 log.warning("Cannot handle partial proto update yet")
                 break
@@ -277,23 +277,23 @@ public class DiscordGateway: ObservableObject {
             handleProtoUpdate(proto: protoUpdate.settings.proto)
 
             // Channel events
-        case let (.channelCreate, channel as Channel): cache.append(channel)
+        case .channelCreate(let channel): cache.append(channel)
 
-        case let (.channelDelete, channel as Channel): cache.remove(channel)
+        case .channelDelete(let channel): cache.remove(channel)
 
-        case let (.channelUpdate, channel as Channel): cache.replace(channel)
+        case .channelUpdate(let channel): cache.replace(channel)
 
-        case let (.messageCreate, message as Message): cache.appendOrReplace(message)
+        case .messageCreate(let message): cache.appendOrReplace(message)
 
-        case let (.presenceUpdate, update as PresenceUpdate):
+        case .presenceUpdate(let update):
             presences.updateValue(Presence(update: update), forKey: update.user.id)
-            log.debug("Updating presence for user ID: \(update.user.id, privacy: .public)")
+            log.debug("Updating presence", metadata: ["user.id": "\(update.user.id)"])
 
         default: break
         }
 
         cache.objectWillChange.send()
-        onEvent.notify(event: (event, data))
-        log.debug("[EVENT] Dispatched event <\(event.rawValue, privacy: .public)>")
+        onEvent.notify(event: data)
+        log.trace("[EVENT] Dispatched event")
     }
 }

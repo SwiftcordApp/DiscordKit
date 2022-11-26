@@ -8,7 +8,7 @@
 import Foundation
 import Logging
 
-extension Logger {
+public extension Logger {
     /// Create a Logger instance at a specific log level
     init(label: String, level: Level?) {
         self.init(label: label)
