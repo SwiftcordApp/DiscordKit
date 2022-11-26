@@ -152,10 +152,19 @@ public struct DiscordKitConfig {
     // The token to use to authenticate with both the Discord REST and Gateway APIs
     // public let token: String
 
+    /// The ``Intents`` to provide when identifying with the Gateway
+    ///
+    /// This is used for event filtering, reducing WebSocket traffic by choosing "buckets" of
+    /// events to receive.
+    ///
+    /// > Important: Some intents are "privileged" and must be enabled in the Developer Portal.
+    public let intents: Intents?
+
+    /// If the current configuration is for a bot account
+    public var isBot: Bool { intents != nil }
+
     // MARK: Configuration constants
     public static let libraryName = "DiscordKit"
-    /// DiscordKit subsystem constant
-    public static let subsystem = "com.cryptoalgo.\(libraryName)"
     public static let discordKitBuild = 1
 
     /// Populate struct values with provided parameters
@@ -163,15 +172,16 @@ public struct DiscordKitConfig {
         baseURL: String = "canary.discord.com",
         version: Int = 9,
         properties: GatewayConnProperties? = nil,
-        userAgent: String? = nil
+        intents: Intents? = nil
     ) {
         self.cdnURL = "https://cdn.discordapp.com/"
         self.baseURL = "https://\(baseURL)/"
         self.version = version
-        if let userAgent = userAgent {
-            self.userAgent = userAgent
+        self.intents = intents
+        if intents == nil {
+            userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) discord/\(version) Chrome/91.0.4472.164 Electron/\(Self.clientParity.electronVersion) Safari/537.36"
         } else {
-            self.userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) discord/\(version) Chrome/91.0.4472.164 Electron/\(Self.clientParity.electronVersion) Safari/537.36"
+            userAgent = "DiscordBot (https://github.com/SwiftcordApp/DiscordKit, \(Self.discordKitBuild))"
         }
         if let properties = properties {
             self.properties = properties

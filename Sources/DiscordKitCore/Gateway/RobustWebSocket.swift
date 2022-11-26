@@ -65,12 +65,8 @@ public class RobustWebSocket: NSObject {
                 pendingReconnect: Timer?, connTimeout: Timer?
 
     // MARK: - Configuration
-    internal let intents: Intents?
     internal let token: String
     private let reconnectInterval: ReconnectDelayClosure
-
-    /// If this gateway connection is using a bot account
-    public var isBot: Bool { intents != nil }
 
     /// The gateway close codes that signal a fatal error, and reconnection shouldn't be attempted
     private static let fatalCloseCodes = [4004] + Array(4010...4014)
@@ -281,7 +277,9 @@ public class RobustWebSocket: NSObject {
                 send(.resume, data: resume)
                 return
             }
-            Self.log.info("[IDENTIFY]", metadata: ["intents": "\(intents?.rawValue.description ?? "none")"])
+            Self.log.info("[IDENTIFY]", metadata: [
+                "intents": "\(String(describing: DiscordKitConfig.default.intents))"
+            ])
             // Send identify
             seq = nil // Clear sequence #
             guard let identify = getIdentify() else {
@@ -355,12 +353,10 @@ public class RobustWebSocket: NSObject {
         reconnectIntClosure: @escaping ReconnectDelayClosure = { code, times in
             guard code != .policyViolation, code != .internalServerError, code?.rawValue != 4004 else { return nil }
             return min(pow(2, Double(times))*1.1 + 1.6, 60)
-        },
-        intents: Intents? = nil
+        }
     ) {
         self.timeout = timeout
         self.token = token
-        self.intents = intents
         reconnectInterval = reconnectIntClosure
         maxMsgSize = maxMessageSize
         super.init()

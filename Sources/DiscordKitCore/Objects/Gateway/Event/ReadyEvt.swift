@@ -30,6 +30,6 @@ public struct BotReadyEvt: Decodable, GatewayData {
     public let guilds: [GuildUnavailable]
     public let session_id: String
     public let shard: [Int]? // Included for inclusivity, will not be used
-    public let application: PartialApplication?
+    public let application: PartialApplication
     public let resume_gateway_url: String
 }

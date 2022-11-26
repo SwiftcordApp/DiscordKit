@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import Logging
 import DiscordKitCore
 
 /// The main client class for bots to interact with Discord's API
@@ -24,13 +25,25 @@ public final class Client {
     // MARK: Configuration Members
     public let intents: Intents
 
+    // Logger
+    private static let logger = Logger(label: "Client", level: nil)
+
     // public let event: EventDispatcher
+
+    // MARK: Information about the bot
+    /// The user object of the bot
+    public fileprivate(set) var user: User?
+    /// The application ID of the bot
+    ///
+    /// This is used for registering application commands, among other actions.
+    public fileprivate(set) var applicationID: String?
 
     public init(intents: Intents = .unprivileged) {
         self.intents = intents
         // Override default config for bots
         DiscordKitConfig.default = .init(
-            properties: .init(browser: DiscordKitConfig.libraryName, device: DiscordKitConfig.libraryName)
+            properties: .init(browser: DiscordKitConfig.libraryName, device: DiscordKitConfig.libraryName),
+            intents: intents
         )
     }
 
@@ -47,7 +60,7 @@ public final class Client {
     /// > will fail, and no events will be received while the gateway is disconnected.
     public func login(token: String) {
         rest = .init(token: token)
-        gateway = .init(token: token, intents: intents)
+        gateway = .init(token: token)
         evtHandlerID = gateway?.onEvent.addHandler { [weak self] data in
             self?.handleEvent(data)
         }
@@ -75,7 +88,14 @@ extension Client {
 
     private func handleEvent(_ data: GatewayIncoming.Data) {
         switch data {
-        case .botReady(_):
+        case .botReady(let readyEvt):
+            // Set several members with info about the bot
+            applicationID = readyEvt.application.id
+            user = readyEvt.user
+            Self.logger.info("Bot client ready", metadata: [
+                "user.id": "\(readyEvt.user.id)",
+                "application.id": "\(readyEvt.application.id)"
+            ])
             NotificationCenter.default.post(name: .ready, object: nil)
         default:
             break
