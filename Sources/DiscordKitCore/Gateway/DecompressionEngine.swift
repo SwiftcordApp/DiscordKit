@@ -139,7 +139,7 @@ public extension DecompressionEngine {
             }
         } while status == COMPRESSION_STATUS_OK
 
-        Self.log.warning("Decompressed data", metadata: [
+        Self.log.trace("Decompressed data", metadata: [
             "original.count": "\(buf.count)",
             "decompressed.count": "\(decompressed.count)"
         ])
