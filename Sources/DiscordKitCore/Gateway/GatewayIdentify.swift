@@ -25,15 +25,15 @@ public extension RobustWebSocket {
             large_threshold: nil,
             shard: nil,
             presence: GatewayPresenceUpdate(since: 0, activities: [], status: .online, afk: false),
-            client_state: isBot ? nil : ClientState( // Just a dummy client_state
+            client_state: DiscordKitConfig.default.isBot ? nil : ClientState( // Just a dummy client_state
                 guild_hashes: GuildHashes(),
                 highest_last_message_id: "0",
                 read_state_version: 0,
                 user_guild_settings_version: -1,
                 user_settings_version: -1
             ),
-            capabilities: isBot ? nil : 0b1111111101, // TODO: Reverse engineer this
-            intents: intents
+            capabilities: DiscordKitConfig.default.isBot ? nil : 0b1111111101, // TODO: Reverse engineer this
+            intents: DiscordKitConfig.default.intents
         )
     }
 
