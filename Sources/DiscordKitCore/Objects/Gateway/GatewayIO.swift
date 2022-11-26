@@ -27,6 +27,7 @@ public struct GatewayIncoming: Decodable {
     /// An enum representing possible payloads
     public enum Data {
         // MARK: - Gateway lifecycle
+
         /// Invalid session payload
         ///
         /// This signals that the current Gateway session has been invalidated
@@ -71,7 +72,20 @@ public struct GatewayIncoming: Decodable {
         /// Informs the client that all missed events have been replayed after resuming.
         case resumed
 
+        // MARK: - Guilds
+
+        /// Guild create event
+        case guildCreate(Guild)
+        /// Guild update event
+        case guildUpdate(Guild)
+        /// Guild delete event
+        ///
+        /// > This event may also be dispatched when a guild becomes unavailable due to a
+        /// > server outage.
+        case guildDelete(GuildUnavailable)
+
         // MARK: - Channels
+
         /// Channel create event
         ///
         /// - Parameter channel: The channel that was created
@@ -136,6 +150,28 @@ public struct GatewayIncoming: Decodable {
         /// - Parameter messageACKEvt: Information about the acknowledged messages
         case messageACK(MessageACKEvt)
 
+        // MARK: - Users
+
+        /// User update event
+        ///
+        /// Dispatched for updates to the current user.
+        case userUpdate(CurrentUser)
+
+        /// Presence update event
+        ///
+        /// Dispatched when the presence of a user has changed, including for the current user.
+        /// > (For user accounts only) By default, such updates are only dispatched for users in
+        /// > open DMs, and require a ``SubscribeGuildEvts`` outgoing payload to enable
+        /// > presence updates for users in a certain guild.
+        case presenceUpdate(PresenceUpdate)
+
+        // MARK: - User account-specific events
+
+        /// User settings proto update event
+        ///
+        /// Dispatched when the user settings proto changes.
+        case settingsProtoUpdate(GatewaySettingsProtoUpdate)
+
         /// Handling this payload/event isn't implemented yet
         case unknown
     }
@@ -182,9 +218,12 @@ public struct GatewayIncoming: Decodable {
             case .threadListSync: data = try values.decode(ThreadListSync.self, forKey: .data)
             case .threadMemberUpdate: data = try values.decode(ThreadMember.self, forKey: .data)
             case .threadMembersUpdate: data = try values.decode(ThreadMembersUpdate.self, forKey: .data)
-
-            case .guildUpdate, .guildCreate: data = try values.decode(Guild.self, forKey: .data)
-            case .guildDelete: data = try values.decode(GuildUnavailable.self, forKey: .data)
+*/
+            // MARK: Guilds
+            case .guildCreate: data = .guildCreate(try values.decode(Guild.self, forKey: .data))
+            case .guildUpdate: data = .guildUpdate(try values.decode(Guild.self, forKey: .data))
+            case .guildDelete: data = .guildDelete(try values.decode(GuildUnavailable.self, forKey: .data))
+/*
             case .guildBanAdd, .guildBanRemove: data = try values.decode(GuildBan.self, forKey: .data)
             case .guildEmojisUpdate: data = try values.decode(GuildEmojisUpdate.self, forKey: .data)
             case .guildStickersUpdate: data = try values.decode(GuildStickersUpdate.self, forKey: .data)
@@ -205,17 +244,20 @@ public struct GatewayIncoming: Decodable {
             case .messageDelete: data = .messageDelete(try values.decode(MessageDelete.self, forKey: .data))
             case .messageDeleteBulk: data = .messageDeleteBulk(try values.decode(MessageDeleteBulk.self, forKey: .data))
             case .messageACK: data = .messageACK(try values.decode(MessageACKEvt.self, forKey: .data))
-/*
-            case .presenceUpdate: data = try values.decode(PresenceUpdate.self, forKey: .data)
-                // Add the remaining like 100 events
 
-            case .userUpdate: data = try values.decode(CurrentUser.self, forKey: .data)
+            // MARK: Users
+            case .userUpdate: data = .userUpdate(try values.decode(CurrentUser.self, forKey: .data))
+            case .presenceUpdate: data = .presenceUpdate(try values.decode(PresenceUpdate.self, forKey: .data))
+
+/*
             case .typingStart: data = try values.decode(TypingStart.self, forKey: .data)
 
-                // User-specific events
+            // MARK: - User account-specific events
             case .channelUnreadUpdate: data = try values.decode(ChannelUnreadUpdate.self, forKey: .data)
-            case .userSettingsUpdate: data = try values.decode(UserSettings.self, forKey: .data)
-            case .userSettingsProtoUpdate: data = try values.decode(GatewaySettingsProtoUpdate.self, forKey: .data)*/
+ */
+            case .userSettingsProtoUpdate: data = .settingsProtoUpdate(
+                try values.decode(GatewaySettingsProtoUpdate.self, forKey: .data)
+            )
             default: data = .unknown
             }
         }

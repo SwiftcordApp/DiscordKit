@@ -27,11 +27,6 @@ public class CachedState: ObservableObject {
     /// grow over time
     public private(set) var users: [Snowflake: User] = [:]
 
-    /// User settings
-    ///
-    /// View ``UserSettings`` for information about each entry.
-    public var userSettings: UserSettings?
-
     /// Populates the cache using the provided event.
     /// - Parameter event: An incoming Gateway "ready" event.
     func configure(using event: ReadyEvt) {
@@ -39,7 +34,6 @@ public class CachedState: ObservableObject {
         dms = event.private_channels
         user = event.user
         event.users.forEach(appendOrReplace(_:))
-        userSettings = event.user_settings
     }
 
     // MARK: Guilds
@@ -109,17 +103,5 @@ public class CachedState: ObservableObject {
     /// - Parameter user: The user to cache.
     func appendOrReplace(_ user: User) {
         users.updateValue(user, forKey: user.id)
-    }
-
-    // MARK: User Settings
-
-    /// If the cache does not contain user settings, the provided settings will be set directly. If the cache already contains user settings, the provided settings will be merged with the existing settings.
-    /// - Parameter updatedSettings: The user settings to cache.
-    func mergeOrReplace(_ updatedSettings: UserSettings) {
-        if let existingSettings = userSettings {
-            userSettings = existingSettings.merged(with: updatedSettings)
-        } else {
-            userSettings = updatedSettings
-        }
     }
 }
