@@ -11,7 +11,7 @@ public extension DiscordREST {
     /// Get Current User
     ///
     /// `GET /users/@me`
-    func getCurrentUser() async -> User? {
+    func getCurrentUser() async -> Result<User, RequestError> {
         return await getReq(path: "users/@me")
     }
 
@@ -20,7 +20,7 @@ public extension DiscordREST {
     /// `GET /users/{user.id}`
     ///
     /// - Parameter user: ID of user to retrieve
-    func getUser(user: Snowflake) async -> User? {
+    func getUser(user: Snowflake) async -> Result<User, RequestError> {
         return await getReq(path: "users/\(user)")
     }
 
@@ -38,7 +38,7 @@ public extension DiscordREST {
         user: Snowflake,
         mutualGuilds: Bool = false,
         guildID: Snowflake? = nil
-    ) async -> UserProfile? {
+    ) async -> Result<UserProfile, RequestError> {
         var query = [URLQueryItem(name: "with_mutual_guilds", value: String(mutualGuilds))]
         if let guildID = guildID {
             query.append(URLQueryItem(name: "guild_id", value: guildID))
@@ -56,7 +56,7 @@ public extension DiscordREST {
         before: Snowflake? = nil,
         after: Snowflake? = nil,
         limit: Int = 200
-    ) async -> [PartialGuild]? {
+    ) async -> Result<[PartialGuild], RequestError> {
         return await getReq(path: "users/@me/guilds")
     }
 
@@ -65,14 +65,14 @@ public extension DiscordREST {
     /// `GET /users/@me/guilds/{guild.id}/member`
     ///
     /// Get guild member object for current user in a guild
-    func getGuildMember(guild: Snowflake) async -> Member? {
+    func getGuildMember(guild: Snowflake) async -> Result<Member, RequestError> {
         return await getReq(path: "users/@me/guilds/\(guild)/member")
     }
 
     // MARK: Leave Guild
     // DELETE /users/@me/guilds/{guild.id}
-    func leaveGuild(guild: Snowflake) async -> Bool {
-        return await deleteReq(path: guild)
+    func leaveGuild(guild: Snowflake) async throws {
+        return try await deleteReq(path: guild)
     }
 
     // MARK: Create DM
@@ -85,8 +85,7 @@ public extension DiscordREST {
     /// - Parameters:
     ///   - provider: Unknown, always observed to be nil
     ///   - voipProvider: Unknown, always observed to be nil
-    @discardableResult
-    func logOut(provider: String? = nil, voipProvider: String? = nil) async -> Bool {
-        return await postReq(path: "auth/logout", body: LogOut(provider: provider, voip_provider: voipProvider))
+    func logOut(provider: String? = nil, voipProvider: String? = nil) async throws {
+        return try await postReq(path: "auth/logout", body: LogOut(provider: provider, voip_provider: voipProvider))
     }
 }

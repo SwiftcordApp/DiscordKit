@@ -10,19 +10,19 @@ import Foundation
 public extension DiscordREST {
     // MARK: Get Guild
     // GET /guilds/{guild.id}
-    func getGuild(id: Snowflake) async -> Guild? {
+    func getGuild(id: Snowflake) async -> Result<Guild, RequestError> {
         return await getReq(path: "guilds/\(id)")
     }
 
     // MARK: Get Guild Channels
     // GET /guilds/{guild.id}/channels
-    func getGuildChannels(id: Snowflake) async -> [DecodableThrowable<Channel>]? {
+    func getGuildChannels(id: Snowflake) async -> Result<[DecodableThrowable<Channel>], RequestError> {
         return await getReq(path: "guilds/\(id)/channels")
     }
 
     // MARK: Get Guild Roles
     // GET /guilds/{guild.id}/roles
-    func getGuildRoles(id: Snowflake) async -> [Role]? {
+    func getGuildRoles(id: Snowflake) async -> Result<[Role], RequestError> {
         return await getReq(path: "guilds/\(id)/roles")
     }
 }
