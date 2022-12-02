@@ -10,7 +10,7 @@ import Foundation
 public extension DiscordREST {
     // MARK: Get Sticker
     // GET /stickers/{sticker.id}
-    func getSticker(id: Snowflake) async -> Sticker? {
+    func getSticker(id: Snowflake) async -> Result<Sticker, RequestError> {
         return await getReq(path: "stickers/\(id)")
     }
 }

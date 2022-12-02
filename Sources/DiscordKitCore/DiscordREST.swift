@@ -6,12 +6,10 @@
 //
 
 import Foundation
-import os
+import Logging
 
 public class DiscordREST {
-    static let subsystem = "com.cryptoalgo.discordapi"
-
-    static let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? DiscordREST.subsystem, category: "DiscordREST")
+    static let log = Logger(label: "DiscordREST", level: nil)
     // How empty, everything is broken into smaller files (for now xD)
 
     static let session: URLSession = {

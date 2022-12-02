@@ -131,7 +131,7 @@ public struct GatewayConnProperties: OutgoingGatewayData {
 /// > your account flagged and banned if values are set incorrectly.
 public struct DiscordKitConfig {
     /// Base Discord URL
-    public let baseURL: String
+    public let baseURL: URL
     /// CDN URL for retrieving attachments, avatars etc.
     public let cdnURL: String
     /// Discord API endpoint version; Only version 9 is implemented &
@@ -145,7 +145,7 @@ public struct DiscordKitConfig {
     public let userAgent: String
 
     /// Base REST endpoint URL
-    public let restBase: String
+    public let restBase: URL
     /// Gateway WebSocket URL
     public let gateway: String
 
@@ -175,7 +175,7 @@ public struct DiscordKitConfig {
         intents: Intents? = nil
     ) {
         self.cdnURL = "https://cdn.discordapp.com/"
-        self.baseURL = "https://\(baseURL)/"
+        self.baseURL = URL(string: "https://\(baseURL)/")!
         self.version = version
         self.intents = intents
         if intents == nil {
@@ -193,7 +193,7 @@ public struct DiscordKitConfig {
             )
         }
         gateway = "wss://gateway.discord.gg/?v=\(version)&encoding=json&compress=zlib-stream"
-        restBase = "\(self.baseURL)api/v\(version)/"
+        restBase = self.baseURL.appendingPathComponent("api").appendingPathComponent("v\(version)")
     }
 
     /// Populate a ``GatewayConnProperties`` struct with some constant

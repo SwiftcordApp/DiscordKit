@@ -35,12 +35,16 @@ let package = Package(
         ),
 		.target(
             name: "DiscordKit",
-            dependencies: [.target(name: "DiscordKitCore")]
+            dependencies: [
+                .target(name: "DiscordKitCore"),
+                .product(name: "Logging", package: "swift-log")
+            ]
         ),
         .target(
             name: "DiscordKitBot",
             dependencies: [
-                .target(name: "DiscordKitCore")
+                .target(name: "DiscordKitCore"),
+                .product(name: "SwiftProtobuf", package: "swift-protobuf")
             ]
         ),
         .testTarget(name: "DiscordKitCommonTests", dependencies: ["DiscordKitCore"])
