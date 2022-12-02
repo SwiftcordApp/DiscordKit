@@ -13,9 +13,7 @@ public extension DiscordREST {
         case unexpectedResponseCode(_ code: Int)
         case invalidResponse
         case superEncodeFailure
-        case jsonEncodingError
-        case jsonDecodingError(error: DecodingError)
-        case jsonDecodingError(genericError: Error)
+        case jsonDecodingError(error: Error) // This is not strongly typed because it was simpler to just use one catch
         case genericError(reason: String)
     }
 
@@ -136,10 +134,8 @@ public extension DiscordREST {
         case .success(let respData):
             do {
                 return .success(try DiscordREST.decoder.decode(T.self, from: respData))
-            } catch let decodingError as DecodingError {
-                return .failure(.jsonDecodingError(error: decodingError))
             } catch {
-                return .failure(.jsonDecodingError(genericError: error))
+                return .failure(.jsonDecodingError(error: error))
             }
         }
     }
@@ -160,10 +156,8 @@ public extension DiscordREST {
         case .success(let respData):
             do {
                 return .success(try DiscordREST.decoder.decode(D.self, from: respData))
-            } catch let decodingError as DecodingError {
-                return .failure(.jsonDecodingError(error: decodingError))
             } catch {
-                return .failure(.jsonDecodingError(genericError: error))
+                return .failure(.jsonDecodingError(error: error))
             }
         case .failure(let err): return .failure(err)
         }
