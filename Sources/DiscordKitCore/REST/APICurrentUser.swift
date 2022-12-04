@@ -13,8 +13,8 @@ import Foundation
 public extension DiscordREST {
     // MARK: Get Current User DMs
     // GET /users/@me/channels
-    func getDMs() async -> Result<[DecodableThrowable<Channel>], RequestError> {
-        return await getReq(path: "users/@me/channels")
+    func getDMs() async throws -> [DecodableThrowable<Channel>] {
+        return try await getReq(path: "users/@me/channels")
     }
 
     // MARK: Change Current User Password
