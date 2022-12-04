@@ -10,8 +10,8 @@ import Foundation
 public extension DiscordREST {
     // MARK: Get Channel
     // GET /channels/{channel.id}
-    func getChannel(id: Snowflake) async -> Result<Channel, RequestError> {
-        return await getReq(path: "channels/\(id)")
+    func getChannel(id: Snowflake) async throws -> Channel {
+        return try await getReq(path: "channels/\(id)")
     }
 
     // MARK: Get Channel Messages
@@ -22,11 +22,11 @@ public extension DiscordREST {
         around: Snowflake? = nil,
         before: Snowflake? = nil,
         after: Snowflake? = nil
-    ) async -> Result<[Message], RequestError> {
+    ) async throws -> [Message] {
         var query = [URLQueryItem(name: "limit", value: String(limit))]
 		if around != nil { query.append(URLQueryItem(name: "around", value: around?.description)) } else if before != nil {query.append(URLQueryItem(name: "before", value: before?.description))} else if after != nil { query.append(URLQueryItem(name: "after", value: after?.description)) }
 
-        return await getReq(path: "channels/\(id)/messages", query: query)
+        return try await getReq(path: "channels/\(id)/messages", query: query)
     }
 
     // MARK: Get Channel Message
@@ -34,19 +34,16 @@ public extension DiscordREST {
     func getChannelMsg(
         id: Snowflake,
         msgID: Snowflake
-    ) async -> Result<Message, RequestError> {
+    ) async throws -> Message {
         if DiscordKitConfig.default.isBot {
-            return await getReq(path: "channels/\(id)/messages/\(msgID)")
+            return try await getReq(path: "channels/\(id)/messages/\(msgID)")
         } else {
             // Actual endpoint only available to bots, so we're using a workaround
-            switch await getChannelMsgs(id: id, limit: 1, around: msgID) {
-            case .success(let messages):
-                guard !messages.isEmpty else {
-                    return .failure(RequestError.genericError(reason: "Messages endpoint did not return any messages"))
-                }
-                return .success(messages[0])
-            case .failure(let reqError): return .failure(reqError)
+            let messages = try await getChannelMsgs(id: id, limit: 1, around: msgID)
+            guard !messages.isEmpty else {
+                throw RequestError.genericError(reason: "Messages endpoint did not return any messages")
             }
+            return messages[0]
         }
     }
 
@@ -56,8 +53,8 @@ public extension DiscordREST {
         message: NewMessage,
         attachments: [URL],
         id: Snowflake
-    ) async -> Result<Message, RequestError> {
-        return await postReq(path: "channels/\(id)/messages", body: message, attachments: attachments)
+    ) async throws -> Message {
+        return try await postReq(path: "channels/\(id)/messages", body: message, attachments: attachments)
     }
 
     // MARK: Delete Message
@@ -74,8 +71,8 @@ public extension DiscordREST {
     func ackMessageRead(
         id: Snowflake,
         msgID: Snowflake
-    ) async -> Result<MessageReadAck, RequestError> {
-        return await postReq(path: "channels/\(id)/messages/\(msgID)/ack", body: MessageReadAck(token: nil), attachments: [])
+    ) async throws -> MessageReadAck {
+        return try await postReq(path: "channels/\(id)/messages/\(msgID)/ack", body: MessageReadAck(token: nil), attachments: [])
     }
 
     // MARK: Typing Start (Undocumented endpoint!)

@@ -48,7 +48,7 @@ public extension DiscordREST {
         attachments: [URL] = [],
         body: Data? = nil,
         method: RequestMethod = .get
-    ) async -> Result<Data, RequestError> {
+    ) async throws -> Data {
         assert(token != nil, "Token should not be nil. Please set a token before using the REST API.")
         let token = token! // Force unwrapping is appropriete here
 
@@ -83,7 +83,7 @@ public extension DiscordREST {
         req.setValue("bugReporterEnabled", forHTTPHeaderField: "x-debug-options")
         guard let superEncoded = try? DiscordREST.encoder.encode(DiscordKitConfig.default.properties) else {
             assertionFailure("Couldn't encode super properties for request")
-            return .failure(.superEncodeFailure)
+            throw RequestError.superEncodeFailure
         }
         req.setValue(superEncoded.base64EncodedString(), forHTTPHeaderField: "x-super-properties")
 
@@ -100,15 +100,15 @@ public extension DiscordREST {
         // Make request
         guard let (data, response) = try? await DiscordREST.session.data(for: req),
               let httpResponse = response as? HTTPURLResponse else {
-            return .failure(.invalidResponse)
+            throw RequestError.invalidResponse
         }
         guard httpResponse.statusCode / 100 == 2 else { // Check if status code is 2**
             Self.log.error("Response status code not 2xx", metadata: ["res.statusCode": "\(httpResponse.statusCode)"])
             Self.log.debug("Raw response: \(String(decoding: data, as: UTF8.self))")
-            return .failure(.unexpectedResponseCode(httpResponse.statusCode))
+            throw RequestError.unexpectedResponseCode(httpResponse.statusCode)
         }
 
-        return .success(data)
+        return data
     }
 
     /// Make a `GET` request to the Discord REST API
@@ -125,18 +125,13 @@ public extension DiscordREST {
     func getReq<T: Decodable>(
         path: String,
         query: [URLQueryItem] = []
-    ) async -> Result<T, RequestError> {
+    ) async throws -> T {
         // This helps debug JSON decoding errors
-        let resp = await makeRequest(path: path, query: query)
-        switch resp {
-        case .failure(let err):
-            return .failure(err)
-        case .success(let respData):
-            do {
-                return .success(try DiscordREST.decoder.decode(T.self, from: respData))
-            } catch {
-                return .failure(.jsonDecodingError(error: error))
-            }
+        let respData = try await makeRequest(path: path, query: query)
+        do {
+            return try DiscordREST.decoder.decode(T.self, from: respData)
+        } catch {
+            throw RequestError.jsonDecodingError(error: error)
         }
     }
 
@@ -145,21 +140,18 @@ public extension DiscordREST {
         path: String,
         body: B? = nil,
         attachments: [URL] = []
-    ) async -> Result<D, RequestError> {
-        let payload = body != nil ? try? DiscordREST.encoder.encode(body) : nil
-        switch await makeRequest(
+    ) async throws -> D {
+        let payload = body != nil ? try DiscordREST.encoder.encode(body) : nil
+        let respData = try await makeRequest(
             path: path,
             attachments: attachments,
             body: payload,
             method: .post
-        ) {
-        case .success(let respData):
-            do {
-                return .success(try DiscordREST.decoder.decode(D.self, from: respData))
-            } catch {
-                return .failure(.jsonDecodingError(error: error))
-            }
-        case .failure(let err): return .failure(err)
+        )
+        do {
+            return try DiscordREST.decoder.decode(D.self, from: respData)
+        } catch {
+            throw RequestError.jsonDecodingError(error: error)
         }
     }
 
@@ -175,7 +167,7 @@ public extension DiscordREST {
             path: path,
             body: payload,
             method: .post
-        ).get()
+        )
     }
 
     /// Make a `POST` request to the Discord REST API, for endpoints
@@ -185,12 +177,12 @@ public extension DiscordREST {
             path: path,
             body: nil,
             method: .post
-        ).get()
+        )
     }
 
     /// Make a `DELETE` request to the Discord REST API
     func deleteReq(path: String) async throws {
-        _ = try await makeRequest(path: path, method: .delete).get()
+        _ = try await makeRequest(path: path, method: .delete)
     }
 
     /// Make a `PATCH` request to the Discord REST API
@@ -206,6 +198,6 @@ public extension DiscordREST {
             path: path,
             body: payload,
             method: .patch
-        ).get()
+        )
     }
 }

@@ -22,8 +22,8 @@ public extension DiscordREST {
         inputValue: String,
         withCounts: Bool = true,
         withExpiration: Bool = true
-    ) async -> Result<Invite, RequestError> {
-        return await getReq(path: "invites/\(inviteID)", query: [
+    ) async throws -> Invite {
+        return try await getReq(path: "invites/\(inviteID)", query: [
             URLQueryItem(name: "with_counts", value: String(withCounts)),
             URLQueryItem(name: "with_expiration", value: String(withExpiration))
         ])
