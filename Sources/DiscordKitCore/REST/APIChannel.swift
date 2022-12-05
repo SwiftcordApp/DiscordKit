@@ -51,7 +51,7 @@ public extension DiscordREST {
     // POST /channels/{channel.id}/messages
     func createChannelMsg(
         message: NewMessage,
-        attachments: [URL],
+        attachments: [URL] = [],
         id: Snowflake
     ) async throws -> Message {
         return try await postReq(path: "channels/\(id)/messages", body: message, attachments: attachments)

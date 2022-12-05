@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import DiscordKitCore
 
 /// A Discord message, with convenience methods
 ///
@@ -14,4 +15,12 @@ import Foundation
 /// > for easier use
 public struct BotMessage {
     public let content: String
+    public let channelID: Snowflake // This will be changed very soon
+    public let id: Snowflake // This too
+
+    init(from message: Message) {
+        content = message.content
+        channelID = message.channel_id
+        id = message.id
+    }
 }
