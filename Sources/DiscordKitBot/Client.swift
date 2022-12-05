@@ -6,12 +6,12 @@
 //
 
 import Foundation
-import Combine
 import Logging
 import DiscordKitCore
 
 /// The main client class for bots to interact with Discord's API
 public final class Client {
+    // REST handler
     private var rest: DiscordREST?
 
     // MARK: Gateway vars
@@ -19,8 +19,9 @@ public final class Client {
     private var evtHandlerID: EventDispatch.HandlerIdentifier?
 
     // MARK: Event publishers
-    public let ready = PassthroughSubject<Void, Never>()
-    public let messages = PassthroughSubject<BotMessage, Never>()
+    private let notificationCenter = NotificationCenter()
+    public let ready: NCWrapper<()>
+    public let messageCreate: NCWrapper<BotMessage>
 
     // MARK: Configuration Members
     public let intents: Intents
@@ -45,6 +46,10 @@ public final class Client {
             properties: .init(browser: DiscordKitConfig.libraryName, device: DiscordKitConfig.libraryName),
             intents: intents
         )
+
+        // Init event wrappers
+        ready = .init(.ready, notificationCenter: notificationCenter)
+        messageCreate = .init(.messageCreate, notificationCenter: notificationCenter)
     }
 
     deinit {
@@ -96,9 +101,21 @@ extension Client {
                 "user.id": "\(readyEvt.user.id)",
                 "application.id": "\(readyEvt.application.id)"
             ])
+            ready.emit()
             NotificationCenter.default.post(name: .ready, object: nil)
+        case .messageCreate(let message):
+            let botMessage = BotMessage(from: message)
+            messageCreate.emit(value: botMessage)
         default:
             break
         }
+    }
+}
+
+// REST-related API
+public extension Client {
+    func sendMessage(_ content: String, channel: Snowflake, replyingTo: Snowflake? = nil) async throws -> Message {
+        let reference = replyingTo != nil ? MessageReference(message_id: replyingTo) : nil
+        return try await rest!.createChannelMsg(message: .init(content: content, message_reference: reference), id: channel)
     }
 }

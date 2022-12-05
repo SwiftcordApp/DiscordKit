@@ -9,4 +9,6 @@ import Foundation
 
 public extension NSNotification.Name {
     static let ready = Self("dk-ready")
+
+    static let messageCreate = Self("dk-msg-create")
 }
