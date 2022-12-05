@@ -8,7 +8,7 @@
 import Foundation
 import os
 
-public class DiscordREST: ObservableObject {
+public class DiscordREST {
     static let subsystem = "com.cryptoalgo.discordapi"
 
     static let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? DiscordREST.subsystem, category: "DiscordREST")
