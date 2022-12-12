@@ -23,5 +23,9 @@ identifier_name:
   allowed_symbols: ["_"]
 cyclomatic_complexity:
   ignores_case_statements: true
+nesting:
+  type_level:
+    warning: 5
+    error: 8
 
 reporter: "xcode" # reporter type (xcode, json, csv, checkstyle, junit, html, emoji, sonarqube, markdown)

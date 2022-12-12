@@ -18,6 +18,9 @@ public final class Client {
     fileprivate var gateway: RobustWebSocket?
     private var evtHandlerID: EventDispatch.HandlerIdentifier?
 
+    // MARK: Application Command Handlers
+    fileprivate var appCommandHandlers: [String: NewAppCommand.Handler] = [:]
+
     // MARK: Event publishers
     private let notificationCenter = NotificationCenter()
     public let ready: NCWrapper<()>
@@ -28,8 +31,6 @@ public final class Client {
 
     // Logger
     private static let logger = Logger(label: "Client", level: nil)
-
-    // public let event: EventDispatcher
 
     // MARK: Information about the bot
     /// The user object of the bot
@@ -90,6 +91,18 @@ public final class Client {
 extension Client {
     public var isReady: Bool { gateway?.sessionOpen == true }
 
+    /// Invoke the handler associated with the respective commands
+    private func invokeCommandHandler(_ commandData: Interaction.Data.AppCommandData, id: Snowflake, token: String) {
+        if let handler = appCommandHandlers[commandData.name] {
+            Self.logger.trace("Invoking application handler", metadata: ["command.name": "\(commandData.name)"])
+            handler(.init(
+                optionValues: commandData.options ?? [],
+                rest: rest!, token: token, interactionID: id
+            ))
+        }
+    }
+
+    /// Handle a subset of gateway events
     private func handleEvent(_ data: GatewayIncoming.Data) {
         switch data {
         case .botReady(let readyEvt):
@@ -101,10 +114,14 @@ extension Client {
                 "application.id": "\(readyEvt.application.id)"
             ])
             ready.emit()
-            NotificationCenter.default.post(name: .ready, object: nil)
         case .messageCreate(let message):
             let botMessage = BotMessage(from: message)
             messageCreate.emit(value: botMessage)
+        case .interaction(let interaction):
+            Self.logger.trace("Received interaction", metadata: ["interaction.id": "\(interaction.id)"])
+            if case .applicationCommand(let commandData) = interaction.data {
+                invokeCommandHandler(commandData, id: interaction.id, token: interaction.token)
+            }
         default:
             break
         }
@@ -120,21 +137,16 @@ public extension Client {
 
     // MARK: Interactions
     /// Register Application Commands with a result builder
-    func registerInteractions(
+    func registerApplicationCommands(
         guild: Snowflake? = nil, @AppCommandBuilder _ commands: () -> [NewAppCommand]
     ) async throws {
-        try await registerInteractions(guild: guild, commands())
+        try await registerApplicationCommands(guild: guild, commands())
     }
-    /// Register Application Commands (AKA "slash commands") with the provided application command create structs
-    func registerInteractions(guild: Snowflake? = nil, _ commands: [NewAppCommand]) async throws {
-        if let guild = guild {
-            for command in commands {
-                try await rest!.createGuildCommand(command, applicationID: applicationID!, guildID: guild)
-            }
-        } else {
-            for command in commands {
-                try await rest!.createGlobalCommand(command, applicationID: applicationID!)
-            }
+    /// Register Application Commands with the provided application command create structs
+    func registerApplicationCommands(guild: Snowflake? = nil, _ commands: [NewAppCommand]) async throws {
+        for command in commands {
+            try await rest!.createCommand(command, applicationID: applicationID!, guildID: guild)
+            appCommandHandlers[command.name] = command.handler
         }
     }
 }

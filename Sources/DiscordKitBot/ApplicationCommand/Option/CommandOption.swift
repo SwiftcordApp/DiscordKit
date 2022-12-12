@@ -26,7 +26,7 @@ public protocol CommandOption: Codable {
     var required: Bool? { get }
 
     // If this command is a subcommand or subcommand group type, these nested options will be its parameters
-    //var options: [CommandOption]? { get }
+    // var options: [CommandOption]? { get }
 
     /// Channel types to restrict visibility of command to
     // var channel_types: ChannelType? { get }
@@ -36,54 +36,8 @@ public protocol CommandOption: Codable {
 }
 
 public struct AppCommandOptionChoice: Codable {
-    public enum OptionValue: Codable {
-        case string(String)
-        case int(Int)
-        case double(Double)
-
-        public func encode(to encoder: Encoder) throws {
-            var container = encoder.singleValueContainer()
-            switch self {
-            case .string(let val): try container.encode(val)
-            case .int(let val): try container.encode(val)
-            case .double(let val): try container.encode(val)
-            }
-        }
-
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.singleValueContainer()
-            
-            if let val = try? container.decode(String.self) {
-                self = .string(val)
-            } else if let val = try? container.decode(Int.self) {
-                self = .int(val)
-            } else if let val = try? container.decode(Double.self) {
-                self = .double(val)
-            } else {
-                throw DecodingError.typeMismatch(
-                    Double.self,
-                    .init(codingPath: [], debugDescription: "Expected either String, Int or Double, found neither")
-                )
-            }
-        }
-    }
-
     public let name: String
-    public let value: OptionValue
-}
-
-public enum CommandOptionType: Int, Codable {
-    case subCommand = 1
-    case subCommandGroup = 2
-    case string = 3
-    case integer = 4
-    case boolean = 5
-    case user = 6
-    case channel = 7
-    case role = 8
-    case mentionable = 9
-    case number = 10
-    case attachment = 11
+    public let value: Interaction.Data.AppCommandData.OptionData.Value // Trust me it makes more sense nested like this
 }
 
 /// An enum to store either a `Double` or `Int` value for setting the minimum or maximum value of an option
@@ -92,10 +46,10 @@ enum MinMaxValue: Codable {
     case number(Double)
     /// Min or max value for an option of ``CommandOptionType/integer`` type
     case integer(Int)
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        
+
         if let val = try? container.decode(Double.self) {
             self = .number(val)
         } else if let val = try? container.decode(Int.self) {
@@ -107,13 +61,13 @@ enum MinMaxValue: Codable {
             )
         }
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        
+
         switch self {
         case .number(let value): try container.encode(value)
         case .integer(let value): try container.encode(value)
         }
     }
-    }
+}
