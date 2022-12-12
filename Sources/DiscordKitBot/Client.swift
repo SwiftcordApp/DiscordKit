@@ -119,21 +119,21 @@ public extension Client {
     }
 
     // MARK: Interactions
-    /// Register Application Commands (AKA "slash commands") with a result builder
+    /// Register Application Commands with a result builder
     func registerInteractions(
-        guild: Snowflake? = nil, @SlashInteractionsBuilder _ slashInteractions: () -> [CreateAppCmd]
+        guild: Snowflake? = nil, @AppCommandBuilder _ commands: () -> [NewAppCommand]
     ) async throws {
-        try await registerInteractions(guild: guild, slashInteractions())
+        try await registerInteractions(guild: guild, commands())
     }
     /// Register Application Commands (AKA "slash commands") with the provided application command create structs
-    func registerInteractions(guild: Snowflake? = nil, _ slashInteractions: [CreateAppCmd]) async throws {
+    func registerInteractions(guild: Snowflake? = nil, _ commands: [NewAppCommand]) async throws {
         if let guild = guild {
-            for interaction in slashInteractions {
-                try await rest!.createGuildCommand(interaction, applicationID: applicationID!, guildID: guild)
+            for command in commands {
+                try await rest!.createGuildCommand(command, applicationID: applicationID!, guildID: guild)
             }
         } else {
-            for interaction in slashInteractions {
-                try await rest!.createGlobalCommand(interaction, applicationID: applicationID!)
+            for command in commands {
+                try await rest!.createGlobalCommand(command, applicationID: applicationID!)
             }
         }
     }
