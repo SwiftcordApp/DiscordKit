@@ -171,7 +171,7 @@ public struct GatewayIncoming: Decodable {
         /// Interaction create event
         ///
         ///
-        case interaction
+        case interaction(Interaction)
 
         // MARK: - User account-specific events
 
@@ -258,7 +258,8 @@ public struct GatewayIncoming: Decodable {
             case .presenceUpdate: data = .presenceUpdate(try values.decode(PresenceUpdate.self, forKey: .data))
 
             // MARK: Interactions
-            //case .interactionCreate: break
+            case .interactionCreate: data = .interaction(try values.decode(Interaction.self, forKey: .data))
+
 /*
             case .typingStart: data = try values.decode(TypingStart.self, forKey: .data)
 
