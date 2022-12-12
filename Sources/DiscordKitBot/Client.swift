@@ -69,7 +69,6 @@ public final class Client {
         evtHandlerID = gateway?.onEvent.addHandler { [weak self] data in
             self?.handleEvent(data)
         }
-        RunLoop.main.run()
     }
 
     /// Disconnect from the gateway, undoes ``login(token:)``
@@ -112,10 +111,30 @@ extension Client {
     }
 }
 
-// REST-related API
+// MARK: - REST-related API
 public extension Client {
     func sendMessage(_ content: String, channel: Snowflake, replyingTo: Snowflake? = nil) async throws -> Message {
         let reference = replyingTo != nil ? MessageReference(message_id: replyingTo) : nil
         return try await rest!.createChannelMsg(message: .init(content: content, message_reference: reference), id: channel)
+    }
+
+    // MARK: Interactions
+    /// Register Application Commands (AKA "slash commands") with a result builder
+    func registerInteractions(
+        guild: Snowflake? = nil, @SlashInteractionsBuilder _ slashInteractions: () -> [CreateAppCmd]
+    ) async throws {
+        try await registerInteractions(guild: guild, slashInteractions())
+    }
+    /// Register Application Commands (AKA "slash commands") with the provided application command create structs
+    func registerInteractions(guild: Snowflake? = nil, _ slashInteractions: [CreateAppCmd]) async throws {
+        if let guild = guild {
+            for interaction in slashInteractions {
+                try await rest!.createGuildCommand(interaction, applicationID: applicationID!, guildID: guild)
+            }
+        } else {
+            for interaction in slashInteractions {
+                try await rest!.createGlobalCommand(interaction, applicationID: applicationID!)
+            }
+        }
     }
 }

@@ -92,6 +92,24 @@ public struct AppCommandOption: Codable {
     ///
     /// Only applicable for ``OptionType/string``, ``OptionType/integer``, or ``OptionType/number`` option types
     public let autocomplete: Bool?
+
+    // MARK: - Constructors for various types of options
+    public init(_ name: String, description: String, required: Bool = false, choices: [AppCommandOptionChoice]? = nil,
+                minLength: Int? = nil, maxLength: Int? = nil, autocomplete: Bool? = nil) {
+        type = .string
+        self.name = name
+        self.description = description
+        self.required = required
+        self.choices = choices
+        min_length = minLength
+        max_length = maxLength
+        self.autocomplete = autocomplete
+
+        options = nil
+        channel_types = nil
+        min_value = nil
+        max_value = nil
+    }
 }
 
 public struct AppCommandOptionChoice: Codable {
