@@ -119,6 +119,7 @@ public struct GatewayIncoming: Decodable {
         case channelPinUpdate(ChannelPinsUpdate)
 
         // MARK: - Messages
+
         /// Message create event
         ///
         /// This event would be dispatched when a message is sent.
@@ -164,6 +165,13 @@ public struct GatewayIncoming: Decodable {
         /// > open DMs, and require a ``SubscribeGuildEvts`` outgoing payload to enable
         /// > presence updates for users in a certain guild.
         case presenceUpdate(PresenceUpdate)
+
+        // MARK: - Interactions
+
+        /// Interaction create event
+        ///
+        ///
+        case interaction
 
         // MARK: - User account-specific events
 
@@ -249,6 +257,8 @@ public struct GatewayIncoming: Decodable {
             case .userUpdate: data = .userUpdate(try values.decode(CurrentUser.self, forKey: .data))
             case .presenceUpdate: data = .presenceUpdate(try values.decode(PresenceUpdate.self, forKey: .data))
 
+            // MARK: Interactions
+            //case .interactionCreate: break
 /*
             case .typingStart: data = try values.decode(TypingStart.self, forKey: .data)
 

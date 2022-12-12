@@ -6,13 +6,14 @@
 //
 
 import Foundation
+import DiscordKitCore
 
 public extension DiscordREST {
     /// Create global application command
     ///
     /// > POST: `/applications/{application.id}/commands`
     /// This creates a global application command available in all guilds.
-    func createGlobalCommand(_ command: CreateAppCmd, applicationID: Snowflake) async throws {
+    func createGlobalCommand(_ command: NewAppCommand, applicationID: Snowflake) async throws {
         return try await postReq(path: "applications/\(applicationID)/commands", body: command)
     }
 
@@ -24,7 +25,7 @@ public extension DiscordREST {
     ///
     /// > Tip: This is useful for testing as guild commands update immediately,
     /// > while updates to global commands take some time to propagate.
-    func createGuildCommand(_ command: CreateAppCmd, applicationID: Snowflake, guildID: Snowflake) async throws {
+    func createGuildCommand(_ command: NewAppCommand, applicationID: Snowflake, guildID: Snowflake) async throws {
         return try await postReq(path: "applications/\(applicationID)/guilds/\(guildID)/commands", body: command)
     }
 }
