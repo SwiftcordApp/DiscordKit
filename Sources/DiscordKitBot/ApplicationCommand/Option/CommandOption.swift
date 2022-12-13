@@ -9,7 +9,7 @@ import Foundation
 import DiscordKitCore
 
 /// An option in an application command
-public protocol CommandOption: Codable {
+public protocol CommandOption: Encodable {
     /// The type of this option
     var type: CommandOptionType { get }
 
@@ -24,9 +24,6 @@ public protocol CommandOption: Codable {
     var description: String { get }
     /// If this command is required
     var required: Bool? { get }
-
-    // If this command is a subcommand or subcommand group type, these nested options will be its parameters
-    // var options: [CommandOption]? { get }
 
     /// Channel types to restrict visibility of command to
     // var channel_types: ChannelType? { get }

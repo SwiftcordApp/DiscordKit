@@ -18,9 +18,9 @@ public struct CommandData {
         self.token = token
         self.interactionID = interactionID
 
-        var optValues: [String: Interaction.Data.AppCommandData.OptionData.Value] = [:]
+        var optValues: [String: Interaction.Data.AppCommandData.OptionData] = [:]
         for optionValue in optionValues {
-            optValues[optionValue.name] = optionValue.value
+            optValues[optionValue.name] = optionValue
         }
         self.optionValues = optValues
     }
@@ -29,7 +29,7 @@ public struct CommandData {
     private let rest: DiscordREST
 
     /// Values of options in this command
-    private let optionValues: [String: Interaction.Data.AppCommandData.OptionData.Value?]
+    private let optionValues: [String: Interaction.Data.AppCommandData.OptionData]
 
     // MARK: Parameters for executing callbacks
     /// The token to use when carrying out actions with this interaction
@@ -52,7 +52,7 @@ public extension CommandData {
     /// - ``optionValue(of:)-7ssru`` - `Int`
     /// - ``optionValue(of:)-6js4d`` - `String`
     func wrappedOptionValue(of name: String) -> Interaction.Data.AppCommandData.OptionData.Value? {
-        optionValues[name] ?? nil // Required to unwrap a double optional into a single optional
+        optionValues[name]?.value
     }
 
     /// Get the `String` value of a certain option
@@ -94,6 +94,15 @@ public extension CommandData {
     func optionValue(of name: String) -> Bool? {
         guard let originalValue = wrappedOptionValue(of: name), case let .boolean(val) = originalValue else { return nil }
         return val
+    }
+
+    /// Check if a sub-option is selected
+    ///
+    /// This will probably be reworked in the future to provide a more friendly way of
+    /// handling sub-options, sub-option groups and nested options.
+    func isSubOption(name: String) -> Bool? {
+        guard let option = optionValues[name] else { return nil }
+        return option.type == .subCommand
     }
 }
 
