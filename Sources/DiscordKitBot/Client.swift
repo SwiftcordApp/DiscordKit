@@ -84,6 +84,8 @@ public final class Client {
         // Clear member vars
         gateway = nil
         rest = nil
+        applicationID = nil
+        user = nil
     }
 }
 
@@ -108,14 +110,17 @@ extension Client {
     private func handleEvent(_ data: GatewayIncoming.Data) {
         switch data {
         case .botReady(let readyEvt):
+            let firstTime = applicationID == nil
             // Set several members with info about the bot
             applicationID = readyEvt.application.id
             user = readyEvt.user
-            Self.logger.info("Bot client ready", metadata: [
-                "user.id": "\(readyEvt.user.id)",
-                "application.id": "\(readyEvt.application.id)"
-            ])
-            ready.emit()
+            if firstTime {
+                Self.logger.info("Bot client ready", metadata: [
+                    "user.id": "\(readyEvt.user.id)",
+                    "application.id": "\(readyEvt.application.id)"
+                ])
+                ready.emit()
+            }
         case .messageCreate(let message):
             let botMessage = BotMessage(from: message)
             messageCreate.emit(value: botMessage)
