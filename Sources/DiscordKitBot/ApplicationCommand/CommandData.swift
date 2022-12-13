@@ -31,30 +31,66 @@ public struct CommandData {
     /// Values of options in this command
     private let optionValues: [String: Interaction.Data.AppCommandData.OptionData.Value?]
 
+    // MARK: Parameters for executing callbacks
     /// The token to use when carrying out actions with this interaction
     let token: String
     /// The ID of this interaction
     public let interactionID: Snowflake
+}
 
-    // MARK: Getter functions for option values
-    public func originalOptionValue(of name: String) -> Interaction.Data.AppCommandData.OptionData.Value? {
+// MARK: - Getter functions for option values
+public extension CommandData {
+    /// Get the wrapped value of a certain option
+    ///
+    /// This returns an enum which can either store a `Double`, `Int` or `String` value,
+    /// which is hard to work with. See below for wrapper methods, providing the primitive
+    /// wrapped type directly, which usually are a better choice.
+    ///
+    /// ## See Also
+    /// Directly get the primitive value of an option with one of the wrapper methods below.
+    /// - ``optionValue(of:)-bi3j`` - `Double`
+    /// - ``optionValue(of:)-7ssru`` - `Int`
+    /// - ``optionValue(of:)-6js4d`` - `String`
+    func wrappedOptionValue(of name: String) -> Interaction.Data.AppCommandData.OptionData.Value? {
         optionValues[name] ?? nil // Required to unwrap a double optional into a single optional
     }
 
-    public func optionValue(of name: String) -> String? {
-        guard let originalValue = originalOptionValue(of: name), case let .string(val) = originalValue else { return nil }
+    /// Get the `String` value of a certain option
+    ///
+    /// ## See Also
+    /// - ``wrappedOptionValue(of:)`` Get the value of the option, wrapped in an Enum
+    ///
+    /// - Returns: The string value of a certain option if it is present and is of type `String`, otherwise `nil`
+    func optionValue(of name: String) -> String? {
+        guard let originalValue = wrappedOptionValue(of: name), case let .string(val) = originalValue else { return nil }
         return val
     }
-    public func optionValue(of name: String) -> Int? {
-        guard let originalValue = originalOptionValue(of: name), case let .int(val) = originalValue else { return nil }
+    /// Get the `Int` value of a certain option
+    ///
+    /// ## See Also
+    /// - ``wrappedOptionValue(of:)`` Get the value of the option, wrapped in an Enum
+    ///
+    /// - Returns: The string value of a certain option if it is present and is of type `Int`, otherwise `nil`
+    func optionValue(of name: String) -> Int? {
+        guard let originalValue = wrappedOptionValue(of: name), case let .int(val) = originalValue else { return nil }
         return val
     }
-    public func optionValue(of name: String) -> Double? {
-        guard let originalValue = originalOptionValue(of: name), case let .double(val) = originalValue else { return nil }
+    /// Get the `Double` value of a certain option
+    ///
+    /// ## See Also
+    /// - ``wrappedOptionValue(of:)`` Get the value of the option, wrapped in an Enum
+    ///
+    /// - Returns: The string value of a certain option if it is present and is of type `Double`, otherwise `nil`
+    func optionValue(of name: String) -> Double? {
+        guard let originalValue = wrappedOptionValue(of: name), case let .double(val) = originalValue else { return nil }
         return val
     }
+}
 
-    public func reply(_ content: String) async throws {
+// MARK: - Callback APIs
+public extension CommandData {
+    /// Reply to this interaction with a plain text response
+    func reply(_ content: String) async throws {
         try await rest.sendInteractionResponse(
             .init(
                 type: .interactionReply,

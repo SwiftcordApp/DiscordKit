@@ -11,7 +11,7 @@ import DiscordKitCore
 /// A Discord message, with convenience methods
 ///
 /// This struct represents a message on Discord,
-/// > Internally, ``Message``s are converted to and from this type
+/// > Internally, `Message`s are converted to and from this type
 /// > for easier use
 public struct BotMessage {
     public let content: String

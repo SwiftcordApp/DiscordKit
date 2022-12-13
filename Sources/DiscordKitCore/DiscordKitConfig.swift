@@ -67,7 +67,8 @@ public struct GatewayConnProperties: OutgoingGatewayData {
     ///
     /// This should be set according to the OS the library is running on
     ///
-    /// - Seealso: ``PropertiesOS``
+    /// ## See Also
+    /// - ``PropertiesOS``
     let os: PropertiesOS // swiftlint:disable:this identifier_name
 
     /// Browser name

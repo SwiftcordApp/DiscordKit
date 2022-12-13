@@ -22,28 +22,28 @@ public struct NCWrapper<Data> {
         notificationCenter.post(name: name, object: value)
     }
 
-    public func listen(listener: @escaping (Data) -> ()) {
-        notificationCenter.addObserver(forName: name, object: nil, queue: nil) { n in
-            guard let obj = n.object as? Data else { return }
+    public func listen(listener: @escaping (Data) -> Void) {
+        notificationCenter.addObserver(forName: name, object: nil, queue: nil) { notif in
+            guard let obj = notif.object as? Data else { return }
             listener(obj)
         }
     }
 
-    public func listen(listener: @escaping (Data) async -> ()) {
+    public func listen(listener: @escaping (Data) async -> Void) {
         listen { data in Task { await listener(data) } }
     }
 }
 
 // Wrapper functions if the data is of type void
-extension NCWrapper where Data == () {
+extension NCWrapper where Data == Void {
     func emit() {
         emit(value: ())
     }
 
-    public func listen(listener: @escaping () -> ()) {
+    public func listen(listener: @escaping () -> Void) {
         listen { _ in listener() }
     }
-    public func listen(listener: @escaping () async -> ()) {
+    public func listen(listener: @escaping () async -> Void) {
         listen { _ in await listener() }
     }
 }
