@@ -29,7 +29,7 @@ public protocol CommandOption: Encodable {
     // var channel_types: ChannelType? { get }
 }
 
-public struct AppCommandOptionChoice: Codable {
+public struct AppCommandOptionChoice: Encodable {
     public let name: String
     public let value: Interaction.Data.AppCommandData.OptionData.Value // Trust me it makes more sense nested like this
 }

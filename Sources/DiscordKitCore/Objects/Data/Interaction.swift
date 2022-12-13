@@ -58,7 +58,7 @@ public struct Interaction: Decodable {
             public let options: [OptionData]?
 
             public struct OptionData: Codable {
-                public enum Value: Codable {
+                public enum Value: Encodable {
                     case string(String)
                     case integer(Int)
                     case double(Double)
@@ -74,23 +74,33 @@ public struct Interaction: Decodable {
                         }
                     }
 
-                    public init(from decoder: Decoder) throws {
-                        let container = try decoder.singleValueContainer()
-
-                        if let val = try? container.decode(String.self) {
-                            self = .string(val)
-                        } else if let val = try? container.decode(Int.self) {
-                            self = .integer(val)
-                        } else if let val = try? container.decode(Double.self) {
-                            self = .double(val)
-                        } else if let val = try? container.decode(Bool.self) {
-                            self = .boolean(val)
-                        } else {
-                            throw DecodingError.typeMismatch(
-                                Bool.self,
-                                .init(codingPath: [], debugDescription: "Expected either String, Int or Double, found neither")
-                            )
-                        }
+                    /// Get the wrapped `String` value
+                    ///
+                    /// - Returns: The string value of a certain option if it is present and is of type `String`, otherwise `nil`
+                    public func value() -> String? {
+                        guard case let .string(val) = self else { return nil }
+                        return val
+                    }
+                    /// Get the wrapped `Int` value
+                    ///
+                    /// - Returns: The string value of a certain option if it is present and is of type `Int`, otherwise `nil`
+                    public func value() -> Int? {
+                        guard case let .integer(val) = self else { return nil }
+                        return val
+                    }
+                    /// Get the wrapped `Double` value
+                    ///
+                    /// - Returns: The string value of a certain option if it is present and is of type `Double`, otherwise `nil`
+                    public func value() -> Double? {
+                        guard case let .double(val) = self else { return nil }
+                        return val
+                    }
+                    /// Get the wrapped `Bool` value
+                    ///
+                    /// - Returns: The string value of a certain option if it is present and is of type `Bool`, otherwise `nil`
+                    public func value() -> Bool? {
+                        guard case let .boolean(val) = self else { return nil }
+                        return val
                     }
                 }
 
@@ -99,6 +109,30 @@ public struct Interaction: Decodable {
                 public let value: Value?
                 public let options: [OptionData]?
                 public let focused: Bool?
+
+                enum CodingKeys: CodingKey {
+                    case name
+                    case type
+                    case value
+                    case options
+                    case focused
+                }
+
+                public init(from decoder: Decoder) throws {
+                    let container = try decoder.container(keyedBy: CodingKeys.self)
+
+                    name = try container.decode(String.self, forKey: .name)
+                    type = try container.decode(CommandOptionType.self, forKey: .type)
+                    options = try container.decodeIfPresent([Self].self, forKey: .options)
+                    focused = try container.decodeIfPresent(Bool.self, forKey: .focused)
+                    switch type {
+                    case .integer: value = .integer(try container.decode(Int.self, forKey: .value))
+                    case .number: value = .double(try container.decode(Double.self, forKey: .value))
+                    case .boolean: value = .boolean(try container.decode(Bool.self, forKey: .value))
+                    case .string: value = .string(try container.decode(String.self, forKey: .value))
+                    default: value = nil
+                    }
+                }
             }
         }
 
