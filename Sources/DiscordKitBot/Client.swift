@@ -151,8 +151,8 @@ public extension Client {
     }
     /// Register Application Commands with the provided application command create structs
     func registerApplicationCommands(guild: Snowflake? = nil, _ commands: [NewAppCommand]) async throws {
+        try await rest!.bulkOverwriteCommands(commands, applicationID: applicationID!, guildID: guild)
         for command in commands {
-            try await rest!.createCommand(command, applicationID: applicationID!, guildID: guild)
             appCommandHandlers[command.name] = command.handler
         }
     }

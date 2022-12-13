@@ -38,6 +38,44 @@ public extension DiscordREST {
         }
     }
 
+    /// Builk overwrite global application command
+    ///
+    /// > PUT: `/applications/{application.id}/commands`
+    ///
+    /// Overwrite global application commands with those provided.
+    ///
+    /// > Warning:
+    /// > This will overwrite **all** types of application commands: slash commands, user
+    /// > commands, and message commands.
+    func bulkOverwriteGlobalCommands(_ commands: [NewAppCommand], applicationID: Snowflake) async throws {
+        try await putReq(path: "applications/\(applicationID)/commands", body: commands)
+    }
+
+    /// Builk overwrite guild application command
+    ///
+    /// > PUT: `/applications/{application.id}/guilds/{guild.id}/commands`
+    ///
+    /// Overwrite the application commands scoped to a certain guild with those provided.
+    ///
+    /// > Warning:
+    /// > This will overwrite **all** types of application commands: slash commands, user
+    /// > commands, and message commands.
+    ///
+    /// > Tip: This is useful for testing as guild commands update immediately,
+    /// > while updates to global commands take some time to propagate.
+    func bulkOverwriteGuildCommands(_ commands: [NewAppCommand], applicationID: Snowflake, guildID: Snowflake) async throws {
+        try await putReq(path: "applications/\(applicationID)/guilds/\(guildID)/commands", body: commands)
+    }
+
+    /// Utility method to conditionally bulk overwrite guild or global commands depending on parameters
+    func bulkOverwriteCommands(_ commands: [NewAppCommand], applicationID: Snowflake, guildID: Snowflake?) async throws {
+        if let guildID = guildID {
+            try await bulkOverwriteGuildCommands(commands, applicationID: applicationID, guildID: guildID)
+        } else {
+            try await bulkOverwriteGlobalCommands(commands, applicationID: applicationID)
+        }
+    }
+
     /// Send a response to an interaction
     func sendInteractionResponse(_ response: InteractionResponse, interactionID: Snowflake, token: String) async throws {
         try await postReq(path: "interactions/\(interactionID)/\(token)/callback", body: response)
