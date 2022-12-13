@@ -72,7 +72,7 @@ public extension CommandData {
     ///
     /// - Returns: The string value of a certain option if it is present and is of type `Int`, otherwise `nil`
     func optionValue(of name: String) -> Int? {
-        guard let originalValue = wrappedOptionValue(of: name), case let .int(val) = originalValue else { return nil }
+        guard let originalValue = wrappedOptionValue(of: name), case let .integer(val) = originalValue else { return nil }
         return val
     }
     /// Get the `Double` value of a certain option
@@ -83,6 +83,16 @@ public extension CommandData {
     /// - Returns: The string value of a certain option if it is present and is of type `Double`, otherwise `nil`
     func optionValue(of name: String) -> Double? {
         guard let originalValue = wrappedOptionValue(of: name), case let .double(val) = originalValue else { return nil }
+        return val
+    }
+    /// Get the `Bool` value of a certain option
+    ///
+    /// ## See Also
+    /// - ``wrappedOptionValue(of:)`` Get the value of the option, wrapped in an Enum
+    ///
+    /// - Returns: The string value of a certain option if it is present and is of type `Bool`, otherwise `nil`
+    func optionValue(of name: String) -> Bool? {
+        guard let originalValue = wrappedOptionValue(of: name), case let .boolean(val) = originalValue else { return nil }
         return val
     }
 }

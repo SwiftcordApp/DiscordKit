@@ -30,9 +30,6 @@ public protocol CommandOption: Codable {
 
     /// Channel types to restrict visibility of command to
     // var channel_types: ChannelType? { get }
-
-    // var min_value: Int? { get }
-    // var max_value: Int? { get }
 }
 
 public struct AppCommandOptionChoice: Codable {

@@ -60,15 +60,17 @@ public struct Interaction: Decodable {
             public struct OptionData: Codable {
                 public enum Value: Codable {
                     case string(String)
-                    case int(Int)
+                    case integer(Int)
                     case double(Double)
+                    case boolean(Bool) // Discord docs are disappointing
 
                     public func encode(to encoder: Encoder) throws {
                         var container = encoder.singleValueContainer()
                         switch self {
                         case .string(let val): try container.encode(val)
-                        case .int(let val): try container.encode(val)
+                        case .integer(let val): try container.encode(val)
                         case .double(let val): try container.encode(val)
+                        case .boolean(let val): try container.encode(val)
                         }
                     }
 
@@ -78,12 +80,14 @@ public struct Interaction: Decodable {
                         if let val = try? container.decode(String.self) {
                             self = .string(val)
                         } else if let val = try? container.decode(Int.self) {
-                            self = .int(val)
+                            self = .integer(val)
                         } else if let val = try? container.decode(Double.self) {
                             self = .double(val)
+                        } else if let val = try? container.decode(Bool.self) {
+                            self = .boolean(val)
                         } else {
                             throw DecodingError.typeMismatch(
-                                Double.self,
+                                Bool.self,
                                 .init(codingPath: [], debugDescription: "Expected either String, Int or Double, found neither")
                             )
                         }

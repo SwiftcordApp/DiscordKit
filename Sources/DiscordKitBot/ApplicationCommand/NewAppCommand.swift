@@ -73,5 +73,5 @@ public struct NewAppCommand: Encodable {
     }
 
     /// An application command handler that will be called on invocation of the command
-    public typealias Handler = (_ interaction: CommandData) -> Void
+    public typealias Handler = (_ interaction: CommandData) async -> Void
 }
