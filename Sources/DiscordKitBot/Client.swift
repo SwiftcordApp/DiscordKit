@@ -95,10 +95,12 @@ extension Client {
     private func invokeCommandHandler(_ commandData: Interaction.Data.AppCommandData, id: Snowflake, token: String) {
         if let handler = appCommandHandlers[commandData.name] {
             Self.logger.trace("Invoking application handler", metadata: ["command.name": "\(commandData.name)"])
-            handler(.init(
-                optionValues: commandData.options ?? [],
-                rest: rest!, token: token, interactionID: id
-            ))
+            Task {
+                await handler(.init(
+                    optionValues: commandData.options ?? [],
+                    rest: rest!, token: token, interactionID: id
+                ))
+            }
         }
     }
 
