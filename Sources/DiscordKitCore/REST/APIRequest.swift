@@ -21,6 +21,7 @@ public extension DiscordREST {
     enum RequestMethod: String {
         case get = "GET"
         case post = "POST"
+        case put = "PUT"
         case delete = "DELETE"
         case patch = "PATCH"
     }
@@ -177,6 +178,21 @@ public extension DiscordREST {
             path: path,
             body: nil,
             method: .post
+        )
+    }
+
+    /// Make a `PUT` request to the Discord REST API
+    ///
+    /// For endpoints that return an empty response
+    func putReq<B: Encodable>(
+        path: String,
+        body: B
+    ) async throws {
+        let payload = try DiscordREST.encoder.encode(body)
+        _ = try await makeRequest(
+            path: path,
+            body: payload,
+            method: .put
         )
     }
 
