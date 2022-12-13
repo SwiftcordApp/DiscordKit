@@ -40,7 +40,6 @@ public extension DiscordREST {
 
     /// Send a response to an interaction
     func sendInteractionResponse(_ response: InteractionResponse, interactionID: Snowflake, token: String) async throws {
-        let b = try DiscordREST.encoder.encode(response)
         try await postReq(path: "interactions/\(interactionID)/\(token)/callback", body: response)
     }
 }

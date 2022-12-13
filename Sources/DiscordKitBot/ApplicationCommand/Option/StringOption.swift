@@ -26,8 +26,7 @@ public struct StringOption: CommandOption {
 
     public var required: Bool?
 
-    /// Choices for ``OptionType/string``, ``OptionType/integer``,
-    /// and ``OptionType/number`` types for the user to pick from
+    /// Choices for the user to pick from
     ///
     /// > Important: There can be a max of 25 choices.
     public let choices: [AppCommandOptionChoice]?
@@ -45,7 +44,5 @@ public struct StringOption: CommandOption {
     public let max_length: Int?
 
     /// If autocomplete interactions are enabled for this option
-    ///
-    /// Only applicable for ``OptionType/string``, ``OptionType/integer``, or ``OptionType/number`` option types
     public let autocomplete: Bool?
 }

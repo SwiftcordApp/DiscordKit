@@ -97,7 +97,7 @@ endpoints. These are named "objects" in the official Discord Developer docs.
 - ``Guild``
 - ``GuildBan``
 - ``GuildEmojisUpdate``
-- ``GuildFolder``
+- ``GuildFolderItem``
 - ``GuildIntegrationsUpdate``
 - ``GuildMemberRemove``
 - ``GuildMemberUpdate``
