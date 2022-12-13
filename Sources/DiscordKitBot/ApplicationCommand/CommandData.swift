@@ -11,99 +11,70 @@ import DiscordKitCore
 /// Provides methods to get parameters of and respond to application command interactions
 public struct CommandData {
     internal init(
-        optionValues: [Interaction.Data.AppCommandData.OptionData],
+        optionValues: [OptionData],
         rest: DiscordREST, token: String, interactionID: Snowflake
     ) {
         self.rest = rest
         self.token = token
         self.interactionID = interactionID
 
-        var optValues: [String: Interaction.Data.AppCommandData.OptionData] = [:]
-        for optionValue in optionValues {
-            optValues[optionValue.name] = optionValue
-        }
-        self.optionValues = optValues
+        self.optionValues = Self.unwrapOptionDatas(optionValues)
     }
 
     /// A private reference to the active rest handler for handling actions
     private let rest: DiscordREST
 
     /// Values of options in this command
-    private let optionValues: [String: Interaction.Data.AppCommandData.OptionData]
+    private let optionValues: [String: OptionData]
 
     // MARK: Parameters for executing callbacks
     /// The token to use when carrying out actions with this interaction
     let token: String
     /// The ID of this interaction
     public let interactionID: Snowflake
+
+    fileprivate static func unwrapOptionDatas(_ options: [OptionData]) -> [String: OptionData] {
+        var optValues: [String: OptionData] = [:]
+        for optionValue in options {
+            optValues[optionValue.name] = optionValue
+        }
+        return optValues
+    }
 }
 
 // MARK: - Getter functions for option values
 public extension CommandData {
-    /// Get the wrapped value of a certain option
-    ///
-    /// This returns an enum which can either store a `Double`, `Int` or `String` value,
-    /// which is hard to work with. See below for wrapper methods, providing the primitive
-    /// wrapped type directly, which usually are a better choice.
-    ///
-    /// ## See Also
-    /// Directly get the primitive value of an option with one of the wrapper methods below.
-    /// - ``optionValue(of:)-bi3j`` - `Double`
-    /// - ``optionValue(of:)-7ssru`` - `Int`
-    /// - ``optionValue(of:)-6js4d`` - `String`
-    func wrappedOptionValue(of name: String) -> Interaction.Data.AppCommandData.OptionData.Value? {
-        optionValues[name]?.value
-    }
-
-    /// Get the `String` value of a certain option
-    ///
-    /// ## See Also
-    /// - ``wrappedOptionValue(of:)`` Get the value of the option, wrapped in an Enum
-    ///
-    /// - Returns: The string value of a certain option if it is present and is of type `String`, otherwise `nil`
+    /// Get the unboxed `String` value of an option
     func optionValue(of name: String) -> String? {
-        guard let originalValue = wrappedOptionValue(of: name), case let .string(val) = originalValue else { return nil }
-        return val
+        optionValues[name]?.value?.value()
     }
-    /// Get the `Int` value of a certain option
-    ///
-    /// ## See Also
-    /// - ``wrappedOptionValue(of:)`` Get the value of the option, wrapped in an Enum
-    ///
-    /// - Returns: The string value of a certain option if it is present and is of type `Int`, otherwise `nil`
+    /// Get the unboxed `Int` value of an option
     func optionValue(of name: String) -> Int? {
-        guard let originalValue = wrappedOptionValue(of: name), case let .integer(val) = originalValue else { return nil }
-        return val
+        optionValues[name]?.value?.value()
     }
-    /// Get the `Double` value of a certain option
-    ///
-    /// ## See Also
-    /// - ``wrappedOptionValue(of:)`` Get the value of the option, wrapped in an Enum
-    ///
-    /// - Returns: The string value of a certain option if it is present and is of type `Double`, otherwise `nil`
+    /// Get the unboxed `Double` value of an option
     func optionValue(of name: String) -> Double? {
-        guard let originalValue = wrappedOptionValue(of: name), case let .double(val) = originalValue else { return nil }
-        return val
+        optionValues[name]?.value?.value()
     }
-    /// Get the `Bool` value of a certain option
-    ///
-    /// ## See Also
-    /// - ``wrappedOptionValue(of:)`` Get the value of the option, wrapped in an Enum
-    ///
-    /// - Returns: The string value of a certain option if it is present and is of type `Bool`, otherwise `nil`
+    /// Get the unboxed `Bool` value of an option
     func optionValue(of name: String) -> Bool? {
-        guard let originalValue = wrappedOptionValue(of: name), case let .boolean(val) = originalValue else { return nil }
-        return val
+        optionValues[name]?.value?.value()
     }
 
-    /// Check if a sub-option is selected
+    /// Check if a sub-option is selected, and get its nested options
     ///
     /// This will probably be reworked in the future to provide a more friendly way of
     /// handling sub-options, sub-option groups and nested options.
-    func isSubOption(name: String) -> Bool? {
-        guard let option = optionValues[name] else { return nil }
-        return option.type == .subCommand
+    func subOption(name: String) -> [String: OptionData.Value]? {
+        guard let option = optionValues[name], option.type == .subCommand else { return nil }
+        // Throw away options without values as they aren't useful in this situation
+        return Self.unwrapOptionDatas(option.options ?? []).compactMapValues { opt in
+            opt.value
+        }
     }
+
+    /// The wrapped value of an option
+    typealias OptionData = Interaction.Data.AppCommandData.OptionData
 }
 
 // MARK: - Callback APIs
