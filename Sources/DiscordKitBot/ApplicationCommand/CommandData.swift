@@ -22,7 +22,10 @@ public struct CommandData {
     }
 
     /// A private reference to the active rest handler for handling actions
-    private let rest: DiscordREST
+    ///
+    /// This is a `weak` reference to prevent retain cycles if the backing ``Client``
+    /// instance gets deallocated.
+    private weak var rest: DiscordREST?
 
     /// Values of options in this command
     private let optionValues: [String: OptionData]
@@ -81,7 +84,7 @@ public extension CommandData {
 public extension CommandData {
     /// Reply to this interaction with a plain text response
     func reply(_ content: String) async throws {
-        try await rest.sendInteractionResponse(
+        try await rest?.sendInteractionResponse(
             .init(
                 type: .interactionReply,
                 data: .message(.init(content: content))
