@@ -30,6 +30,11 @@ public protocol CommandOption: Encodable {
 }
 
 public struct AppCommandOptionChoice: Encodable {
+    public init(name: String, value: Interaction.Data.AppCommandData.OptionData.Value) {
+        self.name = name
+        self.value = value
+    }
+
     public let name: String
     public let value: Interaction.Data.AppCommandData.OptionData.Value // Trust me it makes more sense nested like this
 }

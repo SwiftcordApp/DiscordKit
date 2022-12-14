@@ -24,11 +24,9 @@ public class DiscordREST {
 
     internal var token: String?
 
-    public init(token: String? = nil) {
-        self.token = token
-    }
+    public init() {}
 
-    public func setToken(token: String) {
+    public func setToken(token: String?) {
         self.token = token
     }
 }

@@ -12,7 +12,7 @@ import DiscordKitCore
 /// The main client class for bots to interact with Discord's API
 public final class Client {
     // REST handler
-    private var rest: DiscordREST?
+    private let rest = DiscordREST()
 
     // MARK: Gateway vars
     fileprivate var gateway: RobustWebSocket?
@@ -65,11 +65,24 @@ public final class Client {
     /// > and _after_ all event sinks have been registered. API calls made before this call
     /// > will fail, and no events will be received while the gateway is disconnected.
     public func login(token: String) {
-        rest = .init(token: token)
+        rest.setToken(token: token)
         gateway = .init(token: token)
         evtHandlerID = gateway?.onEvent.addHandler { [weak self] data in
             self?.handleEvent(data)
         }
+    }
+    /// Login to the Discord API with a token from the environment
+    ///
+    /// This method attempts to retrieve the token from the `DISCORD_TOKEN` environment
+    /// variable, and calls ``login(token:)`` if it was found.
+    ///
+    /// ## See Also
+    /// - ``login(token:)`` If you'd like to manually provide a token instead
+    public func login() {
+        let token = ProcessInfo.processInfo.environment["DISCORD_TOKEN"]?.trimmingCharacters(in: .whitespacesAndNewlines)
+        precondition(token != nil, "The \"DISCORD_TOKEN\" environment variable was not found.")
+        // We force unwrap here since that's the best way to inform the developer that they're missing a token
+        login(token: token!)
     }
 
     /// Disconnect from the gateway, undoes ``login(token:)``
@@ -83,7 +96,7 @@ public final class Client {
         if let evtHandlerID = evtHandlerID { _ = gateway?.onEvent.removeHandler(handler: evtHandlerID) }
         // Clear member vars
         gateway = nil
-        rest = nil
+        rest.setToken(token: nil)
         applicationID = nil
         user = nil
     }
@@ -100,7 +113,7 @@ extension Client {
             Task {
                 await handler(.init(
                     optionValues: commandData.options ?? [],
-                    rest: rest!, token: token, interactionID: id
+                    rest: rest, token: token, interactionID: id
                 ))
             }
         }
@@ -122,7 +135,7 @@ extension Client {
                 ready.emit()
             }
         case .messageCreate(let message):
-            let botMessage = BotMessage(from: message)
+            let botMessage = BotMessage(from: message, rest: rest)
             messageCreate.emit(value: botMessage)
         case .interaction(let interaction):
             Self.logger.trace("Received interaction", metadata: ["interaction.id": "\(interaction.id)"])
@@ -139,7 +152,7 @@ extension Client {
 public extension Client {
     func sendMessage(_ content: String, channel: Snowflake, replyingTo: Snowflake? = nil) async throws -> Message {
         let reference = replyingTo != nil ? MessageReference(message_id: replyingTo) : nil
-        return try await rest!.createChannelMsg(message: .init(content: content, message_reference: reference), id: channel)
+        return try await rest.createChannelMsg(message: .init(content: content, message_reference: reference), id: channel)
     }
 
     // MARK: Interactions
@@ -151,7 +164,7 @@ public extension Client {
     }
     /// Register Application Commands with the provided application command create structs
     func registerApplicationCommands(guild: Snowflake? = nil, _ commands: [NewAppCommand]) async throws {
-        try await rest!.bulkOverwriteCommands(commands, applicationID: applicationID!, guildID: guild)
+        try await rest.bulkOverwriteCommands(commands, applicationID: applicationID!, guildID: guild)
         for command in commands {
             appCommandHandlers[command.name] = command.handler
         }
