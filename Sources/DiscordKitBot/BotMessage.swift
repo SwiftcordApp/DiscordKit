@@ -18,7 +18,7 @@ public struct BotMessage {
     public let channelID: Snowflake // This will be changed very soon
     public let id: Snowflake // This too
 
-    init(from message: Message) {
+    init(from message: Message, rest: DiscordREST) {
         content = message.content
         channelID = message.channel_id
         id = message.id
