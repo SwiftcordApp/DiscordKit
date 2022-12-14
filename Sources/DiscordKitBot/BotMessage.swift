@@ -18,9 +18,14 @@ public struct BotMessage {
     public let channelID: Snowflake // This will be changed very soon
     public let id: Snowflake // This too
 
-    init(from message: Message, rest: DiscordREST) {
+    // The REST handler associated with this message, used for message actions
+    fileprivate weak var rest: DiscordREST?
+
+    internal init(from message: Message, rest: DiscordREST) {
         content = message.content
         channelID = message.channel_id
         id = message.id
+
+        self.rest = rest
     }
 }
