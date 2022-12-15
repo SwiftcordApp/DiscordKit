@@ -114,7 +114,7 @@ extension Client {
             Task {
                 await handler(.init(
                     optionValues: commandData.options ?? [],
-                    rest: rest, token: token, interactionID: id
+                    rest: rest, applicationID: applicationID!, interactionID: id, token: token
                 ))
             }
         }
