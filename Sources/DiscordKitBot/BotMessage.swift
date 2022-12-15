@@ -29,3 +29,12 @@ public struct BotMessage {
         self.rest = rest
     }
 }
+
+public extension BotMessage {
+    func reply(_ content: String) async throws -> Message {
+        return try await rest!.createChannelMsg(
+            message: .init(content: content, message_reference: .init(message_id: id)),
+            id: channelID
+        )
+    }
+}

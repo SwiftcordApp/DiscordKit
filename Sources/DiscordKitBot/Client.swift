@@ -151,11 +151,6 @@ extension Client {
 
 // MARK: - REST-related API
 public extension Client {
-    func sendMessage(_ content: String, channel: Snowflake, replyingTo: Snowflake? = nil) async throws -> Message {
-        let reference = replyingTo != nil ? MessageReference(message_id: replyingTo) : nil
-        return try await rest.createChannelMsg(message: .init(content: content, message_reference: reference), id: channel)
-    }
-
     // MARK: Interactions
     /// Register Application Commands with a result builder
     func registerApplicationCommands(
