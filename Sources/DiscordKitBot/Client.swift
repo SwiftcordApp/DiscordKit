@@ -81,6 +81,7 @@ public final class Client {
     public func login() {
         let token = ProcessInfo.processInfo.environment["DISCORD_TOKEN"]?.trimmingCharacters(in: .whitespacesAndNewlines)
         precondition(token != nil, "The \"DISCORD_TOKEN\" environment variable was not found.")
+        precondition(!token!.isEmpty, "The \"DISCORD_TOKEN\" environment variable is empty.")
         // We force unwrap here since that's the best way to inform the developer that they're missing a token
         login(token: token!)
     }
