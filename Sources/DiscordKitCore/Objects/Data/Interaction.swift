@@ -196,7 +196,7 @@ public struct MessageInteraction: Codable {
 
 // MARK: - Interaction Response
 public struct InteractionResponse: Encodable {
-    public init(type: InteractionResponse.ResponseType, data: InteractionResponse.ResponseData) {
+    public init(type: InteractionResponse.ResponseType, data: InteractionResponse.ResponseData?) {
         self.type = type
         self.data = data
     }
@@ -246,5 +246,5 @@ public struct InteractionResponse: Encodable {
     }
 
     public let type: ResponseType
-    public let data: ResponseData
+    public let data: ResponseData?
 }

@@ -9,14 +9,15 @@ import Foundation
 import DiscordKitCore
 
 /// Provides methods to get parameters of and respond to application command interactions
-public struct CommandData {
+public class CommandData {
     internal init(
         optionValues: [OptionData],
-        rest: DiscordREST, token: String, interactionID: Snowflake
+        rest: DiscordREST, applicationID: String, interactionID: Snowflake, token: String
     ) {
         self.rest = rest
         self.token = token
         self.interactionID = interactionID
+        self.applicationID = applicationID
 
         self.optionValues = Self.unwrapOptionDatas(optionValues)
     }
@@ -27,8 +28,14 @@ public struct CommandData {
     /// instance gets deallocated.
     private weak var rest: DiscordREST?
 
+    /// The ID of this bot application
+    private let applicationID: String
+
     /// Values of options in this command
     private let optionValues: [String: OptionData]
+
+    /// If this reply has already been deferred
+    fileprivate var replyDeferred = false
 
     // MARK: Parameters for executing callbacks
     /// The token to use when carrying out actions with this interaction
@@ -82,14 +89,40 @@ public extension CommandData {
 
 // MARK: - Callback APIs
 public extension CommandData {
+    /// Wrapper function to send an interaction response with the current interaction's ID and token
+    private func sendResponse(_ response: InteractionResponse) async throws {
+        try await rest?.sendInteractionResponse(response, interactionID: interactionID, token: token)
+    }
+
     /// Reply to this interaction with a plain text response
+    ///
+    /// If a prior call to ``deferReply()`` was made, this function automatically
+    /// calls ``followUp(_:)`` instead.
     func reply(_ content: String) async throws {
-        try await rest?.sendInteractionResponse(
+        if replyDeferred {
+            _ = try await followUp(content)
+            return
+        }
+        try await sendResponse(
             .init(
                 type: .interactionReply,
                 data: .message(.init(content: content))
-            ),
-            interactionID: interactionID, token: token
+            )
         )
+    }
+
+    /// Send a follow up response to this interaction
+    ///
+    /// By default, this creates a second reply to this interaction, appearing as a
+    /// reply in clients. However, if a call to ``deferReply()`` was made, this
+    /// edits the loading message with the content provided.
+    func followUp(_ content: String) async throws -> Message {
+        try await rest!.sendInteractionFollowUp(.init(content: content), applicationID: applicationID, token: token)
+    }
+
+    /// Defer the reply to this interaction - the user sees a loading state
+    func deferReply() async throws {
+        try await sendResponse(.init(type: .deferredInteractionReply, data: nil))
+        replyDeferred = true
     }
 }
