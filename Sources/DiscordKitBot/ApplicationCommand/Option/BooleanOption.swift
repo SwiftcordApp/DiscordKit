@@ -12,12 +12,11 @@ import DiscordKitCore
 ///
 /// To be used with the ``OptionBuilder`` from the ``NewAppCommand`` initialiser
 public struct BooleanOption: CommandOption {
-    public init(_ name: String, description: String, `required`: Bool? = nil) {
+    public init(_ name: String, description: String) {
         type = .boolean
 
         self.name = name
         self.description = description
-        self.required = `required`
     }
 
     public let type: CommandOptionType
@@ -26,5 +25,5 @@ public struct BooleanOption: CommandOption {
 
     public let description: String
 
-    public let required: Bool?
+    public var required: Bool?
 }

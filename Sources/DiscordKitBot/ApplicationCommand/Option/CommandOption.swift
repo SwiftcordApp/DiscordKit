@@ -23,10 +23,19 @@ public protocol CommandOption: Encodable {
     /// > Important: Must be 1-100 characters long
     var description: String { get }
     /// If this command is required
-    var required: Bool? { get }
+    var required: Bool? { get set }
 
     /// Channel types to restrict visibility of command to
     // var channel_types: ChannelType? { get }
+}
+
+// MARK: Modifiers
+public extension CommandOption {
+    func required() -> Self {
+        var opt = self
+        opt.required = true
+        return opt
+    }
 }
 
 public struct AppCommandOptionChoice: Encodable {

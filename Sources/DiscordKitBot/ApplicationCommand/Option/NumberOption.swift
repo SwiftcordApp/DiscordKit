@@ -12,12 +12,11 @@ import DiscordKitCore
 ///
 /// To be used with the ``OptionBuilder`` from the ``NewAppCommand`` initialiser
 public struct NumberOption: CommandOption {
-    public init(_ name: String, description: String, `required`: Bool? = nil, choices: [AppCommandOptionChoice]? = nil, min: Double? = nil, max: Double? = nil, autocomplete: Bool? = nil) {
+    public init(_ name: String, description: String, choices: [AppCommandOptionChoice]? = nil, min: Double? = nil, max: Double? = nil, autocomplete: Bool? = nil) {
         type = .number
 
         self.name = name
         self.description = description
-        self.required = `required`
         self.choices = choices
         self.min_value = min
         self.max_value = max
@@ -30,7 +29,7 @@ public struct NumberOption: CommandOption {
 
     public let description: String
 
-    public let required: Bool?
+    public var required: Bool?
 
     /// Choices for the user to pick from
     ///
