@@ -13,7 +13,7 @@ public extension DiscordREST {
     ///
     /// > POST: `/applications/{application.id}/commands`
     /// This creates a global application command available in all guilds.
-    func createGlobalCommand(_ command: NewAppCommand, applicationID: Snowflake) async throws {
+    func createGlobalCommand(_ command: NewAppCommand, applicationID: Snowflake) async throws -> AppCommand {
         try await postReq(path: "applications/\(applicationID)/commands", body: command)
     }
 
@@ -25,16 +25,22 @@ public extension DiscordREST {
     ///
     /// > Tip: This is useful for testing as guild commands update immediately,
     /// > while updates to global commands take some time to propagate.
-    func createGuildCommand(_ command: NewAppCommand, applicationID: Snowflake, guildID: Snowflake) async throws {
+    func createGuildCommand(
+        _ command: NewAppCommand,
+        applicationID: Snowflake, guildID: Snowflake
+    ) async throws -> AppCommand {
         try await postReq(path: "applications/\(applicationID)/guilds/\(guildID)/commands", body: command)
     }
 
     /// Utility method to conditionally create a guild or global command depending on parameters
-    func createCommand(_ command: NewAppCommand, applicationID: Snowflake, guildID: Snowflake?) async throws {
+    func createCommand(
+        _ command: NewAppCommand,
+        applicationID: Snowflake, guildID: Snowflake?
+    ) async throws -> AppCommand {
         if let guildID = guildID {
-            try await createGuildCommand(command, applicationID: applicationID, guildID: guildID)
+            return try await createGuildCommand(command, applicationID: applicationID, guildID: guildID)
         } else {
-            try await createGlobalCommand(command, applicationID: applicationID)
+            return try await createGlobalCommand(command, applicationID: applicationID)
         }
     }
 
@@ -47,7 +53,9 @@ public extension DiscordREST {
     /// > Warning:
     /// > This will overwrite **all** types of application commands: slash commands, user
     /// > commands, and message commands.
-    func bulkOverwriteGlobalCommands(_ commands: [NewAppCommand], applicationID: Snowflake) async throws {
+    func bulkOverwriteGlobalCommands(
+        _ commands: [NewAppCommand], applicationID: Snowflake
+    ) async throws -> [AppCommand] {
         try await putReq(path: "applications/\(applicationID)/commands", body: commands)
     }
 
@@ -63,16 +71,23 @@ public extension DiscordREST {
     ///
     /// > Tip: This is useful for testing as guild commands update immediately,
     /// > while updates to global commands take some time to propagate.
-    func bulkOverwriteGuildCommands(_ commands: [NewAppCommand], applicationID: Snowflake, guildID: Snowflake) async throws {
+    func bulkOverwriteGuildCommands(
+        _ commands: [NewAppCommand],
+        applicationID: Snowflake,
+        guildID: Snowflake
+    ) async throws -> [AppCommand] {
         try await putReq(path: "applications/\(applicationID)/guilds/\(guildID)/commands", body: commands)
     }
 
     /// Utility method to conditionally bulk overwrite guild or global commands depending on parameters
-    func bulkOverwriteCommands(_ commands: [NewAppCommand], applicationID: Snowflake, guildID: Snowflake?) async throws {
+    func bulkOverwriteCommands(
+        _ commands: [NewAppCommand],
+        applicationID: Snowflake, guildID: Snowflake?
+    ) async throws -> [AppCommand] {
         if let guildID = guildID {
-            try await bulkOverwriteGuildCommands(commands, applicationID: applicationID, guildID: guildID)
+            return try await bulkOverwriteGuildCommands(commands, applicationID: applicationID, guildID: guildID)
         } else {
-            try await bulkOverwriteGlobalCommands(commands, applicationID: applicationID)
+            return try await bulkOverwriteGlobalCommands(commands, applicationID: applicationID)
         }
     }
 

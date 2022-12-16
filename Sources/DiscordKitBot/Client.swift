@@ -19,7 +19,7 @@ public final class Client {
     private var evtHandlerID: EventDispatch.HandlerIdentifier?
 
     // MARK: Application Command Handlers
-    fileprivate var appCommandHandlers: [String: NewAppCommand.Handler] = [:]
+    fileprivate var appCommandHandlers: [Snowflake: NewAppCommand.Handler] = [:]
 
     // MARK: Event publishers
     private let notificationCenter = NotificationCenter()
@@ -109,7 +109,7 @@ extension Client {
 
     /// Invoke the handler associated with the respective commands
     private func invokeCommandHandler(_ commandData: Interaction.Data.AppCommandData, id: Snowflake, token: String) {
-        if let handler = appCommandHandlers[commandData.name] {
+        if let handler = appCommandHandlers[commandData.id] {
             Self.logger.trace("Invoking application handler", metadata: ["command.name": "\(commandData.name)"])
             Task {
                 await handler(.init(
@@ -160,9 +160,20 @@ public extension Client {
     }
     /// Register Application Commands with the provided application command create structs
     func registerApplicationCommands(guild: Snowflake? = nil, _ commands: [NewAppCommand]) async throws {
-        try await rest.bulkOverwriteCommands(commands, applicationID: applicationID!, guildID: guild)
+        let registeredCommands = try await rest.bulkOverwriteCommands(commands, applicationID: applicationID!, guildID: guild)
         for command in commands {
-            appCommandHandlers[command.name] = command.handler
+            // Find the actual registered command
+            // By comparing both the type and name, we ensure there is no ambiguity.
+            guard let registeredCommand = registeredCommands.first(where: {
+                $0.type == command.type && $0.name == command.name
+            }) else {
+                Self.logger.warning("Could not find registered command corresponding to new command", metadata: [
+                    "command.name": "\(command.name)",
+                    "command.type": "\(command.type)",
+                ])
+                continue
+            }
+            appCommandHandlers[registeredCommand.id] = command.handler
         }
     }
 }

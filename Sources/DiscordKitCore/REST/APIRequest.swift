@@ -182,18 +182,21 @@ public extension DiscordREST {
     }
 
     /// Make a `PUT` request to the Discord REST API
-    ///
-    /// For endpoints that return an empty response
-    func putReq<B: Encodable>(
+    func putReq<B: Encodable, Response: Decodable>(
         path: String,
         body: B
-    ) async throws {
+    ) async throws -> Response {
         let payload = try DiscordREST.encoder.encode(body)
-        _ = try await makeRequest(
+        let data = try await makeRequest(
             path: path,
             body: payload,
             method: .put
         )
+        do {
+            return try DiscordREST.decoder.decode(Response.self, from: data)
+        } catch {
+            throw RequestError.jsonDecodingError(error: error)
+        }
     }
 
     /// Make a `DELETE` request to the Discord REST API
