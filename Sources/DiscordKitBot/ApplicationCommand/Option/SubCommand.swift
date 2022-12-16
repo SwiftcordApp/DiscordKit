@@ -10,18 +10,17 @@ import DiscordKitCore
 
 public struct SubCommand: CommandOption {
     /// Create a sub-command, optionally with an array of options
-    public init(_ name: String, description: String, required: Bool? = nil, options: [CommandOption]? = nil) {
+    public init(_ name: String, description: String, options: [CommandOption]? = nil) {
         type = .subCommand
 
         self.name = name
         self.description = description
-        self.required = required
         self.options = options
     }
 
     /// Create a sub-command with options built by an ``OptionBuilder``
-    public init(_ name: String, description: String, required: Bool? = nil, @OptionBuilder options: () -> [CommandOption]) {
-        self.init(name, description: description, required: required, options: options())
+    public init(_ name: String, description: String, @OptionBuilder options: () -> [CommandOption]) {
+        self.init(name, description: description, options: options())
     }
 
     public let type: CommandOptionType
@@ -30,7 +29,7 @@ public struct SubCommand: CommandOption {
 
     public let description: String
 
-    public let required: Bool?
+    public var required: Bool?
 
     /// If this command is a subcommand or subcommand group type, these nested options will be its parameters
     public let options: [CommandOption]?

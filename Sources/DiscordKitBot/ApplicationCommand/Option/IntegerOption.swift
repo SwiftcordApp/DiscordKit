@@ -12,15 +12,12 @@ import DiscordKitCore
 ///
 /// To be used with the ``OptionBuilder`` from the ``NewAppCommand`` initialiser
 public struct IntegerOption: CommandOption {
-    public init(_ name: String, description: String, `required`: Bool? = nil, choices: [AppCommandOptionChoice]? = nil, min: Int? = nil, max: Int? = nil, autocomplete: Bool? = nil) {
+    public init(_ name: String, description: String, choices: [AppCommandOptionChoice]? = nil, autocomplete: Bool? = nil) {
         type = .integer
 
         self.name = name
         self.description = description
-        self.required = `required`
         self.choices = choices
-        self.min_value = min
-        self.max_value = max
         self.autocomplete = autocomplete
     }
 
@@ -30,7 +27,7 @@ public struct IntegerOption: CommandOption {
 
     public let description: String
 
-    public let required: Bool?
+    public var required: Bool?
 
     /// Choices for the user to pick from
     ///
@@ -38,10 +35,26 @@ public struct IntegerOption: CommandOption {
     public let choices: [AppCommandOptionChoice]?
 
     /// Minimium value permitted for this option
-    public let min_value: Int?
+    fileprivate(set) var min_value: Int?
     /// Maximum value permitted for this option
-    public let max_value: Int?
+    fileprivate(set) var max_value: Int?
 
     /// If autocomplete interactions are enabled for this option
     public let autocomplete: Bool?
+}
+
+extension IntegerOption {
+    /// Require the value of this option to be greater than or equal to this value
+    public func min(_ min: Int) -> Self {
+        var opt = self
+        opt.min_value = min
+        return opt
+    }
+
+    /// Require the value of this option to be smaller than or equal to this value
+    public func max(_ max: Int) -> Self {
+        var opt = self
+        opt.max_value = max
+        return opt
+    }
 }
