@@ -145,10 +145,15 @@ public struct DiscordKitConfig {
     /// The user agent to be sent with requests to the Discord API
     public let userAgent: String
 
+    /// If zlib stream compression is enabled for communication with the gateway
+    public let streamCompression: Bool
+
     /// Base REST endpoint URL
     public let restBase: URL
     /// Gateway WebSocket URL
-    public let gateway: String
+    public var gateway: String {
+        "wss://gateway.discord.gg/?v=\(version)&encoding=json\(streamCompression ? "&compress=zlib-stream" : "")"
+    }
 
     // The token to use to authenticate with both the Discord REST and Gateway APIs
     // public let token: String
@@ -171,16 +176,23 @@ public struct DiscordKitConfig {
     /// Populate struct values with provided parameters
     public init(
         baseURL: String = "canary.discord.com",
-        version: Int = 9,
+        version: Int? = nil,
         properties: GatewayConnProperties? = nil,
-        intents: Intents? = nil
+        intents: Intents? = nil,
+        streamCompression: Bool = true
     ) {
         self.cdnURL = "https://cdn.discordapp.com/"
         self.baseURL = URL(string: "https://\(baseURL)/")!
-        self.version = version
         self.intents = intents
+        self.streamCompression = streamCompression
+
+        if let version {
+            self.version = version
+        } else {
+            self.version = intents == nil ? 9 : 10
+        }
         if intents == nil {
-            userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) discord/\(version) Chrome/91.0.4472.164 Electron/\(Self.clientParity.electronVersion) Safari/537.36"
+            userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) discord/\(self.version) Chrome/91.0.4472.164 Electron/\(Self.clientParity.electronVersion) Safari/537.36"
         } else {
             userAgent = "DiscordBot (https://github.com/SwiftcordApp/DiscordKit, \(Self.discordKitBuild))"
         }
@@ -193,8 +205,7 @@ public struct DiscordKitConfig {
                 buildNumber: Self.clientParity.buildNumber
             )
         }
-        gateway = "wss://gateway.discord.gg/?v=\(version)&encoding=json&compress=zlib-stream"
-        restBase = self.baseURL.appendingPathComponent("api").appendingPathComponent("v\(version)")
+        restBase = self.baseURL.appendingPathComponent("api").appendingPathComponent("v\(self.version)")
     }
 
     /// Populate a ``GatewayConnProperties`` struct with some constant
