@@ -14,6 +14,7 @@ import DiscordKitCore
 /// > Use methods like ``Client/registerApplicationCommands(guild:_:)-3vqy0``
 /// > which allow you to construct commands with an ``AppCommandBuilder``.
 public struct NewAppCommand: Encodable {
+    public let type: AppCommand.CommandType
     /// Name of this application command
     public let name: String
     /// Description of this application command
@@ -24,6 +25,7 @@ public struct NewAppCommand: Encodable {
     let handler: Handler
 
     enum CodingKeys: CodingKey {
+        case type
         case name
         case description
         case options
@@ -31,6 +33,7 @@ public struct NewAppCommand: Encodable {
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(type, forKey: .type)
         try container.encode(name, forKey: .name)
         try container.encode(description, forKey: .description)
 
@@ -46,11 +49,13 @@ public struct NewAppCommand: Encodable {
     /// Create an instance of a ``NewAppCommand``, with options provided as an array without an ``OptionBuilder``
     public init(
         _ name: String, description: String? = nil,
+        type: AppCommand.CommandType = .slash,
         options: [CommandOption]? = nil,
         handler: @escaping Handler
     ) {
         self.name = name
         self.description = description
+        self.type = type
         self.options = options
         self.handler = handler
     }
@@ -58,18 +63,11 @@ public struct NewAppCommand: Encodable {
     /// Create an instance of a ``NewAppCommand``, adding options with an ``OptionBuilder``
     public init(
         _ name: String, description: String? = nil,
+        type: AppCommand.CommandType = .slash,
         @OptionBuilder options: () -> [CommandOption],
         handler: @escaping Handler
     ) {
-        self.init(name, description: description, options: options(), handler: handler)
-    }
-
-    /// Create an instance of a ``NewAppCommand`` without any options
-    public init(
-        _ name: String, description: String? = nil,
-        handler: @escaping Handler
-    ) {
-        self.init(name, description: description, options: nil, handler: handler)
+        self.init(name, description: description, type: type, options: options(), handler: handler)
     }
 
     /// An application command handler that will be called on invocation of the command
