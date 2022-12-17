@@ -100,20 +100,25 @@ public extension CommandData {
     ///
     /// If a prior call to ``deferReply()`` was made, this function automatically
     /// calls ``followUp(_:)`` instead.
-    func reply(content: String?, embeds: [BotEmbed]?) async throws {
+    func reply(content: String?, embeds: [BotEmbed]?, ephemeral: Bool = false) async throws {
         if hasReplied {
             _ = try await followUp(content: content, embeds: embeds)
             return
         }
-        try await sendResponse(.message(.init(content: content, embeds: embeds)), type: .interactionReply)
+        try await sendResponse(
+            .message(
+                .init(content: content, embeds: embeds, flags: ephemeral ? .ephemeral : nil)
+            ),
+            type: .interactionReply
+        )
     }
     /// Reply to this interaction with plain text content
-    func reply(_ content: String) async throws {
-        try await reply(content: content, embeds: nil)
+    func reply(_ content: String, ephemeral: Bool = false) async throws {
+        try await reply(content: content, embeds: nil, ephemeral: ephemeral)
     }
     /// Reply to this interaction with embeds
-    func reply(@EmbedBuilder _ embeds: () -> [BotEmbed]) async throws {
-        try await reply(content: nil, embeds: embeds())
+    func reply(ephemeral: Bool = false, @EmbedBuilder _ embeds: () -> [BotEmbed]) async throws {
+        try await reply(content: nil, embeds: embeds(), ephemeral: ephemeral)
     }
 
     /// Send a follow up response to this interaction
@@ -126,8 +131,8 @@ public extension CommandData {
     }
 
     /// Defer the reply to this interaction - the user sees a loading state
-    func deferReply() async throws {
-        try await sendResponse(nil, type: .deferredInteractionReply)
+    func deferReply(ephemeral: Bool = false) async throws {
+        try await sendResponse(.message(.init(flags: ephemeral ? .ephemeral : nil)), type: .deferredInteractionReply)
         hasReplied = true
     }
 }

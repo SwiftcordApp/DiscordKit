@@ -27,7 +27,13 @@ public struct InteractionResponse: Encodable {
 
     public enum ResponseData: Encodable {
         public struct Message: Codable {
-            public init(content: String? = nil, tts: String? = nil, embeds: [BotEmbed]? = nil, allowed_mentions: AllowedMentions? = nil, flags: Int? = nil, components: [MessageComponent]? = nil, attachments: [NewAttachment]? = nil) {
+            public init(
+                content: String? = nil, tts: String? = nil, embeds: [BotEmbed]? = nil,
+                allowed_mentions: AllowedMentions? = nil,
+                flags: DiscordKitCore.Message.Flags? = nil,
+                components: [MessageComponent]? = nil,
+                attachments: [NewAttachment]? = nil
+            ) {
                 self.content = content
                 self.tts = tts
                 self.embeds = embeds
@@ -41,7 +47,7 @@ public struct InteractionResponse: Encodable {
             public let tts: String?
             public let embeds: [BotEmbed]?
             public let allowed_mentions: AllowedMentions?
-            public let flags: Int?
+            public let flags: DiscordKitCore.Message.Flags?
             public let components: [MessageComponent]?
             public let attachments: [NewAttachment]?
         }
