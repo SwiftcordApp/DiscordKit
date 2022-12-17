@@ -35,7 +35,7 @@ public class CommandData {
     private let optionValues: [String: OptionData]
 
     /// If this reply has already been deferred
-    fileprivate var replyDeferred = false
+    fileprivate var hasReplied = false
 
     // MARK: Parameters for executing callbacks
     /// The token to use when carrying out actions with this interaction
@@ -96,20 +96,24 @@ public extension CommandData {
         try await rest?.sendInteractionResponse(.init(type: type, data: response), interactionID: interactionID, token: token)
     }
 
-    /// Reply to this interaction with a plain text response
+    /// Reply to this interaction
     ///
     /// If a prior call to ``deferReply()`` was made, this function automatically
     /// calls ``followUp(_:)`` instead.
-    func reply(_ content: String) async throws {
-        if replyDeferred {
-            _ = try await followUp(content)
+    func reply(content: String?, embeds: [BotEmbed]?) async throws {
+        if hasReplied {
+            _ = try await followUp(content: content, embeds: embeds)
             return
         }
-        try await sendResponse(.message(.init(content: content)), type: .interactionReply)
+        try await sendResponse(.message(.init(content: content, embeds: embeds)), type: .interactionReply)
     }
-
+    /// Reply to this interaction with plain text content
+    func reply(_ content: String) async throws {
+        try await reply(content: content, embeds: nil)
+    }
+    /// Reply to this interaction with embeds
     func reply(@EmbedBuilder _ embeds: () -> [BotEmbed]) async throws {
-        try await sendResponse(.message(.init(embeds: embeds())), type: .interactionReply)
+        try await reply(content: nil, embeds: embeds())
     }
 
     /// Send a follow up response to this interaction
@@ -117,13 +121,13 @@ public extension CommandData {
     /// By default, this creates a second reply to this interaction, appearing as a
     /// reply in clients. However, if a call to ``deferReply()`` was made, this
     /// edits the loading message with the content provided.
-    func followUp(_ content: String) async throws -> Message {
-        try await rest!.sendInteractionFollowUp(.init(content: content), applicationID: applicationID, token: token)
+    func followUp(content: String?, embeds: [BotEmbed]?) async throws -> Message {
+        try await rest!.sendInteractionFollowUp(.init(content: content, embeds: embeds), applicationID: applicationID, token: token)
     }
 
     /// Defer the reply to this interaction - the user sees a loading state
     func deferReply() async throws {
         try await sendResponse(nil, type: .deferredInteractionReply)
-        replyDeferred = true
+        hasReplied = true
     }
 }
