@@ -90,8 +90,10 @@ public extension CommandData {
 // MARK: - Callback APIs
 public extension CommandData {
     /// Wrapper function to send an interaction response with the current interaction's ID and token
-    private func sendResponse(_ response: InteractionResponse) async throws {
-        try await rest?.sendInteractionResponse(response, interactionID: interactionID, token: token)
+    private func sendResponse(
+        _ response: InteractionResponse.ResponseData?, type: InteractionResponse.ResponseType
+    ) async throws {
+        try await rest?.sendInteractionResponse(.init(type: type, data: response), interactionID: interactionID, token: token)
     }
 
     /// Reply to this interaction with a plain text response
@@ -103,12 +105,11 @@ public extension CommandData {
             _ = try await followUp(content)
             return
         }
-        try await sendResponse(
-            .init(
-                type: .interactionReply,
-                data: .message(.init(content: content))
-            )
-        )
+        try await sendResponse(.message(.init(content: content)), type: .interactionReply)
+    }
+
+    func reply(@EmbedBuilder _ embeds: () -> [BotEmbed]) async throws {
+        try await sendResponse(.message(.init(embeds: embeds())), type: .interactionReply)
     }
 
     /// Send a follow up response to this interaction
@@ -122,7 +123,7 @@ public extension CommandData {
 
     /// Defer the reply to this interaction - the user sees a loading state
     func deferReply() async throws {
-        try await sendResponse(.init(type: .deferredInteractionReply, data: nil))
+        try await sendResponse(nil, type: .deferredInteractionReply)
         replyDeferred = true
     }
 }
