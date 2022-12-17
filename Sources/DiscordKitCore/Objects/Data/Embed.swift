@@ -18,19 +18,36 @@ public enum EmbedType: String, Codable {
 }
 
 public struct Embed: Codable, Identifiable {
-    public let title: String?
+    public init(title: String? = nil, type: EmbedType? = nil, description: String? = nil, url: String? = nil, timestamp: Date? = nil, color: Int? = nil, footer: EmbedFooter? = nil, image: EmbedMedia? = nil, thumbnail: EmbedMedia? = nil, video: EmbedMedia? = nil, provider: EmbedProvider? = nil, author: EmbedAuthor? = nil, fields: [EmbedField]? = nil) {
+        self.title = title
+        self.type = type
+        self.description = description
+        self.url = url
+        self.timestamp = timestamp
+        self.color = color
+        self.footer = footer
+        self.image = image
+        self.thumbnail = thumbnail
+        self.video = video
+        self.provider = provider
+        self.author = author
+        self.fields = fields
+    }
+
+    public var title: String?
     public let type: EmbedType?
-    public let description: String?
-    public let url: String?
-    public let timestamp: Date?
-    public let color: Int?
-    public let footer: EmbedFooter?
+    public var description: String?
+    public var url: String?
+    public var timestamp: Date?
+    public var color: Int?
+    public var footer: EmbedFooter?
     public let image: EmbedMedia?
     public let thumbnail: EmbedMedia?
     public let video: EmbedMedia?
     public let provider: EmbedProvider?
-    public let author: EmbedAuthor?
-    public let fields: [EmbedField]?
+    public var author: EmbedAuthor?
+    public var fields: [EmbedField]?
+
     public var id: String {
 		"\(title ?? "")\(description ?? "")\(url ?? "")\(String(color ?? 0))\(String(timestamp?.timeIntervalSince1970 ?? 0))"
     }
