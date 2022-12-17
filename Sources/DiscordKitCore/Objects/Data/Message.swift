@@ -57,6 +57,31 @@ public enum MessageType: Int, Codable {
 
 /// Represents a message sent in a channel within Discord
 public class Message: Codable, GatewayData, Equatable, Identifiable {
+    public struct Flags: OptionSet, Codable {
+        public init(rawValue: UInt8) {
+            self.rawValue = rawValue
+        }
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            rawValue = try container.decode(UInt8.self)
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.singleValueContainer()
+            try container.encode(rawValue)
+        }
+
+        public let rawValue: UInt8
+
+        static let crossposted = Self(rawValue: 1 << 0)
+        static let isCrosspost = Self(rawValue: 1 << 1)
+        static let suppressEmbeds = Self(rawValue: 1 << 2)
+        static let sourceMessageDeleted = Self(rawValue: 1 << 3)
+        static let urgent = Self(rawValue: 1 << 4)
+        static let hasThread = Self(rawValue: 1 << 5)
+        static let ephemeral = Self(rawValue: 1 << 6)
+    }
+
     public init(id: Snowflake, channel_id: Snowflake, guild_id: Snowflake? = nil, author: User, member: Member? = nil, content: String, timestamp: Date, edited_timestamp: Date? = nil, tts: Bool, mention_everyone: Bool, mentions: [User], mention_roles: [Snowflake], mention_channels: [ChannelMention]? = nil, attachments: [Attachment], embeds: [Embed], reactions: [Reaction]? = nil, pinned: Bool, webhook_id: Snowflake? = nil, type: MessageType, activity: MessageActivity? = nil, application: Application? = nil, application_id: Snowflake? = nil, message_reference: MessageReference? = nil, flags: Int? = nil, referenced_message: Message? = nil, interaction: MessageInteraction? = nil, thread: Channel? = nil, components: [MessageComponent]? = nil, sticker_items: [StickerItem]? = nil) {
         self.id = id
         self.channel_id = channel_id
