@@ -1,32 +1,50 @@
-# DiscordKit
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/64193267/208341700-75fb1d63-f044-4b60-9c86-ed945916b65c.png" height="128">
+</p>
 
-![Discord](https://img.shields.io/discord/964741354112577557?style=for-the-badge)
+<h1 align="center">DiscordKit</h1>
 
-The Discord API implementation that powers [Swiftcord](https://github.com/SwiftcordApp/Swiftcord),
-a native Discord client for macOS also written in Swift.
+<p align="center">
+  <a aria-label="Join the community on Discord" href="https://discord.gg/vChUXVf9Em" target="_blank">
+    <img alt="" src="https://img.shields.io/discord/964741354112577557?style=for-the-badge&labelColor=black&label=Discord">
+  </a>
+  <img alt="" src="https://www.aschey.tech/tokei/github/SwiftcordApp/DiscordKit?style=for-the-badge&labelColor=black">
+  <a aria-label="DiscordKit Guide" href="https://swiftcord.gitbook.io/discordkit-guide/" target="_blank">
+    <img alt="" src="https://img.shields.io/badge/guide-gitbook-important?style=for-the-badge&labelColor=black">
+  </a>
+</p>
 
-A (mainly) fully functional Discord API library written from scratch fully in Swift!
-Currently only supports user accounts, bot support coming soon. Check out the
-[`bot-support`](https://github.com/SwiftcordApp/DiscordKit/tree/bot-support) branch
-and SwiftcordApp/DiscordKit#18 for a quick peep into what we've been up to ;D
+<p align="center">Package for interacting with Discord's API to build Swift bots</p>
 
-**If you like DiscordKit, please give it a ⭐ star, or consider sponsoring! It helps motivate
-me to continue developing it**
+> DiscordKit for Bots is now released! Use DiscordKit to create that bot you've been
+> looking to make, in the Swift that you know and love!
 
-## Documentation
+## About
 
-WIP Developer Documentation is available [here](https://swiftcordapp.github.io/DiscordKit/documentation/discordkit/).
+DiscordKit is a Swift package for creating Discord bots in Swift.
+
+**If DiscordKit has helped you, please give it a ⭐ star, or consider sponsoring! It
+keeps me motivated to continue developing this and other projects.**
+
+## Resources
+
+Here are some (WIP) resources that might be useful while developing with DiscordKit.
+
+* [DiscordKit Guide](https://swiftcord.gitbook.io/discordkit-guide/)
+* [Developer Documentation](https://swiftcordapp.github.io/DiscordKit/documentation/discordkit/)
 
 ## Platform Support
 
-Currently, DiscordKit only offically supports macOS versions 12 and up. Theoretically, You should be able to compile and use DiscordKit on i(Pad)OS/tvOS, however this has not been tested and is considered an unsupported setup.
+Currently, DiscordKit only offically supports macOS versions 11 and up. Theoretically, you should be able to compile and use DiscordKit on any Apple platform with equivalent APIs, however this has not been tested and is considered an unsupported setup.
 
-Linux and Windows is not supported at the moment, due to our reliance on Apple's `Security` and `SystemConfiguration` frameworks. We have not blocked building DiscordKit on Linux and Windows in the event that support for those frameworks is added in the future. We may rework the code to add support for linux/windows in the future.
+Linux and Windows is not supported at the moment, primarily due to our reliance on Apple's `Combine` framework. We have not blocked building DiscordKit on other platforms in the event that support for those frameworks is added to Swift's corelibs in the future.
 
-## Adding DiscordKit to your project
+Linux support is planned, and will arrive sometime in the future. Unfortunately, we do not have a timeline for that at the moment.
+
+## Installation
 ### SPM:
 Add the following to your `Package.swift`:
 ```swift
-.package(url: "https://github.com/SwiftcordApp/DiscordKit", branch: "main"),
+.package(url: "https://github.com/SwiftcordApp/DiscordKit", branch: "bot-support"),
 ```
 Currently, DiscordKit is in alpha, so it's recommended to use the latest commit on the `main` branch.
