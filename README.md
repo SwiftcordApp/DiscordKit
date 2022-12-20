@@ -8,6 +8,10 @@
   <a aria-label="Join the community on Discord" href="https://discord.gg/vChUXVf9Em" target="_blank">
     <img alt="" src="https://img.shields.io/discord/964741354112577557?style=for-the-badge&labelColor=black&label=Discord">
   </a>
+
+  <!-- Self-hosted tokei_rs instance, only works for repos in the SwiftcordApp org -->
+  <img alt="" src="https://vinkwok.tk/tokei/github/SwiftcordApp/DiscordKit?style=for-the-badge&branch=bot-support">
+
   <a aria-label="DiscordKit Guide" href="https://swiftcord.gitbook.io/discordkit-guide/" target="_blank">
     <img alt="" src="https://img.shields.io/badge/guide-gitbook-important?style=for-the-badge&labelColor=black">
   </a>
