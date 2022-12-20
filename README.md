@@ -5,7 +5,7 @@
 <h1 align="center">DiscordKit</h1>
 
 <p align="center">
-  <a aria-label="Join the community on Discord" href="https://discord.gg/vChUXVf9Em" target="_blank">
+  <a aria-label="Join the community on Discord" href="https://discord.gg/he7n6MGDXS" target="_blank">
     <img alt="" src="https://img.shields.io/discord/964741354112577557?style=for-the-badge&labelColor=black&label=Discord">
   </a>
 
