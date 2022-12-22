@@ -1,9 +1,4 @@
-//
-//  File.swift
-//  
-//
-//  Created by Vincent Kwok on 10/7/22.
-//
+// NOTE: This file is auto-generated
 
 import Foundation
 
@@ -27,5 +22,14 @@ public extension DiscordREST {
             URLQueryItem(name: "with_counts", value: String(withCounts)),
             URLQueryItem(name: "with_expiration", value: String(withExpiration))
         ])
+    }
+    // MARK: Delete Invite
+    // DELETE /invites/${InviteCode}
+    func deleteInvite(
+        _ inviteCode: String
+    ) async throws {
+        try await deleteReq(
+            path: "invites/\(inviteCode)/"
+        )
     }
 }

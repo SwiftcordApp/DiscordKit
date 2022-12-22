@@ -1,9 +1,4 @@
-//
-//  APIUser.swift
-//  DiscordAPI
-//
-//  Created by Vincent Kwok on 22/2/22.
-//
+// NOTE: This file is auto-generated
 
 import Foundation
 
@@ -87,5 +82,56 @@ public extension DiscordREST {
     ///   - voipProvider: Unknown, always observed to be nil
     func logOut(provider: String? = nil, voipProvider: String? = nil) async throws {
         return try await postReq(path: "auth/logout", body: LogOut(provider: provider, voip_provider: voipProvider))
+    }
+    // MARK: Edit Current User
+    // PATCH /users/@me
+    func editCurrentUser<B: Encodable>(_ body: B) async throws {
+        try await patchReq(
+            path: "users/@me/",
+            body: body
+        )
+    }
+    // MARK: Create DM
+    // POST /users/@me/channels
+    func createDM<T: Decodable, B: Encodable>(_ body: B) async throws -> T {
+        return try await postReq(
+            path: "users/@me/channels/",
+            body: body
+        )
+    }
+    // MARK: Create Group DM
+    // POST /users/@me/channels
+    func createGroupDM<T: Decodable, B: Encodable>(_ body: B) async throws -> T {
+        return try await postReq(
+            path: "users/@me/channels/",
+            body: body
+        )
+    }
+    // MARK: Get User Connections
+    // GET /users/@me/connections
+    func getUserConnections<T: Decodable>() async throws -> T {
+        return try await getReq(
+            path: "users/@me/connections/"
+        )
+    }
+    // MARK: Get User Application Role Connection
+    // GET /users/@me/applications/${ApplicationId}/role-connection
+    func getUserApplicationRoleConnection<T: Decodable>(
+        _ applicationId: Snowflake
+    ) async throws -> T {
+        return try await getReq(
+            path: "users/@me/applications/\(applicationId)/role-connection/"
+        )
+    }
+    // MARK: Update User Application Role Connection
+    // PUT /users/@me/applications/${ApplicationId}/role-connection
+    func updateUserApplicationRoleConnection<T: Decodable, B: Encodable>(
+        _ applicationId: Snowflake,
+        _ body: B
+    ) async throws -> T {
+        return try await putReq(
+            path: "users/@me/applications/\(applicationId)/role-connection/",
+            body: body
+        )
     }
 }
