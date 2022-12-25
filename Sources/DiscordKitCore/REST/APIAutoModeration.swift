@@ -3,8 +3,9 @@
 import Foundation
 
 public extension DiscordREST {
-    // MARK: List Auto Moderation Rules for Guild
-    // GET /guilds/${GuildId}/auto-moderation/rules
+    /// List Auto Moderation Rules for Guild
+    ///
+    /// > GET: `/guilds/{guild.id}/auto-moderation/rules`
     func listAutoModerationRulesforGuild<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -12,8 +13,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/auto-moderation/rules/"
         )
     }
-    // MARK: Get Auto Moderation Rule
-    // GET /guilds/${GuildId}/auto-moderation/rules/${Auto_moderation_ruleId}
+    /// Get Auto Moderation Rule
+    ///
+    /// > GET: `/guilds/{guild.id}/auto-moderation/rules/{auto_moderation_rule.id}`
     func getAutoModerationRule<T: Decodable>(
         _ guildId: Snowflake,
         _ auto_moderation_ruleId: Snowflake
@@ -22,8 +24,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/auto-moderation/rules/\(auto_moderation_ruleId)/"
         )
     }
-    // MARK: Create Auto Moderation Rule
-    // POST /guilds/${GuildId}/auto-moderation/rules
+    /// Create Auto Moderation Rule
+    ///
+    /// > POST: `/guilds/{guild.id}/auto-moderation/rules`
     func createAutoModerationRule<T: Decodable, B: Encodable>(
         _ guildId: Snowflake,
         _ body: B
@@ -33,8 +36,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Edit Auto Moderation Rule
-    // PATCH /guilds/${GuildId}/auto-moderation/rules/${Auto_moderation_ruleId}
+    /// Edit Auto Moderation Rule
+    ///
+    /// > PATCH: `/guilds/{guild.id}/auto-moderation/rules/{auto_moderation_rule.id}`
     func editAutoModerationRule<B: Encodable>(
         _ guildId: Snowflake,
         _ auto_moderation_ruleId: Snowflake,
@@ -45,8 +49,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Delete Auto Moderation Rule
-    // DELETE /guilds/${GuildId}/auto-moderation/rules/${Auto_moderation_ruleId}
+    /// Delete Auto Moderation Rule
+    ///
+    /// > DELETE: `/guilds/{guild.id}/auto-moderation/rules/{auto_moderation_rule.id}`
     func deleteAutoModerationRule(
         _ guildId: Snowflake,
         _ auto_moderation_ruleId: Snowflake

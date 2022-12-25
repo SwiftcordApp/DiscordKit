@@ -3,8 +3,9 @@
 import Foundation
 
 public extension DiscordREST {
-    // MARK: List Scheduled Events for Guild
-    // GET /guilds/${GuildId}/scheduled-events
+    /// List Scheduled Events for Guild
+    ///
+    /// > GET: `/guilds/{guild.id}/scheduled-events`
     func listScheduledEventsforGuild<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -12,8 +13,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/scheduled-events/"
         )
     }
-    // MARK: Create Guild Scheduled Event
-    // POST /guilds/${GuildId}/scheduled-events
+    /// Create Guild Scheduled Event
+    ///
+    /// > POST: `/guilds/{guild.id}/scheduled-events`
     func createGuildScheduledEvent<T: Decodable, B: Encodable>(
         _ guildId: Snowflake,
         _ body: B
@@ -23,8 +25,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Get Guild Scheduled Event
-    // GET /guilds/${GuildId}/scheduled-events/${Guild_scheduled_eventId}
+    /// Get Guild Scheduled Event
+    ///
+    /// > GET: `/guilds/{guild.id}/scheduled-events/{guild_scheduled_event.id}`
     func getGuildScheduledEvent<T: Decodable>(
         _ guildId: Snowflake,
         _ guild_scheduled_eventId: Snowflake
@@ -33,8 +36,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/scheduled-events/\(guild_scheduled_eventId)/"
         )
     }
-    // MARK: Edit Guild Scheduled Event
-    // PATCH /guilds/${GuildId}/scheduled-events/${Guild_scheduled_eventId}
+    /// Edit Guild Scheduled Event
+    ///
+    /// > PATCH: `/guilds/{guild.id}/scheduled-events/{guild_scheduled_event.id}`
     func editGuildScheduledEvent<B: Encodable>(
         _ guildId: Snowflake,
         _ guild_scheduled_eventId: Snowflake,
@@ -45,8 +49,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Delete Guild Scheduled Event
-    // DELETE /guilds/${GuildId}/scheduled-events/${Guild_scheduled_eventId}
+    /// Delete Guild Scheduled Event
+    ///
+    /// > DELETE: `/guilds/{guild.id}/scheduled-events/{guild_scheduled_event.id}`
     func deleteGuildScheduledEvent(
         _ guildId: Snowflake,
         _ guild_scheduled_eventId: Snowflake
@@ -55,8 +60,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/scheduled-events/\(guild_scheduled_eventId)/"
         )
     }
-    // MARK: Get Guild Scheduled Event Users
-    // GET /guilds/${GuildId}/scheduled-events/${Guild_scheduled_eventId}/users
+    /// Get Guild Scheduled Event Users
+    ///
+    /// > GET: `/guilds/{guild.id}/scheduled-events/{guild_scheduled_event.id}/users`
     func getGuildScheduledEventUsers<T: Decodable>(
         _ guildId: Snowflake,
         _ guild_scheduled_eventId: Snowflake

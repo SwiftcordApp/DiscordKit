@@ -3,20 +3,23 @@
 import Foundation
 
 public extension DiscordREST {
-    // MARK: Get Sticker
-    // GET /stickers/{sticker.id}
+    /// Get Sticker
+    ///
+    /// > GET: `/stickers/{sticker.id}`
     func getSticker(id: Snowflake) async throws -> Sticker {
         return try await getReq(path: "stickers/\(id)")
     }
-    // MARK: List Nitro Sticker Packs
-    // GET /sticker-packs
+    /// List Nitro Sticker Packs
+    ///
+    /// > GET: `/sticker-packs`
     func listNitroStickerPacks<T: Decodable>() async throws -> T {
         return try await getReq(
             path: "sticker-packs/"
         )
     }
-    // MARK: List Guild Stickers
-    // GET /guilds/${GuildId}/stickers
+    /// List Guild Stickers
+    ///
+    /// > GET: `/guilds/{guild.id}/stickers`
     func listGuildStickers<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -24,8 +27,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/stickers/"
         )
     }
-    // MARK: Get Guild Sticker
-    // GET /guilds/${GuildId}/stickers/${StickerId}
+    /// Get Guild Sticker
+    ///
+    /// > GET: `/guilds/{guild.id}/stickers/{sticker.id}`
     func getGuildSticker<T: Decodable>(
         _ guildId: Snowflake,
         _ stickerId: Snowflake
@@ -34,8 +38,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/stickers/\(stickerId)/"
         )
     }
-    // MARK: Create Guild Sticker
-    // POST /guilds/${GuildId}/stickers
+    /// Create Guild Sticker
+    ///
+    /// > POST: `/guilds/{guild.id}/stickers`
     func createGuildSticker<T: Decodable, B: Encodable>(
         _ guildId: Snowflake,
         _ body: B
@@ -45,8 +50,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Edit Guild Sticker
-    // PATCH /guilds/${GuildId}/stickers/${StickerId}
+    /// Edit Guild Sticker
+    ///
+    /// > PATCH: `/guilds/{guild.id}/stickers/{sticker.id}`
     func editGuildSticker<B: Encodable>(
         _ guildId: Snowflake,
         _ stickerId: Snowflake,
@@ -57,8 +63,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Delete Guild Sticker
-    // DELETE /guilds/${GuildId}/stickers/${StickerId}
+    /// Delete Guild Sticker
+    ///
+    /// > DELETE: `/guilds/{guild.id}/stickers/{sticker.id}`
     func deleteGuildSticker(
         _ guildId: Snowflake,
         _ stickerId: Snowflake

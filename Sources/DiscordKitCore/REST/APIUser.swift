@@ -3,7 +3,7 @@
 import Foundation
 
 public extension DiscordREST {
-    /// Get Current User
+        /// Get Current User
     ///
     /// `GET /users/@me`
     func getCurrentUser() async throws -> User {
@@ -41,8 +41,9 @@ public extension DiscordREST {
         return try await getReq(path: "users/\(user)/profile", query: query)
     }
 
-    // MARK: Modify Current User
-    // TODO: Patch not yet implemented
+    /// Modify Current User
+    ///
+    /// TODO: Patch not yet implemented
 
     /// Get Current User Guilds
     ///
@@ -64,13 +65,12 @@ public extension DiscordREST {
         return try await getReq(path: "users/@me/guilds/\(guild)/member")
     }
 
-    // MARK: Leave Guild
-    // DELETE /users/@me/guilds/{guild.id}
+    /// Leave Guild
+    ///
+    /// > DELETE: `/users/@me/guilds/{guild.id}`
     func leaveGuild(guild: Snowflake) async throws {
         return try await deleteReq(path: guild)
     }
-
-    // MARK: Create DM
 
     /// Log out
     ///
@@ -83,39 +83,52 @@ public extension DiscordREST {
     func logOut(provider: String? = nil, voipProvider: String? = nil) async throws {
         return try await postReq(path: "auth/logout", body: LogOut(provider: provider, voip_provider: voipProvider))
     }
-    // MARK: Edit Current User
-    // PATCH /users/@me
+    /// Get Current User
+    ///
+    /// > GET: `/users/@me`
+    func getCurrentUser<T: Decodable>() async throws -> T {
+        return try await getReq(
+            path: "users/@me/"
+        )
+    }
+    /// Edit Current User
+    ///
+    /// > PATCH: `/users/@me`
     func editCurrentUser<B: Encodable>(_ body: B) async throws {
         try await patchReq(
             path: "users/@me/",
             body: body
         )
     }
-    // MARK: Create DM
-    // POST /users/@me/channels
+    /// Create DM
+    ///
+    /// > POST: `/users/@me/channels`
     func createDM<T: Decodable, B: Encodable>(_ body: B) async throws -> T {
         return try await postReq(
             path: "users/@me/channels/",
             body: body
         )
     }
-    // MARK: Create Group DM
-    // POST /users/@me/channels
+    /// Create Group DM
+    ///
+    /// > POST: `/users/@me/channels`
     func createGroupDM<T: Decodable, B: Encodable>(_ body: B) async throws -> T {
         return try await postReq(
             path: "users/@me/channels/",
             body: body
         )
     }
-    // MARK: Get User Connections
-    // GET /users/@me/connections
+    /// Get User Connections
+    ///
+    /// > GET: `/users/@me/connections`
     func getUserConnections<T: Decodable>() async throws -> T {
         return try await getReq(
             path: "users/@me/connections/"
         )
     }
-    // MARK: Get User Application Role Connection
-    // GET /users/@me/applications/${ApplicationId}/role-connection
+    /// Get User Application Role Connection
+    ///
+    /// > GET: `/users/@me/applications/{application.id}/role-connection`
     func getUserApplicationRoleConnection<T: Decodable>(
         _ applicationId: Snowflake
     ) async throws -> T {
@@ -123,8 +136,9 @@ public extension DiscordREST {
             path: "users/@me/applications/\(applicationId)/role-connection/"
         )
     }
-    // MARK: Update User Application Role Connection
-    // PUT /users/@me/applications/${ApplicationId}/role-connection
+    /// Update User Application Role Connection
+    ///
+    /// > PUT: `/users/@me/applications/{application.id}/role-connection`
     func updateUserApplicationRoleConnection<T: Decodable, B: Encodable>(
         _ applicationId: Snowflake,
         _ body: B

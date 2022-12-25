@@ -3,8 +3,9 @@
 import Foundation
 
 public extension DiscordREST {
-    // MARK: Create Webhook
-    // POST /channels/${ChannelId}/webhooks
+    /// Create Webhook
+    ///
+    /// > POST: `/channels/{channel.id}/webhooks`
     func createWebhook<T: Decodable, B: Encodable>(
         _ channelId: Snowflake,
         _ body: B
@@ -14,8 +15,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Get Channel Webhooks
-    // GET /channels/${ChannelId}/webhooks
+    /// Get Channel Webhooks
+    ///
+    /// > GET: `/channels/{channel.id}/webhooks`
     func getChannelWebhooks<T: Decodable>(
         _ channelId: Snowflake
     ) async throws -> T {
@@ -23,8 +25,9 @@ public extension DiscordREST {
             path: "channels/\(channelId)/webhooks/"
         )
     }
-    // MARK: Get Guild Webhooks
-    // GET /guilds/${GuildId}/webhooks
+    /// Get Guild Webhooks
+    ///
+    /// > GET: `/guilds/{guild.id}/webhooks`
     func getGuildWebhooks<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -32,8 +35,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/webhooks/"
         )
     }
-    // MARK: Get Webhook
-    // GET /webhooks/${WebhookId}
+    /// Get Webhook
+    ///
+    /// > GET: `/webhooks/{webhook.id}`
     func getWebhook<T: Decodable>(
         _ webhookId: Snowflake
     ) async throws -> T {
@@ -41,8 +45,9 @@ public extension DiscordREST {
             path: "webhooks/\(webhookId)/"
         )
     }
-    // MARK: Get Webhook with Token
-    // GET /webhooks/${WebhookId}/${WebhookToken}
+    /// Get Webhook with Token
+    ///
+    /// > GET: `/webhooks/{webhook.id}/{webhook.token}`
     func getWebhookwithToken<T: Decodable>(
         _ webhookId: Snowflake,
         _ webhookToken: String
@@ -51,8 +56,9 @@ public extension DiscordREST {
             path: "webhooks/\(webhookId)/\(webhookToken)/"
         )
     }
-    // MARK: Edit Webhook
-    // PATCH /webhooks/${WebhookId}
+    /// Edit Webhook
+    ///
+    /// > PATCH: `/webhooks/{webhook.id}`
     func editWebhook<B: Encodable>(
         _ webhookId: Snowflake,
         _ body: B
@@ -62,8 +68,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Edit Webhook with Token
-    // PATCH /webhooks/${WebhookId}/${WebhookToken}
+    /// Edit Webhook with Token
+    ///
+    /// > PATCH: `/webhooks/{webhook.id}/{webhook.token}`
     func editWebhookwithToken<B: Encodable>(
         _ webhookId: Snowflake,
         _ webhookToken: String,
@@ -74,8 +81,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Delete Webhook
-    // DELETE /webhooks/${WebhookId}
+    /// Delete Webhook
+    ///
+    /// > DELETE: `/webhooks/{webhook.id}`
     func deleteWebhook(
         _ webhookId: Snowflake
     ) async throws {
@@ -83,8 +91,9 @@ public extension DiscordREST {
             path: "webhooks/\(webhookId)/"
         )
     }
-    // MARK: Delete Webhook with Token
-    // DELETE /webhooks/${WebhookId}/${WebhookToken}
+    /// Delete Webhook with Token
+    ///
+    /// > DELETE: `/webhooks/{webhook.id}/{webhook.token}`
     func deleteWebhookwithToken(
         _ webhookId: Snowflake,
         _ webhookToken: String
@@ -93,8 +102,9 @@ public extension DiscordREST {
             path: "webhooks/\(webhookId)/\(webhookToken)/"
         )
     }
-    // MARK: Execute Webhook
-    // POST /webhooks/${WebhookId}/${WebhookToken}
+    /// Execute Webhook
+    ///
+    /// > POST: `/webhooks/{webhook.id}/{webhook.token}`
     func executeWebhook<T: Decodable, B: Encodable>(
         _ webhookId: Snowflake,
         _ webhookToken: String,
@@ -105,8 +115,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Execute Slack-Compatible Webhook
-    // POST /webhooks/${WebhookId}/${WebhookToken}/slack
+    /// Execute Slack-Compatible Webhook
+    ///
+    /// > POST: `/webhooks/{webhook.id}/{webhook.token}/slack`
     func executeSlackCompatibleWebhook<T: Decodable, B: Encodable>(
         _ webhookId: Snowflake,
         _ webhookToken: String,
@@ -117,8 +128,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Execute GitHub-Compatible Webhook
-    // POST /webhooks/${WebhookId}/${WebhookToken}/github
+    /// Execute GitHub-Compatible Webhook
+    ///
+    /// > POST: `/webhooks/{webhook.id}/{webhook.token}/github`
     func executeGitHubCompatibleWebhook<T: Decodable, B: Encodable>(
         _ webhookId: Snowflake,
         _ webhookToken: String,
@@ -129,8 +141,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Get Webhook Message
-    // GET /webhooks/${WebhookId}/${WebhookToken}/messages/${MessageId}
+    /// Get Webhook Message
+    ///
+    /// > GET: `/webhooks/{webhook.id}/{webhook.token}/messages/{message.id}`
     func getWebhookMessage<T: Decodable>(
         _ webhookId: Snowflake,
         _ webhookToken: String,
@@ -140,8 +153,9 @@ public extension DiscordREST {
             path: "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)/"
         )
     }
-    // MARK: Edit Webhook Message
-    // PATCH /webhooks/${WebhookId}/${WebhookToken}/messages/${MessageId}
+    /// Edit Webhook Message
+    ///
+    /// > PATCH: `/webhooks/{webhook.id}/{webhook.token}/messages/{message.id}`
     func editWebhookMessage<B: Encodable>(
         _ webhookId: Snowflake,
         _ webhookToken: String,
@@ -153,8 +167,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Delete Webhook Message
-    // DELETE /webhooks/${WebhookId}/${WebhookToken}/messages/${MessageId}
+    /// Delete Webhook Message
+    ///
+    /// > DELETE: `/webhooks/{webhook.id}/{webhook.token}/messages/{message.id}`
     func deleteWebhookMessage(
         _ webhookId: Snowflake,
         _ webhookToken: String,

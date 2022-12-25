@@ -3,8 +3,9 @@
 import Foundation
 
 public extension DiscordREST {
-    // MARK: Get Entitlements
-    // GET /applications/${ApplicationId}/entitlements
+    /// Get Entitlements
+    ///
+    /// > GET: `/applications/{application.id}/entitlements`
     func getEntitlements<T: Decodable>(
         _ applicationId: Snowflake
     ) async throws -> T {
@@ -12,8 +13,9 @@ public extension DiscordREST {
             path: "applications/\(applicationId)/entitlements/"
         )
     }
-    // MARK: Get Entitlement
-    // GET /applications/${ApplicationId}/entitlements/${EntitlementId}
+    /// Get Entitlement
+    ///
+    /// > GET: `/applications/{application.id}/entitlements/{entitlement.id}`
     func getEntitlement<T: Decodable>(
         _ applicationId: Snowflake,
         _ entitlementId: Snowflake
@@ -22,8 +24,9 @@ public extension DiscordREST {
             path: "applications/\(applicationId)/entitlements/\(entitlementId)/"
         )
     }
-    // MARK: Get SKUs
-    // GET /applications/${ApplicationId}/skus
+    /// Get SKUs
+    ///
+    /// > GET: `/applications/{application.id}/skus`
     func getSKUs<T: Decodable>(
         _ applicationId: Snowflake
     ) async throws -> T {
@@ -31,8 +34,9 @@ public extension DiscordREST {
             path: "applications/\(applicationId)/skus/"
         )
     }
-    // MARK: Consume SKU
-    // POST /applications/${ApplicationId}/entitlements/${EntitlementId}/consume
+    /// Consume SKU
+    ///
+    /// > POST: `/applications/{application.id}/entitlements/{entitlement.id}/consume`
     func consumeSKU<T: Decodable, B: Encodable>(
         _ applicationId: Snowflake,
         _ entitlementId: Snowflake,
@@ -43,8 +47,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Delete Test Entitlement
-    // DELETE /applications/${ApplicationId}/entitlements/${EntitlementId}
+    /// Delete Test Entitlement
+    ///
+    /// > DELETE: `/applications/{application.id}/entitlements/{entitlement.id}`
     func deleteTestEntitlement(
         _ applicationId: Snowflake,
         _ entitlementId: Snowflake
@@ -53,8 +58,9 @@ public extension DiscordREST {
             path: "applications/\(applicationId)/entitlements/\(entitlementId)/"
         )
     }
-    // MARK: Create Purchase Discount
-    // PUT /store/skus/${SkuId}/discounts/${UserId}
+    /// Create Purchase Discount
+    ///
+    /// > PUT: `/store/skus/{sku.id}/discounts/{user.id}`
     func createPurchaseDiscount<T: Decodable, B: Encodable>(
         _ skuId: Snowflake,
         _ userId: Snowflake,
@@ -65,8 +71,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Delete Purchase Discount
-    // DELETE /store/skus/${SkuId}/discounts/${UserId}
+    /// Delete Purchase Discount
+    ///
+    /// > DELETE: `/store/skus/{sku.id}/discounts/{user.id}`
     func deletePurchaseDiscount(
         _ skuId: Snowflake,
         _ userId: Snowflake

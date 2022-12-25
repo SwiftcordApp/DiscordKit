@@ -3,8 +3,9 @@
 import Foundation
 
 public extension DiscordREST {
-    // MARK: Get Guild Template
-    // GET /guilds/templates/${TemplateCode}
+    /// Get Guild Template
+    ///
+    /// > GET: `/guilds/templates/{template.code}`
     func getGuildTemplate<T: Decodable>(
         _ templateCode: String
     ) async throws -> T {
@@ -12,8 +13,9 @@ public extension DiscordREST {
             path: "guilds/templates/\(templateCode)/"
         )
     }
-    // MARK: Create Guild from Guild Template
-    // POST /guilds/templates/${TemplateCode}
+    /// Create Guild from Guild Template
+    ///
+    /// > POST: `/guilds/templates/{template.code}`
     func createGuildfromGuildTemplate<T: Decodable, B: Encodable>(
         _ templateCode: String,
         _ body: B
@@ -23,8 +25,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Get Guild Templates
-    // GET /guilds/${GuildId}/templates
+    /// Get Guild Templates
+    ///
+    /// > GET: `/guilds/{guild.id}/templates`
     func getGuildTemplates<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -32,8 +35,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/templates/"
         )
     }
-    // MARK: Create Guild Template
-    // POST /guilds/${GuildId}/templates
+    /// Create Guild Template
+    ///
+    /// > POST: `/guilds/{guild.id}/templates`
     func createGuildTemplate<T: Decodable, B: Encodable>(
         _ guildId: Snowflake,
         _ body: B
@@ -43,8 +47,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Sync Guild Template
-    // PUT /guilds/${GuildId}/templates/${TemplateCode}
+    /// Sync Guild Template
+    ///
+    /// > PUT: `/guilds/{guild.id}/templates/{template.code}`
     func syncGuildTemplate<T: Decodable, B: Encodable>(
         _ guildId: Snowflake,
         _ templateCode: String,
@@ -55,8 +60,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Edit Guild Template
-    // PATCH /guilds/${GuildId}/templates/${TemplateCode}
+    /// Edit Guild Template
+    ///
+    /// > PATCH: `/guilds/{guild.id}/templates/{template.code}`
     func editGuildTemplate<B: Encodable>(
         _ guildId: Snowflake,
         _ templateCode: String,
@@ -67,8 +73,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Delete Guild Template
-    // DELETE /guilds/${GuildId}/templates/${TemplateCode}
+    /// Delete Guild Template
+    ///
+    /// > DELETE: `/guilds/{guild.id}/templates/{template.code}`
     func deleteGuildTemplate(
         _ guildId: Snowflake,
         _ templateCode: String

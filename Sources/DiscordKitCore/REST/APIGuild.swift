@@ -3,33 +3,38 @@
 import Foundation
 
 public extension DiscordREST {
-    // MARK: Get Guild
-    // GET /guilds/{guild.id}
+    /// Get Guild
+    ///
+    /// > GET: `/guilds/{guild.id}`
     func getGuild(id: Snowflake) async throws -> Guild {
         return try await getReq(path: "guilds/\(id)")
     }
 
-    // MARK: Get Guild Channels
-    // GET /guilds/{guild.id}/channels
+    /// Get Guild Channels
+    ///
+    /// > GET: `/guilds/{guild.id}/channels`
     func getGuildChannels(id: Snowflake) async throws -> [DecodableThrowable<Channel>] {
         return try await getReq(path: "guilds/\(id)/channels")
     }
 
-    // MARK: Get Guild Roles
-    // GET /guilds/{guild.id}/roles
+    /// Get Guild Roles
+    ///
+    /// > GET: `/guilds/{guild.id}/roles`
     func getGuildRoles(id: Snowflake) async throws -> [Role] {
         return try await getReq(path: "guilds/\(id)/roles")
     }
-    // MARK: Create Guild
-    // POST /guilds
+    /// Create Guild
+    ///
+    /// > POST: `/guilds`
     func createGuild<T: Decodable, B: Encodable>(_ body: B) async throws -> T {
         return try await postReq(
             path: "guilds/",
             body: body
         )
     }
-    // MARK: Get Guild Preview
-    // GET /guilds/${GuildId}/preview
+    /// Get Guild Preview
+    ///
+    /// > GET: `/guilds/{guild.id}/preview`
     func getGuildPreview<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -37,8 +42,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/preview/"
         )
     }
-    // MARK: Edit Guild
-    // PATCH /guilds/${GuildId}
+    /// Edit Guild
+    ///
+    /// > PATCH: `/guilds/{guild.id}`
     func editGuild<B: Encodable>(
         _ guildId: Snowflake,
         _ body: B
@@ -48,8 +54,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Delete Guild
-    // DELETE /guilds/${GuildId}
+    /// Delete Guild
+    ///
+    /// > DELETE: `/guilds/{guild.id}`
     func deleteGuild(
         _ guildId: Snowflake
     ) async throws {
@@ -57,8 +64,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/"
         )
     }
-    // MARK: Create Guild Channel
-    // POST /guilds/${GuildId}/channels
+    /// Create Guild Channel
+    ///
+    /// > POST: `/guilds/{guild.id}/channels`
     func createGuildChannel<T: Decodable, B: Encodable>(
         _ guildId: Snowflake,
         _ body: B
@@ -68,8 +76,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Edit Guild Channel Positions
-    // PATCH /guilds/${GuildId}/channels
+    /// Edit Guild Channel Positions
+    ///
+    /// > PATCH: `/guilds/{guild.id}/channels`
     func editGuildChannelPositions<B: Encodable>(
         _ guildId: Snowflake,
         _ body: B
@@ -79,8 +88,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: List Active Guild Threads
-    // GET /guilds/${GuildId}/threads/active
+    /// List Active Guild Threads
+    ///
+    /// > GET: `/guilds/{guild.id}/threads/active`
     func listActiveGuildThreads<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -88,8 +98,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/threads/active/"
         )
     }
-    // MARK: Get Guild Member
-    // GET /guilds/${GuildId}/members/${UserId}
+    /// Get Guild Member
+    ///
+    /// > GET: `/guilds/{guild.id}/members/{user.id}`
     func getGuildMember<T: Decodable>(
         _ guildId: Snowflake,
         _ userId: Snowflake
@@ -98,8 +109,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/members/\(userId)/"
         )
     }
-    // MARK: List Guild Members
-    // GET /guilds/${GuildId}/members
+    /// List Guild Members
+    ///
+    /// > GET: `/guilds/{guild.id}/members`
     func listGuildMembers<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -107,8 +119,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/members/"
         )
     }
-    // MARK: Search Guild Members
-    // GET /guilds/${GuildId}/members/search
+    /// Search Guild Members
+    ///
+    /// > GET: `/guilds/{guild.id}/members/search`
     func searchGuildMembers<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -116,8 +129,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/members/search/"
         )
     }
-    // MARK: Add Guild Member
-    // PUT /guilds/${GuildId}/members/${UserId}
+    /// Add Guild Member
+    ///
+    /// > PUT: `/guilds/{guild.id}/members/{user.id}`
     func addGuildMember<T: Decodable, B: Encodable>(
         _ guildId: Snowflake,
         _ userId: Snowflake,
@@ -128,8 +142,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Edit Guild Member
-    // PATCH /guilds/${GuildId}/members/${UserId}
+    /// Edit Guild Member
+    ///
+    /// > PATCH: `/guilds/{guild.id}/members/{user.id}`
     func editGuildMember<B: Encodable>(
         _ guildId: Snowflake,
         _ userId: Snowflake,
@@ -140,8 +155,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Edit Current Member
-    // PATCH /guilds/${GuildId}/members/@me
+    /// Edit Current Member
+    ///
+    /// > PATCH: `/guilds/{guild.id}/members/@me`
     func editCurrentMember<B: Encodable>(
         _ guildId: Snowflake,
         _ body: B
@@ -151,8 +167,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Edit Current User Nick
-    // PATCH /guilds/${GuildId}/members/@me/nick
+    /// Edit Current User Nick
+    ///
+    /// > PATCH: `/guilds/{guild.id}/members/@me/nick`
     func editCurrentUserNick<B: Encodable>(
         _ guildId: Snowflake,
         _ body: B
@@ -162,8 +179,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Add Guild Member Role
-    // PUT /guilds/${GuildId}/members/${UserId}/roles/${RoleId}
+    /// Add Guild Member Role
+    ///
+    /// > PUT: `/guilds/{guild.id}/members/{user.id}/roles/{role.id}`
     func addGuildMemberRole<T: Decodable, B: Encodable>(
         _ guildId: Snowflake,
         _ userId: Snowflake,
@@ -175,8 +193,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Remove Guild Member Role
-    // DELETE /guilds/${GuildId}/members/${UserId}/roles/${RoleId}
+    /// Remove Guild Member Role
+    ///
+    /// > DELETE: `/guilds/{guild.id}/members/{user.id}/roles/{role.id}`
     func removeGuildMemberRole(
         _ guildId: Snowflake,
         _ userId: Snowflake,
@@ -186,8 +205,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/members/\(userId)/roles/\(roleId)/"
         )
     }
-    // MARK: Remove Guild Member
-    // DELETE /guilds/${GuildId}/members/${UserId}
+    /// Remove Guild Member
+    ///
+    /// > DELETE: `/guilds/{guild.id}/members/{user.id}`
     func removeGuildMember(
         _ guildId: Snowflake,
         _ userId: Snowflake
@@ -196,8 +216,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/members/\(userId)/"
         )
     }
-    // MARK: Get Guild Bans
-    // GET /guilds/${GuildId}/bans
+    /// Get Guild Bans
+    ///
+    /// > GET: `/guilds/{guild.id}/bans`
     func getGuildBans<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -205,8 +226,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/bans/"
         )
     }
-    // MARK: Get Guild Ban
-    // GET /guilds/${GuildId}/bans/${UserId}
+    /// Get Guild Ban
+    ///
+    /// > GET: `/guilds/{guild.id}/bans/{user.id}`
     func getGuildBan<T: Decodable>(
         _ guildId: Snowflake,
         _ userId: Snowflake
@@ -215,8 +237,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/bans/\(userId)/"
         )
     }
-    // MARK: Create Guild Ban
-    // PUT /guilds/${GuildId}/bans/${UserId}
+    /// Create Guild Ban
+    ///
+    /// > PUT: `/guilds/{guild.id}/bans/{user.id}`
     func createGuildBan<T: Decodable, B: Encodable>(
         _ guildId: Snowflake,
         _ userId: Snowflake,
@@ -227,8 +250,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Remove Guild Ban
-    // DELETE /guilds/${GuildId}/bans/${UserId}
+    /// Remove Guild Ban
+    ///
+    /// > DELETE: `/guilds/{guild.id}/bans/{user.id}`
     func removeGuildBan(
         _ guildId: Snowflake,
         _ userId: Snowflake
@@ -237,8 +261,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/bans/\(userId)/"
         )
     }
-    // MARK: Create Guild Role
-    // POST /guilds/${GuildId}/roles
+    /// Create Guild Role
+    ///
+    /// > POST: `/guilds/{guild.id}/roles`
     func createGuildRole<T: Decodable, B: Encodable>(
         _ guildId: Snowflake,
         _ body: B
@@ -248,8 +273,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Edit Guild Role Positions
-    // PATCH /guilds/${GuildId}/roles
+    /// Edit Guild Role Positions
+    ///
+    /// > PATCH: `/guilds/{guild.id}/roles`
     func editGuildRolePositions<B: Encodable>(
         _ guildId: Snowflake,
         _ body: B
@@ -259,8 +285,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Edit Guild Role
-    // PATCH /guilds/${GuildId}/roles/${RoleId}
+    /// Edit Guild Role
+    ///
+    /// > PATCH: `/guilds/{guild.id}/roles/{role.id}`
     func editGuildRole<B: Encodable>(
         _ guildId: Snowflake,
         _ roleId: Snowflake,
@@ -271,8 +298,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Edit Guild MFA Level
-    // POST /guilds/${GuildId}/mfa
+    /// Edit Guild MFA Level
+    ///
+    /// > POST: `/guilds/{guild.id}/mfa`
     func editGuildMFALevel<T: Decodable, B: Encodable>(
         _ guildId: Snowflake,
         _ body: B
@@ -282,8 +310,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Delete Guild Role
-    // DELETE /guilds/${GuildId}/roles/${RoleId}
+    /// Delete Guild Role
+    ///
+    /// > DELETE: `/guilds/{guild.id}/roles/{role.id}`
     func deleteGuildRole(
         _ guildId: Snowflake,
         _ roleId: Snowflake
@@ -292,8 +321,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/roles/\(roleId)/"
         )
     }
-    // MARK: Get Guild Prune Count
-    // GET /guilds/${GuildId}/prune
+    /// Get Guild Prune Count
+    ///
+    /// > GET: `/guilds/{guild.id}/prune`
     func getGuildPruneCount<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -301,8 +331,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/prune/"
         )
     }
-    // MARK: Begin Guild Prune
-    // POST /guilds/${GuildId}/prune
+    /// Begin Guild Prune
+    ///
+    /// > POST: `/guilds/{guild.id}/prune`
     func beginGuildPrune<T: Decodable, B: Encodable>(
         _ guildId: Snowflake,
         _ body: B
@@ -312,8 +343,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Get Guild Voice Regions
-    // GET /guilds/${GuildId}/regions
+    /// Get Guild Voice Regions
+    ///
+    /// > GET: `/guilds/{guild.id}/regions`
     func getGuildVoiceRegions<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -321,8 +353,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/regions/"
         )
     }
-    // MARK: Get Guild Invites
-    // GET /guilds/${GuildId}/invites
+    /// Get Guild Invites
+    ///
+    /// > GET: `/guilds/{guild.id}/invites`
     func getGuildInvites<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -330,8 +363,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/invites/"
         )
     }
-    // MARK: Get Guild Integrations
-    // GET /guilds/${GuildId}/integrations
+    /// Get Guild Integrations
+    ///
+    /// > GET: `/guilds/{guild.id}/integrations`
     func getGuildIntegrations<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -339,8 +373,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/integrations/"
         )
     }
-    // MARK: Delete Guild Integration
-    // DELETE /guilds/${GuildId}/integrations/${IntegrationId}
+    /// Delete Guild Integration
+    ///
+    /// > DELETE: `/guilds/{guild.id}/integrations/{integration.id}`
     func deleteGuildIntegration(
         _ guildId: Snowflake,
         _ integrationId: Snowflake
@@ -349,8 +384,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/integrations/\(integrationId)/"
         )
     }
-    // MARK: Get Guild Widget Settings
-    // GET /guilds/${GuildId}/widget
+    /// Get Guild Widget Settings
+    ///
+    /// > GET: `/guilds/{guild.id}/widget`
     func getGuildWidgetSettings<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -358,8 +394,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/widget/"
         )
     }
-    // MARK: Edit Guild Widget
-    // PATCH /guilds/${GuildId}/widget
+    /// Edit Guild Widget
+    ///
+    /// > PATCH: `/guilds/{guild.id}/widget`
     func editGuildWidget<B: Encodable>(
         _ guildId: Snowflake,
         _ body: B
@@ -369,8 +406,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Get Guild Widget
-    // GET /guilds/${GuildId}/widget.json
+    /// Get Guild Widget
+    ///
+    /// > GET: `/guilds/{guild.id}/widget.json`
     func getGuildWidget<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -378,8 +416,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/widget.json/"
         )
     }
-    // MARK: Get Guild Vanity URL
-    // GET /guilds/${GuildId}/vanity-url
+    /// Get Guild Vanity URL
+    ///
+    /// > GET: `/guilds/{guild.id}/vanity-url`
     func getGuildVanityURL<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -387,8 +426,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/vanity-url/"
         )
     }
-    // MARK: Get Guild Widget Image
-    // GET /guilds/${GuildId}/widget.png
+    /// Get Guild Widget Image
+    ///
+    /// > GET: `/guilds/{guild.id}/widget.png`
     func getGuildWidgetImage<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -396,8 +436,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/widget.png/"
         )
     }
-    // MARK: Get Guild Welcome Screen
-    // GET /guilds/${GuildId}/welcome-screen
+    /// Get Guild Welcome Screen
+    ///
+    /// > GET: `/guilds/{guild.id}/welcome-screen`
     func getGuildWelcomeScreen<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -405,8 +446,9 @@ public extension DiscordREST {
             path: "guilds/\(guildId)/welcome-screen/"
         )
     }
-    // MARK: Edit Guild Welcome Screen
-    // PATCH /guilds/${GuildId}/welcome-screen
+    /// Edit Guild Welcome Screen
+    ///
+    /// > PATCH: `/guilds/{guild.id}/welcome-screen`
     func editGuildWelcomeScreen<B: Encodable>(
         _ guildId: Snowflake,
         _ body: B
@@ -416,8 +458,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Edit Current User Voice State
-    // PATCH /guilds/${GuildId}/voice-states/@me
+    /// Edit Current User Voice State
+    ///
+    /// > PATCH: `/guilds/{guild.id}/voice-states/@me`
     func editCurrentUserVoiceState<B: Encodable>(
         _ guildId: Snowflake,
         _ body: B
@@ -427,8 +470,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Edit User Voice State
-    // PATCH /guilds/${GuildId}/voice-states/${UserId}
+    /// Edit User Voice State
+    ///
+    /// > PATCH: `/guilds/{guild.id}/voice-states/{user.id}`
     func editUserVoiceState<B: Encodable>(
         _ guildId: Snowflake,
         _ userId: Snowflake,

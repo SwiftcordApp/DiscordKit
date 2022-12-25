@@ -3,8 +3,9 @@
 import Foundation
 
 public extension DiscordREST {
-    // MARK: Create Interaction Response
-    // POST /interactions/${InteractionId}/${InteractionToken}/callback
+    /// Create Interaction Response
+    ///
+    /// > POST: `/interactions/{interaction.id}/{interaction.token}/callback`
     func createInteractionResponse<T: Decodable, B: Encodable>(
         _ interactionId: Snowflake,
         _ interactionToken: String,
@@ -15,8 +16,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Get Original Interaction Response
-    // GET /webhooks/${ApplicationId}/${InteractionToken}/messages/@original
+    /// Get Original Interaction Response
+    ///
+    /// > GET: `/webhooks/{application.id}/{interaction.token}/messages/@original`
     func getOriginalInteractionResponse<T: Decodable>(
         _ applicationId: Snowflake,
         _ interactionToken: String
@@ -25,8 +27,9 @@ public extension DiscordREST {
             path: "webhooks/\(applicationId)/\(interactionToken)/messages/@original/"
         )
     }
-    // MARK: Edit Original Interaction Response
-    // PATCH /webhooks/${ApplicationId}/${InteractionToken}/messages/@original
+    /// Edit Original Interaction Response
+    ///
+    /// > PATCH: `/webhooks/{application.id}/{interaction.token}/messages/@original`
     func editOriginalInteractionResponse<B: Encodable>(
         _ applicationId: Snowflake,
         _ interactionToken: String,
@@ -37,8 +40,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Delete Original Interaction Response
-    // DELETE /webhooks/${ApplicationId}/${InteractionToken}/messages/@original
+    /// Delete Original Interaction Response
+    ///
+    /// > DELETE: `/webhooks/{application.id}/{interaction.token}/messages/@original`
     func deleteOriginalInteractionResponse(
         _ applicationId: Snowflake,
         _ interactionToken: String
@@ -47,8 +51,9 @@ public extension DiscordREST {
             path: "webhooks/\(applicationId)/\(interactionToken)/messages/@original/"
         )
     }
-    // MARK: Create Followup Message
-    // POST /webhooks/${ApplicationId}/${InteractionToken}
+    /// Create Followup Message
+    ///
+    /// > POST: `/webhooks/{application.id}/{interaction.token}`
     func createFollowupMessage<T: Decodable, B: Encodable>(
         _ applicationId: Snowflake,
         _ interactionToken: String,
@@ -59,8 +64,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Get Followup Message
-    // GET /webhooks/${ApplicationId}/${InteractionToken}/messages/${MessageId}
+    /// Get Followup Message
+    ///
+    /// > GET: `/webhooks/{application.id}/{interaction.token}/messages/{message.id}`
     func getFollowupMessage<T: Decodable>(
         _ applicationId: Snowflake,
         _ interactionToken: String,
@@ -70,8 +76,9 @@ public extension DiscordREST {
             path: "webhooks/\(applicationId)/\(interactionToken)/messages/\(messageId)/"
         )
     }
-    // MARK: Edit Followup Message
-    // PATCH /webhooks/${ApplicationId}/${InteractionToken}/messages/${MessageId}
+    /// Edit Followup Message
+    ///
+    /// > PATCH: `/webhooks/{application.id}/{interaction.token}/messages/{message.id}`
     func editFollowupMessage<B: Encodable>(
         _ applicationId: Snowflake,
         _ interactionToken: String,
@@ -83,8 +90,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Delete Followup Message
-    // DELETE /webhooks/${ApplicationId}/${InteractionToken}/messages/${MessageId}
+    /// Delete Followup Message
+    ///
+    /// > DELETE: `/webhooks/{application.id}/{interaction.token}/messages/{message.id}`
     func deleteFollowupMessage(
         _ applicationId: Snowflake,
         _ interactionToken: String,

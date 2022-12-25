@@ -3,8 +3,9 @@
 import Foundation
 
 public extension DiscordREST {
-    // MARK: Get Achievements
-    // GET /applications/${ApplicationId}/achievements
+    /// Get Achievements
+    ///
+    /// > GET: `/applications/{application.id}/achievements`
     func getAchievements<T: Decodable>(
         _ applicationId: Snowflake
     ) async throws -> T {
@@ -12,8 +13,9 @@ public extension DiscordREST {
             path: "applications/\(applicationId)/achievements/"
         )
     }
-    // MARK: Get Achievement
-    // GET /applications/${ApplicationId}/achievements/${AchievementId}
+    /// Get Achievement
+    ///
+    /// > GET: `/applications/{application.id}/achievements/{achievement.id}`
     func getAchievement<T: Decodable>(
         _ applicationId: Snowflake,
         _ achievementId: Snowflake
@@ -22,8 +24,9 @@ public extension DiscordREST {
             path: "applications/\(applicationId)/achievements/\(achievementId)/"
         )
     }
-    // MARK: Create Achievement
-    // POST /applications/${ApplicationId}/achievements
+    /// Create Achievement
+    ///
+    /// > POST: `/applications/{application.id}/achievements`
     func createAchievement<T: Decodable, B: Encodable>(
         _ applicationId: Snowflake,
         _ body: B
@@ -33,8 +36,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Update Achievement
-    // PATCH /applications/${ApplicationId}/achievements/${AchievementId}
+    /// Update Achievement
+    ///
+    /// > PATCH: `/applications/{application.id}/achievements/{achievement.id}`
     func updateAchievement<B: Encodable>(
         _ applicationId: Snowflake,
         _ achievementId: Snowflake,
@@ -45,8 +49,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Delete Achievement
-    // DELETE /applications/${ApplicationId}/achievements/${AchievementId}
+    /// Delete Achievement
+    ///
+    /// > DELETE: `/applications/{application.id}/achievements/{achievement.id}`
     func deleteAchievement(
         _ applicationId: Snowflake,
         _ achievementId: Snowflake
@@ -55,8 +60,9 @@ public extension DiscordREST {
             path: "applications/\(applicationId)/achievements/\(achievementId)/"
         )
     }
-    // MARK: Update User Achievement
-    // PUT /users/${UserId}/applications/${ApplicationId}/achievements/${AchievementId}
+    /// Update User Achievement
+    ///
+    /// > PUT: `/users/{user.id}/applications/{application.id}/achievements/{achievement.id}`
     func updateUserAchievement<T: Decodable, B: Encodable>(
         _ userId: Snowflake,
         _ applicationId: Snowflake,
@@ -68,8 +74,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Get User Achievements
-    // GET /users/@me/applications/${ApplicationId}/achievements
+    /// Get User Achievements
+    ///
+    /// > GET: `/users/@me/applications/{application.id}/achievements`
     func getUserAchievements<T: Decodable>(
         _ applicationId: Snowflake
     ) async throws -> T {

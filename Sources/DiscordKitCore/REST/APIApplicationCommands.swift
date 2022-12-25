@@ -3,8 +3,9 @@
 import Foundation
 
 public extension DiscordREST {
-    // MARK: Get Global Application Commands
-    // GET /applications/${ApplicationId}/commands
+    /// Get Global Application Commands
+    ///
+    /// > GET: `/applications/{application.id}/commands`
     func getGlobalApplicationCommands<T: Decodable>(
         _ applicationId: Snowflake
     ) async throws -> T {
@@ -12,8 +13,9 @@ public extension DiscordREST {
             path: "applications/\(applicationId)/commands/"
         )
     }
-    // MARK: Create Global Application Command
-    // POST /applications/${ApplicationId}/commands
+    /// Create Global Application Command
+    ///
+    /// > POST: `/applications/{application.id}/commands`
     func createGlobalApplicationCommand<T: Decodable, B: Encodable>(
         _ applicationId: Snowflake,
         _ body: B
@@ -23,8 +25,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Get Global Application Command
-    // GET /applications/${ApplicationId}/commands/${CommandId}
+    /// Get Global Application Command
+    ///
+    /// > GET: `/applications/{application.id}/commands/{command.id}`
     func getGlobalApplicationCommand<T: Decodable>(
         _ applicationId: Snowflake,
         _ commandId: Snowflake
@@ -33,8 +36,9 @@ public extension DiscordREST {
             path: "applications/\(applicationId)/commands/\(commandId)/"
         )
     }
-    // MARK: Edit Global Application Command
-    // PATCH /applications/${ApplicationId}/commands/${CommandId}
+    /// Edit Global Application Command
+    ///
+    /// > PATCH: `/applications/{application.id}/commands/{command.id}`
     func editGlobalApplicationCommand<B: Encodable>(
         _ applicationId: Snowflake,
         _ commandId: Snowflake,
@@ -45,8 +49,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Delete Global Application Command
-    // DELETE /applications/${ApplicationId}/commands/${CommandId}
+    /// Delete Global Application Command
+    ///
+    /// > DELETE: `/applications/{application.id}/commands/{command.id}`
     func deleteGlobalApplicationCommand(
         _ applicationId: Snowflake,
         _ commandId: Snowflake
@@ -55,8 +60,9 @@ public extension DiscordREST {
             path: "applications/\(applicationId)/commands/\(commandId)/"
         )
     }
-    // MARK: Bulk Overwrite Global Application Commands
-    // PUT /applications/${ApplicationId}/commands
+    /// Bulk Overwrite Global Application Commands
+    ///
+    /// > PUT: `/applications/{application.id}/commands`
     func bulkOverwriteGlobalApplicationCommands<T: Decodable, B: Encodable>(
         _ applicationId: Snowflake,
         _ body: B
@@ -66,8 +72,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Get Guild Application Commands
-    // GET /applications/${ApplicationId}/guilds/${GuildId}/commands
+    /// Get Guild Application Commands
+    ///
+    /// > GET: `/applications/{application.id}/guilds/{guild.id}/commands`
     func getGuildApplicationCommands<T: Decodable>(
         _ applicationId: Snowflake,
         _ guildId: Snowflake
@@ -76,8 +83,9 @@ public extension DiscordREST {
             path: "applications/\(applicationId)/guilds/\(guildId)/commands/"
         )
     }
-    // MARK: Create Guild Application Command
-    // POST /applications/${ApplicationId}/guilds/${GuildId}/commands
+    /// Create Guild Application Command
+    ///
+    /// > POST: `/applications/{application.id}/guilds/{guild.id}/commands`
     func createGuildApplicationCommand<T: Decodable, B: Encodable>(
         _ applicationId: Snowflake,
         _ guildId: Snowflake,
@@ -88,8 +96,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Get Guild Application Command
-    // GET /applications/${ApplicationId}/guilds/${GuildId}/commands/${CommandId}
+    /// Get Guild Application Command
+    ///
+    /// > GET: `/applications/{application.id}/guilds/{guild.id}/commands/{command.id}`
     func getGuildApplicationCommand<T: Decodable>(
         _ applicationId: Snowflake,
         _ guildId: Snowflake,
@@ -99,8 +108,9 @@ public extension DiscordREST {
             path: "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)/"
         )
     }
-    // MARK: Edit Guild Application Command
-    // PATCH /applications/${ApplicationId}/guilds/${GuildId}/commands/${CommandId}
+    /// Edit Guild Application Command
+    ///
+    /// > PATCH: `/applications/{application.id}/guilds/{guild.id}/commands/{command.id}`
     func editGuildApplicationCommand<B: Encodable>(
         _ applicationId: Snowflake,
         _ guildId: Snowflake,
@@ -112,8 +122,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Delete Guild Application Command
-    // DELETE /applications/${ApplicationId}/guilds/${GuildId}/commands/${CommandId}
+    /// Delete Guild Application Command
+    ///
+    /// > DELETE: `/applications/{application.id}/guilds/{guild.id}/commands/{command.id}`
     func deleteGuildApplicationCommand(
         _ applicationId: Snowflake,
         _ guildId: Snowflake,
@@ -123,8 +134,9 @@ public extension DiscordREST {
             path: "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)/"
         )
     }
-    // MARK: Bulk Overwrite Guild Application Commands
-    // PUT /applications/${ApplicationId}/guilds/${GuildId}/commands
+    /// Bulk Overwrite Guild Application Commands
+    ///
+    /// > PUT: `/applications/{application.id}/guilds/{guild.id}/commands`
     func bulkOverwriteGuildApplicationCommands<T: Decodable, B: Encodable>(
         _ applicationId: Snowflake,
         _ guildId: Snowflake,
@@ -135,8 +147,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Get Guild Application Command Permissions
-    // GET /applications/${ApplicationId}/guilds/${GuildId}/commands/permissions
+    /// Get Guild Application Command Permissions
+    ///
+    /// > GET: `/applications/{application.id}/guilds/{guild.id}/commands/permissions`
     func getGuildApplicationCommandPermissions<T: Decodable>(
         _ applicationId: Snowflake,
         _ guildId: Snowflake
@@ -145,8 +158,9 @@ public extension DiscordREST {
             path: "applications/\(applicationId)/guilds/\(guildId)/commands/permissions/"
         )
     }
-    // MARK: Get Application Command Permissions
-    // GET /applications/${ApplicationId}/guilds/${GuildId}/commands/${CommandId}/permissions
+    /// Get Application Command Permissions
+    ///
+    /// > GET: `/applications/{application.id}/guilds/{guild.id}/commands/{command.id}/permissions`
     func getApplicationCommandPermissions<T: Decodable>(
         _ applicationId: Snowflake,
         _ guildId: Snowflake,
@@ -156,8 +170,9 @@ public extension DiscordREST {
             path: "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)/permissions/"
         )
     }
-    // MARK: Edit Application Command Permissions
-    // PUT /applications/${ApplicationId}/guilds/${GuildId}/commands/${CommandId}/permissions
+    /// Edit Application Command Permissions
+    ///
+    /// > PUT: `/applications/{application.id}/guilds/{guild.id}/commands/{command.id}/permissions`
     func editApplicationCommandPermissions<T: Decodable, B: Encodable>(
         _ applicationId: Snowflake,
         _ guildId: Snowflake,
@@ -169,8 +184,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Batch Edit Application Command Permissions
-    // PUT /applications/${ApplicationId}/guilds/${GuildId}/commands/permissions
+    /// Batch Edit Application Command Permissions
+    ///
+    /// > PUT: `/applications/{application.id}/guilds/{guild.id}/commands/permissions`
     func batchEditApplicationCommandPermissions<T: Decodable, B: Encodable>(
         _ applicationId: Snowflake,
         _ guildId: Snowflake,

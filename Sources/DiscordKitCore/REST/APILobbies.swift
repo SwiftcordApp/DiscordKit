@@ -3,16 +3,18 @@
 import Foundation
 
 public extension DiscordREST {
-    // MARK: Create Lobby
-    // POST /lobbies
+    /// Create Lobby
+    ///
+    /// > POST: `/lobbies`
     func createLobby<T: Decodable, B: Encodable>(_ body: B) async throws -> T {
         return try await postReq(
             path: "lobbies/",
             body: body
         )
     }
-    // MARK: Update Lobby
-    // PATCH /lobbies/${LobbyId}
+    /// Update Lobby
+    ///
+    /// > PATCH: `/lobbies/{lobby.id}`
     func updateLobby<B: Encodable>(
         _ lobbyId: Snowflake,
         _ body: B
@@ -22,8 +24,9 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Delete Lobby
-    // DELETE /lobbies/${LobbyId}
+    /// Delete Lobby
+    ///
+    /// > DELETE: `/lobbies/{lobby.id}`
     func deleteLobby(
         _ lobbyId: Snowflake
     ) async throws {
@@ -31,8 +34,9 @@ public extension DiscordREST {
             path: "lobbies/\(lobbyId)/"
         )
     }
-    // MARK: Update Lobby Member
-    // PATCH /lobbies/${LobbyId}/members/${UserId}
+    /// Update Lobby Member
+    ///
+    /// > PATCH: `/lobbies/{lobby.id}/members/{user.id}`
     func updateLobbyMember<B: Encodable>(
         _ lobbyId: Snowflake,
         _ userId: Snowflake,
@@ -43,16 +47,18 @@ public extension DiscordREST {
             body: body
         )
     }
-    // MARK: Create Lobby Search
-    // POST /lobbies/search
+    /// Create Lobby Search
+    ///
+    /// > POST: `/lobbies/search`
     func createLobbySearch<T: Decodable, B: Encodable>(_ body: B) async throws -> T {
         return try await postReq(
             path: "lobbies/search/",
             body: body
         )
     }
-    // MARK: Send Lobby Data
-    // POST /lobbies/${LobbyId}/send
+    /// Send Lobby Data
+    ///
+    /// > POST: `/lobbies/{lobby.id}/send`
     func sendLobbyData<T: Decodable, B: Encodable>(
         _ lobbyId: Snowflake,
         _ body: B

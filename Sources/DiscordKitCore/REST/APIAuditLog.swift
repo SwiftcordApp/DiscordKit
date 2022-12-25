@@ -3,8 +3,9 @@
 import Foundation
 
 public extension DiscordREST {
-    // MARK: Get Guild Audit Log
-    // GET /guilds/${GuildId}/audit-logs
+    /// Get Guild Audit Log
+    ///
+    /// > GET: `/guilds/{guild.id}/audit-logs`
     func getGuildAuditLog<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
