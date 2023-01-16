@@ -108,8 +108,8 @@ public extension DiscordREST {
     func executeWebhook<T: Decodable, B: Encodable>(
         _ webhookId: Snowflake,
         _ webhookToken: String,
-        _ body: B
-    ) async throws -> T {
+        _ body: B // TODO: Return type depends on `wait` param
+    ) async throws -> T? {
         return try await postReq(
             path: "webhooks/\(webhookId)/\(webhookToken)/",
             body: body

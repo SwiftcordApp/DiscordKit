@@ -173,7 +173,7 @@ public extension DiscordREST {
 
     /// Make a `POST` request to the Discord REST API, for endpoints
     /// that both require no payload and returns a 204 empty response
-    func emptyPostReq(path: String) async throws {
+    func postReq(path: String) async throws {
         _ = try await makeRequest(
             path: path,
             body: nil,
@@ -198,6 +198,21 @@ public extension DiscordREST {
             throw RequestError.jsonDecodingError(error: error)
         }
     }
+    
+    /// Make a `PUT` request to the Discord REST API
+    ///
+    /// For endpoints that returns a 204 empty response
+    func putReq<B: Encodable>(
+        path: String,
+        body: B
+    ) async throws {
+        let payload = try DiscordREST.encoder.encode(body)
+        _ = try await makeRequest(
+            path: path,
+            body: payload,
+            method: .put
+        )
+    }
 
     /// Make a `DELETE` request to the Discord REST API
     func deleteReq(path: String) async throws {
@@ -212,11 +227,16 @@ public extension DiscordREST {
         path: String,
         body: B
     ) async throws {
-        let payload = try? DiscordREST.encoder.encode(body)
+        let payload: Data?
+        payload = try? DiscordREST.encoder.encode(body)
         _ = try await makeRequest(
             path: path,
             body: payload,
             method: .patch
         )
+    }
+    
+    func patchReq(path: String) async throws {
+        _ = try await makeRequest(path: path, body: nil, method: .patch)
     }
 }

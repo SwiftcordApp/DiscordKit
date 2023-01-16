@@ -37,14 +37,12 @@ public extension DiscordREST {
     /// Consume SKU
     ///
     /// > POST: `/applications/{application.id}/entitlements/{entitlement.id}/consume`
-    func consumeSKU<T: Decodable, B: Encodable>(
+    func consumeSKU(
         _ applicationId: Snowflake,
-        _ entitlementId: Snowflake,
-        _ body: B
-    ) async throws -> T {
-        return try await postReq(
-            path: "applications/\(applicationId)/entitlements/\(entitlementId)/consume/",
-            body: body
+        _ entitlementId: Snowflake
+    ) async throws {
+        try await postReq(
+            path: "applications/\(applicationId)/entitlements/\(entitlementId)/consume/"
         )
     }
     /// Delete Test Entitlement
@@ -61,12 +59,12 @@ public extension DiscordREST {
     /// Create Purchase Discount
     ///
     /// > PUT: `/store/skus/{sku.id}/discounts/{user.id}`
-    func createPurchaseDiscount<T: Decodable, B: Encodable>(
+    func createPurchaseDiscount<B: Encodable>(
         _ skuId: Snowflake,
         _ userId: Snowflake,
         _ body: B
-    ) async throws -> T {
-        return try await putReq(
+    ) async throws {
+        try await putReq(
             path: "store/skus/\(skuId)/discounts/\(userId)/",
             body: body
         )

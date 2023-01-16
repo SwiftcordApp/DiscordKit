@@ -6,11 +6,11 @@ public extension DiscordREST {
     /// Create Interaction Response
     ///
     /// > POST: `/interactions/{interaction.id}/{interaction.token}/callback`
-    func createInteractionResponse<T: Decodable, B: Encodable>(
+    func createInteractionResponse<B: Encodable>(
         _ interactionId: Snowflake,
         _ interactionToken: String,
         _ body: B
-    ) async throws -> T {
+    ) async throws {
         return try await postReq(
             path: "interactions/\(interactionId)/\(interactionToken)/callback/",
             body: body

@@ -73,7 +73,7 @@ public extension DiscordREST {
     ///
     /// > POST: `/channels/{channel.id}/typing`
     func typingStart(id: Snowflake) async throws {
-        return try await emptyPostReq(path: "channels/\(id)/typing")
+        return try await postReq(path: "channels/\(id)/typing")
     }
 
     /// Edit Channel
@@ -104,15 +104,13 @@ public extension DiscordREST {
     /// Create Reaction
     ///
     /// > PUT: `/channels/{channel.id}/messages/{message.id}/reactions/{emoji}/@me`
-    func createReaction<T: Decodable, B: Encodable>(
+    func createReaction(
         _ channelId: Snowflake,
         _ messageId: Snowflake,
-        _ emoji: String,
-        _ body: B
-    ) async throws -> T {
-        return try await putReq(
-            path: "channels/\(channelId)/messages/\(messageId)/reactions/\(emoji)/@me/",
-            body: body
+        _ emoji: String
+    ) async throws {
+        try await patchReq(
+            path: "channels/\(channelId)/messages/\(messageId)/reactions/\(emoji)/@me/"
         )
     }
     /// Delete Own Reaction
@@ -191,11 +189,11 @@ public extension DiscordREST {
     /// Bulk Delete Messages
     ///
     /// > POST: `/channels/{channel.id}/messages/bulk-delete`
-    func bulkDeleteMessages<T: Decodable, B: Encodable>(
+    func bulkDeleteMessages<B: Encodable>(
         _ channelId: Snowflake,
         _ body: B
-    ) async throws -> T {
-        return try await postReq(
+    ) async throws {
+        try await postReq(
             path: "channels/\(channelId)/messages/bulk-delete/",
             body: body
         )
@@ -203,12 +201,12 @@ public extension DiscordREST {
     /// Edit Channel Permissions
     ///
     /// > PUT: `/channels/{channel.id}/permissions/{overwrite.id}`
-    func editChannelPermissions<T: Decodable, B: Encodable>(
+    func editChannelPermissions<B: Encodable>(
         _ channelId: Snowflake,
         _ overwriteId: Snowflake,
         _ body: B
-    ) async throws -> T {
-        return try await putReq(
+    ) async throws {
+        try await putReq(
             path: "channels/\(channelId)/permissions/\(overwriteId)/",
             body: body
         )
@@ -261,11 +259,11 @@ public extension DiscordREST {
     /// Trigger Typing Indicator
     ///
     /// > POST: `/channels/{channel.id}/typing`
-    func triggerTypingIndicator<T: Decodable, B: Encodable>(
+    func triggerTypingIndicator<B: Encodable>(
         _ channelId: Snowflake,
         _ body: B
-    ) async throws -> T {
-        return try await postReq(
+    ) async throws {
+        try await postReq(
             path: "channels/\(channelId)/typing/",
             body: body
         )
@@ -283,12 +281,12 @@ public extension DiscordREST {
     /// Pin Message
     ///
     /// > PUT: `/channels/{channel.id}/pins/{message.id}`
-    func pinMessage<T: Decodable, B: Encodable>(
+    func pinMessage<B: Encodable>(
         _ channelId: Snowflake,
         _ messageId: Snowflake,
         _ body: B
-    ) async throws -> T {
-        return try await putReq(
+    ) async throws {
+        try await putReq(
             path: "channels/\(channelId)/pins/\(messageId)/",
             body: body
         )
@@ -368,11 +366,11 @@ public extension DiscordREST {
     /// Join Thread
     ///
     /// > PUT: `/channels/{channel.id}/thread-members/@me`
-    func joinThread<T: Decodable, B: Encodable>(
+    func joinThread<B: Encodable>(
         _ channelId: Snowflake,
         _ body: B
-    ) async throws -> T {
-        return try await putReq(
+    ) async throws {
+        try await putReq(
             path: "channels/\(channelId)/thread-members/@me/",
             body: body
         )
@@ -380,12 +378,12 @@ public extension DiscordREST {
     /// Add Thread Member
     ///
     /// > PUT: `/channels/{channel.id}/thread-members/{user.id}`
-    func addThreadMember<T: Decodable, B: Encodable>(
+    func addThreadMember<B: Encodable>(
         _ channelId: Snowflake,
         _ userId: Snowflake,
         _ body: B
-    ) async throws -> T {
-        return try await putReq(
+    ) async throws {
+        try await putReq(
             path: "channels/\(channelId)/thread-members/\(userId)/",
             body: body
         )

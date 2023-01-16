@@ -136,7 +136,7 @@ public extension DiscordREST {
         _ guildId: Snowflake,
         _ userId: Snowflake,
         _ body: B
-    ) async throws -> T {
+    ) async throws -> T? {
         return try await putReq(
             path: "guilds/\(guildId)/members/\(userId)/",
             body: body
@@ -182,13 +182,13 @@ public extension DiscordREST {
     /// Add Guild Member Role
     ///
     /// > PUT: `/guilds/{guild.id}/members/{user.id}/roles/{role.id}`
-    func addGuildMemberRole<T: Decodable, B: Encodable>(
+    func addGuildMemberRole<B: Encodable>(
         _ guildId: Snowflake,
         _ userId: Snowflake,
         _ roleId: Snowflake,
         _ body: B
-    ) async throws -> T {
-        return try await putReq(
+    ) async throws {
+        try await putReq(
             path: "guilds/\(guildId)/members/\(userId)/roles/\(roleId)/",
             body: body
         )
@@ -240,12 +240,12 @@ public extension DiscordREST {
     /// Create Guild Ban
     ///
     /// > PUT: `/guilds/{guild.id}/bans/{user.id}`
-    func createGuildBan<T: Decodable, B: Encodable>(
+    func createGuildBan<B: Encodable>(
         _ guildId: Snowflake,
         _ userId: Snowflake,
         _ body: B
-    ) async throws -> T {
-        return try await putReq(
+    ) async throws {
+        try await putReq(
             path: "guilds/\(guildId)/bans/\(userId)/",
             body: body
         )
