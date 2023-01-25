@@ -58,7 +58,7 @@ public struct InteractionResponse: Encodable {
 
         public func encode(to encoder: Encoder) throws {
             var container = encoder.singleValueContainer()
-            
+
             switch self {
             case .message(let message): try container.encode(message)
             }

@@ -198,7 +198,7 @@ public extension DiscordREST {
             throw RequestError.jsonDecodingError(error: error)
         }
     }
-    
+
     /// Make a `PUT` request to the Discord REST API
     ///
     /// For endpoints that returns a 204 empty response
@@ -235,7 +235,7 @@ public extension DiscordREST {
             method: .patch
         )
     }
-    
+
     func patchReq(path: String) async throws {
         _ = try await makeRequest(path: path, body: nil, method: .patch)
     }
