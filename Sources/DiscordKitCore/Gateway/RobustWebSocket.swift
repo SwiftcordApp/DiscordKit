@@ -317,7 +317,7 @@ public class RobustWebSocket: NSObject {
             fallthrough
         case .resumed:
             sessionOpen = true
-            //onEvent.notify(event: (type, decoded.data))
+            // onEvent.notify(event: (type, decoded.data))
         case .reconnect:
             Self.log.warning("Gateway-requested reconnect: disconnecting and reconnecting immediately")
             forceClose()
@@ -412,7 +412,7 @@ public extension RobustWebSocket {
     @objc private func sendHeartbeat(_ interval: TimeInterval) {
         guard connected else { return }
         if let hbTimeout = hbTimeout, hbTimeout.isValid {
-            Self.log.warning("Skipping sending heartbeat",  metadata: ["reason": "already waiting for one"])
+            Self.log.warning("Skipping sending heartbeat", metadata: ["reason": "already waiting for one"])
             return
         }
 

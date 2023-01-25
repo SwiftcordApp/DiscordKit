@@ -169,7 +169,7 @@ public extension Client {
             }) else {
                 Self.logger.warning("Could not find registered command corresponding to new command", metadata: [
                     "command.name": "\(command.name)",
-                    "command.type": "\(command.type)",
+                    "command.type": "\(command.type)"
                 ])
                 continue
             }
