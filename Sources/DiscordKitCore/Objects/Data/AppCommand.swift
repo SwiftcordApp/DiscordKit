@@ -16,7 +16,7 @@ public struct AppCommand: Codable {
         case slash = 1
         case user = 2
         case message = 3
-        
+
         public init(from decoder: Decoder) throws {
             let container = try decoder.singleValueContainer()
             if container.decodeNil() {
