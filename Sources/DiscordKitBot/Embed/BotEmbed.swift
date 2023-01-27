@@ -41,7 +41,11 @@ public struct BotEmbed: Codable {
         case timestamp
         case color
         case fields
+        case footer
     }
+
+    // Always rich as that's the only type supported
+    private let type = EmbedType.rich
 
     // Fields are implicitly internal(get) as we do not want them appearing in autocomplete
     fileprivate(set) var title: String?
@@ -49,6 +53,7 @@ public struct BotEmbed: Codable {
     fileprivate(set) var url: URL?
     fileprivate(set) var timestamp: Date?
     fileprivate(set) var color: Int?
+    fileprivate(set) var footer: EmbedFooter?
     private let fields: [Field]?
 
     public init(fields: [Field]? = nil) {
@@ -56,30 +61,6 @@ public struct BotEmbed: Codable {
     }
     public init(@EmbedFieldBuilder fields: () -> [Field]) {
         self.init(fields: fields())
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-
-        title = try container.decodeIfPresent(String.self, forKey: .title)
-        description = try container.decodeIfPresent(String.self, forKey: .description)
-        url = try container.decodeIfPresent(URL.self, forKey: .url)
-        timestamp = try container.decodeIfPresent(Date.self, forKey: .timestamp)
-        color = try container.decodeIfPresent(Int.self, forKey: .color)
-        fields = try container.decodeIfPresent([BotEmbed.Field].self, forKey: .fields)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-
-        // Always encode rich type because that's the only type of embed supported
-        try container.encode(EmbedType.rich, forKey: .type)
-        try container.encodeIfPresent(title, forKey: .title)
-        try container.encodeIfPresent(description, forKey: .description)
-        try container.encodeIfPresent(url, forKey: .url)
-        try container.encodeIfPresent(timestamp, forKey: .timestamp)
-        try container.encodeIfPresent(color, forKey: .color)
-        try container.encodeIfPresent(fields, forKey: .fields)
     }
 }
 
@@ -93,6 +74,12 @@ public extension BotEmbed {
     func description(_ description: String?) -> Self {
         var embed = self
         embed.description = description
+        return embed
+    }
+
+    func footer(_ text: String) -> Self {
+        var embed = self
+        embed.footer = .init(text: text)
         return embed
     }
 
