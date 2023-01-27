@@ -54,6 +54,12 @@ public struct Embed: Codable, Identifiable {
 }
 
 public struct EmbedFooter: Codable {
+    public init(text: String, icon_url: String? = nil, proxy_icon_url: String? = nil) {
+        self.text = text
+        self.icon_url = icon_url
+        self.proxy_icon_url = proxy_icon_url
+    }
+
     public let text: String
     public let icon_url: String?
     public let proxy_icon_url: String?
