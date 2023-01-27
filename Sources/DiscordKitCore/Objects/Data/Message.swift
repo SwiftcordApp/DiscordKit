@@ -334,6 +334,10 @@ public struct MessageComponent: Codable {
     public let type: MessageComponentTypes
 }
 
+public protocol Component: Encodable {
+    var type: MessageComponentTypes { get }
+}
+
 /// Call message component
 /// Representation of a call message shown in DMs
 public struct CallMessageComponent: Codable {

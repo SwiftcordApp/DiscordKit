@@ -8,6 +8,17 @@
 import Foundation
 
 public struct Emoji: Codable {
+    public init(id: Snowflake? = nil, name: String? = nil, roles: [Role]? = nil, user: User? = nil, require_colons: Bool? = nil, managed: Bool? = nil, animated: Bool? = nil, available: Bool? = nil) {
+        self.id = id
+        self.name = name
+        self.roles = roles
+        self.user = user
+        self.require_colons = require_colons
+        self.managed = managed
+        self.animated = animated
+        self.available = available
+    }
+
     public let id: Snowflake?
     public let name: String? // Can be null only in reaction emoji objects
     public let roles: [Role]?

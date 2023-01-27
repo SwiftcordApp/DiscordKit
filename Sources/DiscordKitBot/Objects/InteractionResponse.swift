@@ -26,12 +26,12 @@ public struct InteractionResponse: Encodable {
     }
 
     public enum ResponseData: Encodable {
-        public struct Message: Codable {
+        public struct Message: Encodable {
             public init(
                 content: String? = nil, tts: String? = nil, embeds: [BotEmbed]? = nil,
                 allowed_mentions: AllowedMentions? = nil,
                 flags: DiscordKitCore.Message.Flags? = nil,
-                components: [MessageComponent]? = nil,
+                components: [Component]? = nil,
                 attachments: [NewAttachment]? = nil
             ) {
                 self.content = content
@@ -48,8 +48,36 @@ public struct InteractionResponse: Encodable {
             public let embeds: [BotEmbed]?
             public let allowed_mentions: AllowedMentions?
             public let flags: DiscordKitCore.Message.Flags?
-            public let components: [MessageComponent]?
+            public let components: [Component]?
             public let attachments: [NewAttachment]?
+            
+            enum CodingKeys: CodingKey {
+                case content
+                case tts
+                case embeds
+                case allowed_mentions
+                case flags
+                case attachments
+                case components
+            }
+
+            public func encode(to encoder: Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+
+                try container.encodeIfPresent(self.content, forKey: .content)
+                try container.encodeIfPresent(self.tts, forKey: .tts)
+                try container.encodeIfPresent(self.embeds, forKey: .embeds)
+                try container.encodeIfPresent(self.allowed_mentions, forKey: .allowed_mentions)
+                try container.encodeIfPresent(self.flags, forKey: .flags)
+                try container.encodeIfPresent(self.attachments, forKey: .attachments)
+
+                if let components {
+                    var componentContainer = container.nestedUnkeyedContainer(forKey: .components)
+                    for component in components {
+                        try componentContainer.encode(component)
+                    }
+                }
+            }
         }
 
         case message(Message)
