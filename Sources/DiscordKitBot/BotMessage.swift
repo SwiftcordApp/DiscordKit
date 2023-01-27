@@ -33,7 +33,7 @@ public struct BotMessage {
 public extension BotMessage {
     func reply(_ content: String) async throws -> Message {
         return try await rest!.createChannelMsg(
-            message: .init(content: content, message_reference: .init(message_id: id)),
+            message: .init(content: content, message_reference: .init(message_id: id), components: []),
             id: channelID
         )
     }

@@ -100,25 +100,31 @@ public extension CommandData {
     ///
     /// If a prior call to ``deferReply()`` was made, this function automatically
     /// calls ``followUp(_:)`` instead.
-    func reply(content: String?, embeds: [BotEmbed]?, ephemeral: Bool = false) async throws {
+    func reply(content: String?, embeds: [BotEmbed]?, components: [Component]?, ephemeral: Bool = false) async throws {
         if hasReplied {
-            _ = try await followUp(content: content, embeds: embeds)
+            _ = try await followUp(content: content, embeds: embeds, components: components)
             return
         }
         try await sendResponse(
             .message(
-                .init(content: content, embeds: embeds, flags: ephemeral ? .ephemeral : nil)
+                .init(content: content, embeds: embeds, flags: ephemeral ? .ephemeral : nil, components: components)
             ),
             type: .interactionReply
         )
     }
     /// Reply to this interaction with plain text content
     func reply(_ content: String, ephemeral: Bool = false) async throws {
-        try await reply(content: content, embeds: nil, ephemeral: ephemeral)
+        try await reply(content: content, embeds: nil, components: nil, ephemeral: ephemeral)
+    }
+    func reply(_ content: String, ephemeral: Bool = false, @ComponentBuilder _ components: () -> [Component]) async throws {
+        try await reply(content: content, embeds: nil, components: components(), ephemeral: ephemeral)
     }
     /// Reply to this interaction with embeds
     func reply(ephemeral: Bool = false, @EmbedBuilder _ embeds: () -> [BotEmbed]) async throws {
-        try await reply(content: nil, embeds: embeds(), ephemeral: ephemeral)
+        try await reply(content: nil, embeds: embeds(), components: nil, ephemeral: ephemeral)
+    }
+    func reply(ephemeral: Bool = false, @EmbedBuilder _ embeds: () -> [BotEmbed], @ComponentBuilder components: () -> [Component]) async throws {
+        try await reply(content: nil, embeds: embeds(), components: components(), ephemeral: ephemeral)
     }
 
     /// Send a follow up response to this interaction
@@ -126,8 +132,8 @@ public extension CommandData {
     /// By default, this creates a second reply to this interaction, appearing as a
     /// reply in clients. However, if a call to ``deferReply()`` was made, this
     /// edits the loading message with the content provided.
-    func followUp(content: String?, embeds: [BotEmbed]?) async throws -> Message {
-        try await rest!.sendInteractionFollowUp(.init(content: content, embeds: embeds), applicationID: applicationID, token: token)
+    func followUp(content: String?, embeds: [BotEmbed]?, components: [Component]?) async throws -> Message {
+        try await rest!.sendInteractionFollowUp(.init(content: content, embeds: embeds, components: components), applicationID: applicationID, token: token)
     }
 
     /// Defer the reply to this interaction - the user sees a loading state
