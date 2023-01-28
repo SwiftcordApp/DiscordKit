@@ -51,13 +51,22 @@ public struct Interaction: Decodable {
 
     /// The data payload of an interaction
     public enum Data {
+        /// The data payload for application command interactions
+        ///
+        /// This contains information about the executed command and its options (if present)
         public struct AppCommandData: Codable {
+            /// ID of the invoked application command
             public let id: Snowflake
+            /// Name of command
             public let name: String
+            /// Type of command
             public let type: Int
+            /// Options of command (present if the command has options)
             public let options: [OptionData]?
 
+            /// The data representing one option
             public struct OptionData: Codable {
+                /// The value of an option
                 public enum Value: Encodable {
                     case string(String)
                     case integer(Int)
@@ -104,10 +113,15 @@ public struct Interaction: Decodable {
                     }
                 }
 
+                /// Name of the option
                 public let name: String
+                /// Data type of the option
                 public let type: CommandOptionType
+                /// User-specified value of the option
                 public let value: Value?
+                /// Nested options, if this is a sub-option
                 public let options: [OptionData]?
+                /// If this option is focused (only sent for autocomplete options)
                 public let focused: Bool?
 
                 enum CodingKeys: CodingKey {
@@ -118,6 +132,7 @@ public struct Interaction: Decodable {
                     case focused
                 }
 
+                // Custom decodable conformance to "smartly" decode typed data based on provided type
                 public init(from decoder: Decoder) throws {
                     let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -136,7 +151,16 @@ public struct Interaction: Decodable {
             }
         }
 
+        /// The data payload for message component interactions
+        ///
+        /// This will be sent for all interactions with message components except link buttons
+        public struct MessageComponentData: Codable {
+            public let custom_id: String
+            public let component_type: MessageComponentTypes
+        }
+
         case applicationCommand(AppCommandData)
+        case messageComponent(MessageComponentData)
     }
 
     enum CodingKeys: String, CodingKey {
@@ -174,13 +198,12 @@ public struct Interaction: Decodable {
         guildLocale = try container.decodeIfPresent(String.self, forKey: .guildLocale)
 
         // Conditionally decode data based on type
+        // Data will always be present for every type except PING
         switch type {
         case .applicationCmd, .applicationCmdAutocomplete:
-            if let data = try container.decodeIfPresent(Data.AppCommandData.self, forKey: .data) {
-                self.data = .applicationCommand(data)
-            } else {
-                data = nil
-            }
+            data = .applicationCommand(try container.decode(Data.AppCommandData.self, forKey: .data))
+        case .messageComponent:
+            data = .messageComponent(try container.decode(Data.MessageComponentData.self, forKey: .data))
         default: data = nil
         }
     }
