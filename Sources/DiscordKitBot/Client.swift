@@ -140,8 +140,13 @@ extension Client {
             messageCreate.emit(value: botMessage)
         case .interaction(let interaction):
             Self.logger.trace("Received interaction", metadata: ["interaction.id": "\(interaction.id)"])
-            if case .applicationCommand(let commandData) = interaction.data {
+            // Handle interactions based on type
+            switch interaction.data {
+            case .applicationCommand(let commandData):
                 invokeCommandHandler(commandData, id: interaction.id, token: interaction.token)
+            case .messageComponent(let componentData):
+                print("Component interaction: \(componentData.custom_id)")
+            default: break
             }
         default:
             break
