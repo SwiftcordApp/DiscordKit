@@ -122,7 +122,7 @@ public struct CurrentUser: Codable, GatewayData, Equatable {
     ///
     /// > Experiment: If anyone figures out the possible values and function of
     /// > this property, please make a PR with relevant changes :D
-    public let purchased_flags: String?
+    public let purchased_flags: Int?
 
     /// If this user is a premium (nitro) user
     public let premium: Bool
