@@ -17,9 +17,14 @@ public struct ReadyEvt: Decodable, GatewayData {
     public let session_id: String
     public let user_settings: UserSettings? // Depreciated, no longer sent
     /// Protobuf of user settings
-    public let user_settings_proto: String?
+    public let user_settings_proto: String
     /// DMs for this user
     public let private_channels: [Channel]
+
+    /// The user's unreads
+    ///
+    /// > An implementation for unreads is still WIP in Swiftcord
+    public let read_state: ReadState
 }
 
 /// The ready event payload for bot accounts
