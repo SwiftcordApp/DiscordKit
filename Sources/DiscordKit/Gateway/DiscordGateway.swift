@@ -244,9 +244,7 @@ public class DiscordGateway: ObservableObject {
         case .userReady(let event):
             cache.configure(using: event)
             presences.removeAll()
-            if let proto = event.user_settings_proto {
-                handleProtoUpdate(proto: proto)
-            } else { log.warning("No user settings proto, is this a bot account?") }
+            handleProtoUpdate(proto: event.user_settings_proto)
             log.info("[READY] Gateway wrapper ready")
 
         case .readySupplemental(let evt):

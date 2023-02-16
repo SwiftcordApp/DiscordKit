@@ -177,7 +177,8 @@ public class RobustWebSocket: NSObject {
                     @unknown default: Self.log.warning("Unknown sock message case!")
                     }
                 } catch {
-                    Self.log.warning("Error decoding message", metadata: ["error": "\(error.localizedDescription)"])
+                    // TODO: Add handler for decoding errors
+                    Self.log.warning("Error decoding message", metadata: ["error": "\(error)"])
                 }
                 self?.attachSockReceiveListener()
             case .failure(let error):
@@ -229,27 +230,6 @@ public class RobustWebSocket: NSObject {
 
     // MARK: - Handlers
     private func handleMessage(with message: String) throws {
-        // For debugging JSON decoding errors, how wonderful!
-        /* do {
-            try DiscordREST.decoder.decode(GatewayIncoming.self, from: message.data(using: .utf8)!)
-            // process data
-        } catch let DecodingError.dataCorrupted(context) {
-            print(context)
-        } catch let DecodingError.keyNotFound(key, context) {
-            print("Key '\(key)' not found:", context.debugDescription)
-            print("codingPath:", context.codingPath)
-        } catch let DecodingError.valueNotFound(value, context) {
-            print("Value '\(value)' not found:", context.debugDescription)
-            print("codingPath:", context.codingPath)
-        } catch let DecodingError.typeMismatch(type, context) {
-            print("Type '\(type)' mismatch:", context.debugDescription)
-            print("codingPath:", context.codingPath)
-            print(message)
-            return
-        } catch {
-            print("error: ", error)
-        } */
-
         guard let msgData = message.data(using: .utf8) else { return }
 		let decoded = try DiscordREST.decoder.decode(GatewayIncoming.self, from: msgData)
 
