@@ -173,6 +173,14 @@ public struct GatewayIncoming: Decodable {
         ///
         case interaction(Interaction)
 
+        // MARK: - Typing
+
+        /// Typing start event
+        ///
+        /// Sent when a user starts typing in a channel that is subscribed to. Must subscribe
+        /// to events from a specific channel before these events will be received.
+        case typingStart(TypingStart)
+
         // MARK: - User account-specific events
 
         /// User settings proto update event
@@ -260,9 +268,9 @@ public struct GatewayIncoming: Decodable {
             // MARK: Interactions
             case .interactionCreate: data = .interaction(try values.decode(Interaction.self, forKey: .data))
 
+            // MARK: Typing
+            case .typingStart: data = .typingStart(try values.decode(TypingStart.self, forKey: .data))
 /*
-            case .typingStart: data = try values.decode(TypingStart.self, forKey: .data)
-
             // MARK: - User account-specific events
             case .channelUnreadUpdate: data = try values.decode(ChannelUnreadUpdate.self, forKey: .data)
  */
