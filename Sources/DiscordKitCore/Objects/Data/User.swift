@@ -6,7 +6,11 @@
 
 import Foundation
 
-public struct User: Codable, GatewayData, Equatable {
+public struct User: Codable, GatewayData, Identifiable, Equatable {
+    public static func == (lhs: User, rhs: User) -> Bool {
+        lhs.id == rhs.id
+    }
+
     // To work around the default access level
     public init(id: Snowflake, username: String, discriminator: String, avatar: HashedAsset?, bot: Bool?, bio: String?, system: Bool?, mfa_enabled: Bool?, banner: HashedAsset?, accent_color: Int?, locale: Locale?, verified: Bool?, flags: User.Flags?, premium_type: PremiumType?, public_flags: User.Flags?) {
         self.id = id
