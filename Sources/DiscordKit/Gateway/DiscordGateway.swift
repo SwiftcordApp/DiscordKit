@@ -56,6 +56,9 @@ public class DiscordGateway: ObservableObject {
     /// Includes both single DMs and group DMs
     @Published public var privateChannels: [Channel] = []
 
+    /// Read state
+    @Published public var readState: [Snowflake: ReadState.Entry] = [:]
+
     private var evtListenerID: EventDispatch.HandlerIdentifier?,
                 authFailureListenerID: EventDispatch.HandlerIdentifier?,
                 connStateChangeListenerID: EventDispatch.HandlerIdentifier?
@@ -241,8 +244,11 @@ public class DiscordGateway: ObservableObject {
     }
     private func handleEvent(_ data: GatewayIncoming.Data) {
         switch data {
+        // MARK: Lifecycle events
         case .userReady(let event):
             cache.configure(using: event)
+            readState.removeAll()
+            event.read_state.entries.forEach { readState[$0.id] = $0 }
             presences.removeAll()
             handleProtoUpdate(proto: event.user_settings_proto)
             log.info("[READY] Gateway wrapper ready")
@@ -253,14 +259,14 @@ public class DiscordGateway: ObservableObject {
                 presences.updateValue(presence, forKey: presence.user_id)
             }
 
-        // Guild events
+        // MARK: Guild events
         case .guildCreate(let guild): cache.appendOrReplace(guild)
 
         case .guildDelete(let guild): cache.remove(guild)
 
         case .guildUpdate(let guild): handleGuildUpdate(guild)
 
-        // User updates
+        // MARK: User updates
         case .userUpdate(let currentUser): cache.user = currentUser
 
         case .settingsProtoUpdate(let protoUpdate):
@@ -274,7 +280,11 @@ public class DiscordGateway: ObservableObject {
             }
             handleProtoUpdate(proto: protoUpdate.settings.proto)
 
-            // Channel events
+        case .presenceUpdate(let update):
+            presences.updateValue(Presence(update: update), forKey: update.user.id)
+            log.debug("Updating presence", metadata: ["user.id": "\(update.user.id)"])
+
+        // MARK: Channel events
         case .channelCreate(let channel): cache.append(channel)
 
         case .channelDelete(let channel): cache.remove(channel)
@@ -283,9 +293,9 @@ public class DiscordGateway: ObservableObject {
 
         case .messageCreate(let message): cache.appendOrReplace(message)
 
-        case .presenceUpdate(let update):
-            presences.updateValue(Presence(update: update), forKey: update.user.id)
-            log.debug("Updating presence", metadata: ["user.id": "\(update.user.id)"])
+        // MARK: Message Events
+        case .messageACK(let ack):
+            readState[ack.channel_id] = readState[ack.channel_id]?.updatingLastMessage(id: ack.message_id) ?? .init(id: ack.channel_id, lastMessageID: ack.message_id)
 
         default: break
         }
