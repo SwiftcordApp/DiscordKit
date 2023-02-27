@@ -8,12 +8,15 @@
 import Foundation
 
 /// A holder that can hold either representation of [Snowflakes](https://discord.com/developers/docs/reference#snowflakes)
+///
+/// This is used in cases where the API is known to arbitrarily return
+/// either representations of Snowflakes.
 public enum HybridSnowflake: Codable {
     /// A snowflake represented as an integer
     case int(Int)
 
     /// A snowflake represented as a string
-    case string(String)
+    case string(Snowflake)
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
@@ -31,6 +34,19 @@ public enum HybridSnowflake: Codable {
             self = .string(val)
         } else {
             self = .int(try container.decode(Int.self))
+        }
+    }
+
+    public var stringValue: Snowflake {
+        switch self {
+        case .string(let str): return str
+        case .int(let int): return String(int)
+        }
+    }
+    public var intValue: Int {
+        switch self {
+        case .string(let str): return Int(str) ?? 0
+        case .int(let int): return int
         }
     }
 }
