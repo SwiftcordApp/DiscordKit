@@ -25,22 +25,22 @@ public extension DiscordREST {
     }
     /// Get Invite
     ///
-    /// > GET: `/invites/{invite.code}`
+    /// > GET /invites/{invite.code}
     func getInvite<T: Decodable>(
         _ inviteCode: String
     ) async throws -> T {
         return try await getReq(
-            path: "invites/\(inviteCode)/"
+            path: "invites/\(inviteCode)"
         )
     }
     /// Delete Invite
     ///
-    /// > DELETE: `/invites/{invite.code}`
+    /// > DELETE /invites/{invite.code}
     func deleteInvite(
         _ inviteCode: String
     ) async throws {
         try await deleteReq(
-            path: "invites/\(inviteCode)/"
+            path: "invites/\(inviteCode)"
         )
     }
 }

@@ -213,6 +213,19 @@ public extension DiscordREST {
             method: .put
         )
     }
+    
+    /// Make a `PUT` request to the Discord REST API
+    ///
+    /// For endpoints that returns a 204 empty response and doesn't have any body
+    func putReq(
+        path: String
+    ) async throws {
+        _ = try await makeRequest(
+            path: path,
+            body: nil,
+            method: .put
+        )
+    }
 
     /// Make a `DELETE` request to the Discord REST API
     func deleteReq(path: String) async throws {
