@@ -5,7 +5,7 @@ import Foundation
 public extension DiscordREST {
     /// Get Sticker
     ///
-    /// > GET /stickers/{sticker.id}
+    /// > GET: `/stickers/{sticker.id}`
     func getSticker<T: Decodable>(
         _ stickerId: Snowflake
     ) async throws -> T {
@@ -15,7 +15,7 @@ public extension DiscordREST {
     }
     /// List Nitro Sticker Packs
     ///
-    /// > GET /sticker-packs
+    /// > GET: `/sticker-packs`
     func listNitroStickerPacks<T: Decodable>() async throws -> T {
         return try await getReq(
             path: "sticker-packs"
@@ -23,7 +23,7 @@ public extension DiscordREST {
     }
     /// List Guild Stickers
     ///
-    /// > GET /guilds/{guild.id}/stickers
+    /// > GET: `/guilds/{guild.id}/stickers`
     func listGuildStickers<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -33,7 +33,7 @@ public extension DiscordREST {
     }
     /// Get Guild Sticker
     ///
-    /// > GET /guilds/{guild.id}/stickers/{sticker.id}
+    /// > GET: `/guilds/{guild.id}/stickers/{sticker.id}`
     func getGuildSticker<T: Decodable>(
         _ guildId: Snowflake,
         _ stickerId: Snowflake
@@ -44,7 +44,7 @@ public extension DiscordREST {
     }
     /// Create Guild Sticker
     ///
-    /// > POST /guilds/{guild.id}/stickers
+    /// > POST: `/guilds/{guild.id}/stickers`
     func createGuildSticker<T: Decodable, B: Encodable>(
         _ guildId: Snowflake,
         _ body: B
@@ -56,7 +56,7 @@ public extension DiscordREST {
     }
     /// Edit Guild Sticker
     ///
-    /// > PATCH /guilds/{guild.id}/stickers/{sticker.id}
+    /// > PATCH: `/guilds/{guild.id}/stickers/{sticker.id}`
     func editGuildSticker<B: Encodable>(
         _ guildId: Snowflake,
         _ stickerId: Snowflake,
@@ -69,7 +69,7 @@ public extension DiscordREST {
     }
     /// Delete Guild Sticker
     ///
-    /// > DELETE /guilds/{guild.id}/stickers/{sticker.id}
+    /// > DELETE: `/guilds/{guild.id}/stickers/{sticker.id}`
     func deleteGuildSticker(
         _ guildId: Snowflake,
         _ stickerId: Snowflake

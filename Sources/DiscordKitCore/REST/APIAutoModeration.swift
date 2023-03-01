@@ -5,7 +5,7 @@ import Foundation
 public extension DiscordREST {
     /// List Auto Moderation Rules for Guild
     ///
-    /// > GET /guilds/{guild.id}/auto-moderation/rules
+    /// > GET: `/guilds/{guild.id}/auto-moderation/rules`
     func listAutoModerationRulesforGuild<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -15,7 +15,7 @@ public extension DiscordREST {
     }
     /// Get Auto Moderation Rule
     ///
-    /// > GET /guilds/{guild.id}/auto-moderation/rules/{auto_moderation_rule.id}
+    /// > GET: `/guilds/{guild.id}/auto-moderation/rules/{auto_moderation_rule.id}`
     func getAutoModerationRule<T: Decodable>(
         _ guildId: Snowflake,
         _ auto_moderation_ruleId: Snowflake
@@ -26,7 +26,7 @@ public extension DiscordREST {
     }
     /// Create Auto Moderation Rule
     ///
-    /// > POST /guilds/{guild.id}/auto-moderation/rules
+    /// > POST: `/guilds/{guild.id}/auto-moderation/rules`
     func createAutoModerationRule<T: Decodable, B: Encodable>(
         _ guildId: Snowflake,
         _ body: B
@@ -38,7 +38,7 @@ public extension DiscordREST {
     }
     /// Edit Auto Moderation Rule
     ///
-    /// > PATCH /guilds/{guild.id}/auto-moderation/rules/{auto_moderation_rule.id}
+    /// > PATCH: `/guilds/{guild.id}/auto-moderation/rules/{auto_moderation_rule.id}`
     func editAutoModerationRule<B: Encodable>(
         _ guildId: Snowflake,
         _ auto_moderation_ruleId: Snowflake,
@@ -51,7 +51,7 @@ public extension DiscordREST {
     }
     /// Delete Auto Moderation Rule
     ///
-    /// > DELETE /guilds/{guild.id}/auto-moderation/rules/{auto_moderation_rule.id}
+    /// > DELETE: `/guilds/{guild.id}/auto-moderation/rules/{auto_moderation_rule.id}`
     func deleteAutoModerationRule(
         _ guildId: Snowflake,
         _ auto_moderation_ruleId: Snowflake

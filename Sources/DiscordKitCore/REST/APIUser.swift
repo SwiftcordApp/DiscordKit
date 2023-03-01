@@ -85,7 +85,7 @@ public extension DiscordREST {
     }
     /// Edit Current User
     ///
-    /// > PATCH /users/@me
+    /// > PATCH: `/users/@me`
     func editCurrentUser<B: Encodable>(_ body: B) async throws {
         try await patchReq(
             path: "users/@me",
@@ -94,7 +94,7 @@ public extension DiscordREST {
     }
     /// Create DM
     ///
-    /// > POST /users/@me/channels
+    /// > POST: `/users/@me/channels`
     func createDM<T: Decodable, B: Encodable>(_ body: B) async throws -> T {
         return try await postReq(
             path: "users/@me/channels",
@@ -103,7 +103,7 @@ public extension DiscordREST {
     }
     /// Create Group DM
     ///
-    /// > POST /users/@me/channels
+    /// > POST: `/users/@me/channels`
     func createGroupDM<T: Decodable, B: Encodable>(_ body: B) async throws -> T {
         return try await postReq(
             path: "users/@me/channels",
@@ -112,7 +112,7 @@ public extension DiscordREST {
     }
     /// Get User Connections
     ///
-    /// > GET /users/@me/connections
+    /// > GET: `/users/@me/connections`
     func getUserConnections<T: Decodable>() async throws -> T {
         return try await getReq(
             path: "users/@me/connections"
@@ -120,7 +120,7 @@ public extension DiscordREST {
     }
     /// Get User Application Role Connection
     ///
-    /// > GET /users/@me/applications/{application.id}/role-connection
+    /// > GET: `/users/@me/applications/{application.id}/role-connection`
     func getUserApplicationRoleConnection<T: Decodable>(
         _ applicationId: Snowflake
     ) async throws -> T {
@@ -130,7 +130,7 @@ public extension DiscordREST {
     }
     /// Update User Application Role Connection
     ///
-    /// > PUT /users/@me/applications/{application.id}/role-connection
+    /// > PUT: `/users/@me/applications/{application.id}/role-connection`
     func updateUserApplicationRoleConnection<T: Decodable, B: Encodable>(
         _ applicationId: Snowflake,
         _ body: B

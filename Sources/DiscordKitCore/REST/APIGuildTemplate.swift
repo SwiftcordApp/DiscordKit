@@ -5,7 +5,7 @@ import Foundation
 public extension DiscordREST {
     /// Get Guild Template
     ///
-    /// > GET /guilds/templates/{template.code}
+    /// > GET: `/guilds/templates/{template.code}`
     func getGuildTemplate<T: Decodable>(
         _ templateCode: String
     ) async throws -> T {
@@ -15,7 +15,7 @@ public extension DiscordREST {
     }
     /// Create Guild from Guild Template
     ///
-    /// > POST /guilds/templates/{template.code}
+    /// > POST: `/guilds/templates/{template.code}`
     func createGuildfromGuildTemplate<T: Decodable, B: Encodable>(
         _ templateCode: String,
         _ body: B
@@ -27,7 +27,7 @@ public extension DiscordREST {
     }
     /// Get Guild Templates
     ///
-    /// > GET /guilds/{guild.id}/templates
+    /// > GET: `/guilds/{guild.id}/templates`
     func getGuildTemplates<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -37,7 +37,7 @@ public extension DiscordREST {
     }
     /// Create Guild Template
     ///
-    /// > POST /guilds/{guild.id}/templates
+    /// > POST: `/guilds/{guild.id}/templates`
     func createGuildTemplate<T: Decodable, B: Encodable>(
         _ guildId: Snowflake,
         _ body: B
@@ -49,7 +49,7 @@ public extension DiscordREST {
     }
     /// Sync Guild Template
     ///
-    /// > PUT /guilds/{guild.id}/templates/{template.code}
+    /// > PUT: `/guilds/{guild.id}/templates/{template.code}`
     func syncGuildTemplate<T: Decodable, B: Encodable>(
         _ guildId: Snowflake,
         _ templateCode: String,
@@ -62,7 +62,7 @@ public extension DiscordREST {
     }
     /// Edit Guild Template
     ///
-    /// > PATCH /guilds/{guild.id}/templates/{template.code}
+    /// > PATCH: `/guilds/{guild.id}/templates/{template.code}`
     func editGuildTemplate<B: Encodable>(
         _ guildId: Snowflake,
         _ templateCode: String,
@@ -75,7 +75,7 @@ public extension DiscordREST {
     }
     /// Delete Guild Template
     ///
-    /// > DELETE /guilds/{guild.id}/templates/{template.code}
+    /// > DELETE: `/guilds/{guild.id}/templates/{template.code}`
     func deleteGuildTemplate(
         _ guildId: Snowflake,
         _ templateCode: String

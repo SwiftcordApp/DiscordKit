@@ -5,7 +5,7 @@ import Foundation
 public extension DiscordREST {
     /// List Scheduled Events for Guild
     ///
-    /// > GET /guilds/{guild.id}/scheduled-events
+    /// > GET: `/guilds/{guild.id}/scheduled-events`
     func listScheduledEventsforGuild<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -15,7 +15,7 @@ public extension DiscordREST {
     }
     /// Create Guild Scheduled Event
     ///
-    /// > POST /guilds/{guild.id}/scheduled-events
+    /// > POST: `/guilds/{guild.id}/scheduled-events`
     func createGuildScheduledEvent<T: Decodable, B: Encodable>(
         _ guildId: Snowflake,
         _ body: B
@@ -27,7 +27,7 @@ public extension DiscordREST {
     }
     /// Get Guild Scheduled Event
     ///
-    /// > GET /guilds/{guild.id}/scheduled-events/{guild_scheduled_event.id}
+    /// > GET: `/guilds/{guild.id}/scheduled-events/{guild_scheduled_event.id}`
     func getGuildScheduledEvent<T: Decodable>(
         _ guildId: Snowflake,
         _ guild_scheduled_eventId: Snowflake
@@ -38,7 +38,7 @@ public extension DiscordREST {
     }
     /// Edit Guild Scheduled Event
     ///
-    /// > PATCH /guilds/{guild.id}/scheduled-events/{guild_scheduled_event.id}
+    /// > PATCH: `/guilds/{guild.id}/scheduled-events/{guild_scheduled_event.id}`
     func editGuildScheduledEvent<B: Encodable>(
         _ guildId: Snowflake,
         _ guild_scheduled_eventId: Snowflake,
@@ -51,7 +51,7 @@ public extension DiscordREST {
     }
     /// Delete Guild Scheduled Event
     ///
-    /// > DELETE /guilds/{guild.id}/scheduled-events/{guild_scheduled_event.id}
+    /// > DELETE: `/guilds/{guild.id}/scheduled-events/{guild_scheduled_event.id}`
     func deleteGuildScheduledEvent(
         _ guildId: Snowflake,
         _ guild_scheduled_eventId: Snowflake
@@ -62,7 +62,7 @@ public extension DiscordREST {
     }
     /// Get Guild Scheduled Event Users
     ///
-    /// > GET /guilds/{guild.id}/scheduled-events/{guild_scheduled_event.id}/users
+    /// > GET: `/guilds/{guild.id}/scheduled-events/{guild_scheduled_event.id}/users`
     func getGuildScheduledEventUsers<T: Decodable>(
         _ guildId: Snowflake,
         _ guild_scheduled_eventId: Snowflake

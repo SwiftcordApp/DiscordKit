@@ -5,7 +5,7 @@ import Foundation
 public extension DiscordREST {
     /// List Guild Emojis
     ///
-    /// > GET /guilds/{guild.id}/emojis
+    /// > GET: `/guilds/{guild.id}/emojis`
     func listGuildEmojis<T: Decodable>(
         _ guildId: Snowflake
     ) async throws -> T {
@@ -15,7 +15,7 @@ public extension DiscordREST {
     }
     /// Get Guild Emoji
     ///
-    /// > GET /guilds/{guild.id}/emojis/{emoji.id}
+    /// > GET: `/guilds/{guild.id}/emojis/{emoji.id}`
     func getGuildEmoji<T: Decodable>(
         _ guildId: Snowflake,
         _ emojiId: Snowflake
@@ -26,7 +26,7 @@ public extension DiscordREST {
     }
     /// Create Guild Emoji
     ///
-    /// > POST /guilds/{guild.id}/emojis
+    /// > POST: `/guilds/{guild.id}/emojis`
     func createGuildEmoji<T: Decodable, B: Encodable>(
         _ guildId: Snowflake,
         _ body: B
@@ -38,7 +38,7 @@ public extension DiscordREST {
     }
     /// Edit Guild Emoji
     ///
-    /// > PATCH /guilds/{guild.id}/emojis/{emoji.id}
+    /// > PATCH: `/guilds/{guild.id}/emojis/{emoji.id}`
     func editGuildEmoji<B: Encodable>(
         _ guildId: Snowflake,
         _ emojiId: Snowflake,
@@ -51,7 +51,7 @@ public extension DiscordREST {
     }
     /// Delete Guild Emoji
     ///
-    /// > DELETE /guilds/{guild.id}/emojis/{emoji.id}
+    /// > DELETE: `/guilds/{guild.id}/emojis/{emoji.id}`
     func deleteGuildEmoji(
         _ guildId: Snowflake,
         _ emojiId: Snowflake

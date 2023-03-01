@@ -5,7 +5,7 @@ import Foundation
 public extension DiscordREST {
     /// Get Application Role Connection Metadata Records
     ///
-    /// > GET /applications/{application.id}/role-connections/metadata
+    /// > GET: `/applications/{application.id}/role-connections/metadata`
     func getApplicationRoleConnectionMetadataRecords<T: Decodable>(
         _ applicationId: Snowflake
     ) async throws -> T {
@@ -15,7 +15,7 @@ public extension DiscordREST {
     }
     /// Update Application Role Connection Metadata Records
     ///
-    /// > PUT /applications/{application.id}/role-connections/metadata
+    /// > PUT: `/applications/{application.id}/role-connections/metadata`
     func updateApplicationRoleConnectionMetadataRecords<T: Decodable, B: Encodable>(
         _ applicationId: Snowflake,
         _ body: B

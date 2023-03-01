@@ -5,7 +5,7 @@ import Foundation
 public extension DiscordREST {
     /// Get Entitlements
     ///
-    /// > GET /applications/{application.id}/entitlements
+    /// > GET: `/applications/{application.id}/entitlements`
     func getEntitlements<T: Decodable>(
         _ applicationId: Snowflake
     ) async throws -> T {
@@ -15,7 +15,7 @@ public extension DiscordREST {
     }
     /// Get Entitlement
     ///
-    /// > GET /applications/{application.id}/entitlements/{entitlement.id}
+    /// > GET: `/applications/{application.id}/entitlements/{entitlement.id}`
     func getEntitlement<T: Decodable>(
         _ applicationId: Snowflake,
         _ entitlementId: Snowflake
@@ -26,7 +26,7 @@ public extension DiscordREST {
     }
     /// Get SKUs
     ///
-    /// > GET /applications/{application.id}/skus
+    /// > GET: `/applications/{application.id}/skus`
     func getSKUs<T: Decodable>(
         _ applicationId: Snowflake
     ) async throws -> T {
@@ -36,7 +36,7 @@ public extension DiscordREST {
     }
     /// Consume SKU
     ///
-    /// > POST /applications/{application.id}/entitlements/{entitlement.id}/consume
+    /// > POST: `/applications/{application.id}/entitlements/{entitlement.id}/consume`
     func consumeSKU<T: Decodable, B: Encodable>(
         _ applicationId: Snowflake,
         _ entitlementId: Snowflake,
@@ -49,7 +49,7 @@ public extension DiscordREST {
     }
     /// Delete Test Entitlement
     ///
-    /// > DELETE /applications/{application.id}/entitlements/{entitlement.id}
+    /// > DELETE: `/applications/{application.id}/entitlements/{entitlement.id}`
     func deleteTestEntitlement(
         _ applicationId: Snowflake,
         _ entitlementId: Snowflake
@@ -60,7 +60,7 @@ public extension DiscordREST {
     }
     /// Create Purchase Discount
     ///
-    /// > PUT /store/skus/{sku.id}/discounts/{user.id}
+    /// > PUT: `/store/skus/{sku.id}/discounts/{user.id}`
     func createPurchaseDiscount<T: Decodable, B: Encodable>(
         _ skuId: Snowflake,
         _ userId: Snowflake,
@@ -73,7 +73,7 @@ public extension DiscordREST {
     }
     /// Delete Purchase Discount
     ///
-    /// > DELETE /store/skus/{sku.id}/discounts/{user.id}
+    /// > DELETE: `/store/skus/{sku.id}/discounts/{user.id}`
     func deletePurchaseDiscount(
         _ skuId: Snowflake,
         _ userId: Snowflake

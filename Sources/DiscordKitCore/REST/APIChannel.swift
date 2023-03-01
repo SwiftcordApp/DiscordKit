@@ -78,7 +78,7 @@ public extension DiscordREST {
 
     /// Edit Channel
     ///
-    /// > PATCH /channels/{channel.id}
+    /// > PATCH: `/channels/{channel.id}`
     func editChannel<B: Encodable>(
         _ channelId: Snowflake,
         _ body: B
@@ -90,7 +90,7 @@ public extension DiscordREST {
     }
     /// Create Message
     ///
-    /// > POST /channels/{channel.id}/messages
+    /// > POST: `/channels/{channel.id}/messages`
     func createMessage<T: Decodable, B: Encodable>(
         _ channelId: Snowflake,
         _ body: B
@@ -102,7 +102,7 @@ public extension DiscordREST {
     }
     /// Crosspost Message
     ///
-    /// > POST /channels/{channel.id}/messages/{message.id}/crosspost
+    /// > POST: `/channels/{channel.id}/messages/{message.id}/crosspost`
     func crosspostMessage<T: Decodable, B: Encodable>(
         _ channelId: Snowflake,
         _ messageId: Snowflake,
@@ -115,7 +115,7 @@ public extension DiscordREST {
     }
     /// Create Reaction
     ///
-    /// > PUT /channels/{channel.id}/messages/{message.id}/reactions/{emoji}/@me
+    /// > PUT: `/channels/{channel.id}/messages/{message.id}/reactions/{emoji}/@me`
     func createReaction(
         _ channelId: Snowflake,
         _ messageId: Snowflake,
@@ -127,7 +127,7 @@ public extension DiscordREST {
     }
     /// Delete Own Reaction
     ///
-    /// > DELETE /channels/{channel.id}/messages/{message.id}/reactions/{emoji}/@me
+    /// > DELETE: `/channels/{channel.id}/messages/{message.id}/reactions/{emoji}/@me`
     func deleteOwnReaction(
         _ channelId: Snowflake,
         _ messageId: Snowflake,
@@ -139,7 +139,7 @@ public extension DiscordREST {
     }
     /// Delete User Reaction
     ///
-    /// > DELETE /channels/{channel.id}/messages/{message.id}/reactions/{emoji}/{user.id}
+    /// > DELETE: `/channels/{channel.id}/messages/{message.id}/reactions/{emoji}/{user.id}`
     func deleteUserReaction(
         _ channelId: Snowflake,
         _ messageId: Snowflake,
@@ -152,7 +152,7 @@ public extension DiscordREST {
     }
     /// Get Reactions
     ///
-    /// > GET /channels/{channel.id}/messages/{message.id}/reactions/{emoji}
+    /// > GET: `/channels/{channel.id}/messages/{message.id}/reactions/{emoji}`
     func getReactions<T: Decodable>(
         _ channelId: Snowflake,
         _ messageId: Snowflake,
@@ -164,7 +164,7 @@ public extension DiscordREST {
     }
     /// Delete All Reactions
     ///
-    /// > DELETE /channels/{channel.id}/messages/{message.id}/reactions
+    /// > DELETE: `/channels/{channel.id}/messages/{message.id}/reactions`
     func deleteAllReactions(
         _ channelId: Snowflake,
         _ messageId: Snowflake
@@ -175,7 +175,7 @@ public extension DiscordREST {
     }
     /// Delete All Reactions for Emoji
     ///
-    /// > DELETE /channels/{channel.id}/messages/{message.id}/reactions/{emoji}
+    /// > DELETE: `/channels/{channel.id}/messages/{message.id}/reactions/{emoji}`
     func deleteAllReactionsforEmoji(
         _ channelId: Snowflake,
         _ messageId: Snowflake,
@@ -187,7 +187,7 @@ public extension DiscordREST {
     }
     /// Edit Message
     ///
-    /// > PATCH /channels/{channel.id}/messages/{message.id}
+    /// > PATCH: `/channels/{channel.id}/messages/{message.id}`
     func editMessage<B: Encodable>(
         _ channelId: Snowflake,
         _ messageId: Snowflake,
@@ -200,7 +200,7 @@ public extension DiscordREST {
     }
     /// Bulk Delete Messages
     ///
-    /// > POST /channels/{channel.id}/messages/bulk-delete
+    /// > POST: `/channels/{channel.id}/messages/bulk-delete`
     func bulkDeleteMessages<T: Decodable, B: Encodable>(
         _ channelId: Snowflake,
         _ body: B
@@ -212,7 +212,7 @@ public extension DiscordREST {
     }
     /// Edit Channel Permissions
     ///
-    /// > PUT /channels/{channel.id}/permissions/{overwrite.id}
+    /// > PUT: `/channels/{channel.id}/permissions/{overwrite.id}`
     func editChannelPermissions<T: Decodable, B: Encodable>(
         _ channelId: Snowflake,
         _ overwriteId: Snowflake,
@@ -225,7 +225,7 @@ public extension DiscordREST {
     }
     /// Get Channel Invites
     ///
-    /// > GET /channels/{channel.id}/invites
+    /// > GET: `/channels/{channel.id}/invites`
     func getChannelInvites<T: Decodable>(
         _ channelId: Snowflake
     ) async throws -> T {
@@ -235,7 +235,7 @@ public extension DiscordREST {
     }
     /// Create Channel Invite
     ///
-    /// > POST /channels/{channel.id}/invites
+    /// > POST: `/channels/{channel.id}/invites`
     func createChannelInvite<T: Decodable, B: Encodable>(
         _ channelId: Snowflake,
         _ body: B
@@ -247,7 +247,7 @@ public extension DiscordREST {
     }
     /// Delete Channel Permission
     ///
-    /// > DELETE /channels/{channel.id}/permissions/{overwrite.id}
+    /// > DELETE: `/channels/{channel.id}/permissions/{overwrite.id}`
     func deleteChannelPermission(
         _ channelId: Snowflake,
         _ overwriteId: Snowflake
@@ -258,7 +258,7 @@ public extension DiscordREST {
     }
     /// Follow Announcement Channel
     ///
-    /// > POST /channels/{channel.id}/followers
+    /// > POST: `/channels/{channel.id}/followers`
     func followAnnouncementChannel<T: Decodable, B: Encodable>(
         _ channelId: Snowflake,
         _ body: B
@@ -270,7 +270,7 @@ public extension DiscordREST {
     }
     /// Trigger Typing Indicator
     ///
-    /// > POST /channels/{channel.id}/typing
+    /// > POST: `/channels/{channel.id}/typing`
     func triggerTypingIndicator<T: Decodable, B: Encodable>(
         _ channelId: Snowflake,
         _ body: B
@@ -282,7 +282,7 @@ public extension DiscordREST {
     }
     /// Get Pinned Messages
     ///
-    /// > GET /channels/{channel.id}/pins
+    /// > GET: `/channels/{channel.id}/pins`
     func getPinnedMessages<T: Decodable>(
         _ channelId: Snowflake
     ) async throws -> T {
@@ -292,7 +292,7 @@ public extension DiscordREST {
     }
     /// Pin Message
     ///
-    /// > PUT /channels/{channel.id}/pins/{message.id}
+    /// > PUT: `/channels/{channel.id}/pins/{message.id}`
     func pinMessage(
         _ channelId: Snowflake,
         _ messageId: Snowflake
@@ -303,7 +303,7 @@ public extension DiscordREST {
     }
     /// Unpin Message
     ///
-    /// > DELETE /channels/{channel.id}/pins/{message.id}
+    /// > DELETE: `/channels/{channel.id}/pins/{message.id}`
     func unpinMessage(
         _ channelId: Snowflake,
         _ messageId: Snowflake
@@ -314,7 +314,7 @@ public extension DiscordREST {
     }
     /// Group DM Add Recipient
     ///
-    /// > PUT /channels/{channel.id}/recipients/{user.id}
+    /// > PUT: `/channels/{channel.id}/recipients/{user.id}`
     func groupDMAddRecipient<T: Decodable, B: Encodable>(
         _ channelId: Snowflake,
         _ userId: Snowflake,
@@ -327,7 +327,7 @@ public extension DiscordREST {
     }
     /// Group DM Remove Recipient
     ///
-    /// > DELETE /channels/{channel.id}/recipients/{user.id}
+    /// > DELETE: `/channels/{channel.id}/recipients/{user.id}`
     func groupDMRemoveRecipient(
         _ channelId: Snowflake,
         _ userId: Snowflake
@@ -338,7 +338,7 @@ public extension DiscordREST {
     }
     /// Start Thread from Message
     ///
-    /// > POST /channels/{channel.id}/messages/{message.id}/threads
+    /// > POST: `/channels/{channel.id}/messages/{message.id}/threads`
     func startThreadfromMessage<T: Decodable, B: Encodable>(
         _ channelId: Snowflake,
         _ messageId: Snowflake,
@@ -351,7 +351,7 @@ public extension DiscordREST {
     }
     /// Start Thread without Message
     ///
-    /// > POST /channels/{channel.id}/threads
+    /// > POST: `/channels/{channel.id}/threads`
     func startThreadwithoutMessage<T: Decodable, B: Encodable>(
         _ channelId: Snowflake,
         _ body: B
@@ -363,7 +363,7 @@ public extension DiscordREST {
     }
     /// Start Thread in Forum Channel
     ///
-    /// > POST /channels/{channel.id}/threads
+    /// > POST: `/channels/{channel.id}/threads`
     func startThreadinForumChannel<T: Decodable, B: Encodable>(
         _ channelId: Snowflake,
         _ body: B
@@ -375,7 +375,7 @@ public extension DiscordREST {
     }
     /// Join Thread
     ///
-    /// > PUT /channels/{channel.id}/thread-members/@me
+    /// > PUT: `/channels/{channel.id}/thread-members/@me`
     func joinThread(
         _ channelId: Snowflake
     ) async throws {
@@ -385,7 +385,7 @@ public extension DiscordREST {
     }
     /// Add Thread Member
     ///
-    /// > PUT /channels/{channel.id}/thread-members/{user.id}
+    /// > PUT: `/channels/{channel.id}/thread-members/{user.id}`
     func addThreadMember(
         _ channelId: Snowflake,
         _ userId: Snowflake
@@ -396,7 +396,7 @@ public extension DiscordREST {
     }
     /// Leave Thread
     ///
-    /// > DELETE /channels/{channel.id}/thread-members/@me
+    /// > DELETE: `/channels/{channel.id}/thread-members/@me`
     func leaveThread(
         _ channelId: Snowflake
     ) async throws {
@@ -406,7 +406,7 @@ public extension DiscordREST {
     }
     /// Remove Thread Member
     ///
-    /// > DELETE /channels/{channel.id}/thread-members/{user.id}
+    /// > DELETE: `/channels/{channel.id}/thread-members/{user.id}`
     func removeThreadMember(
         _ channelId: Snowflake,
         _ userId: Snowflake
@@ -417,7 +417,7 @@ public extension DiscordREST {
     }
     /// Get Thread Member
     ///
-    /// > GET /channels/{channel.id}/thread-members/{user.id}
+    /// > GET: `/channels/{channel.id}/thread-members/{user.id}`
     func getThreadMember<T: Decodable>(
         _ channelId: Snowflake,
         _ userId: Snowflake
@@ -428,7 +428,7 @@ public extension DiscordREST {
     }
     /// List Thread Members
     ///
-    /// > GET /channels/{channel.id}/thread-members
+    /// > GET: `/channels/{channel.id}/thread-members`
     func listThreadMembers<T: Decodable>(
         _ channelId: Snowflake
     ) async throws -> T {
@@ -438,7 +438,7 @@ public extension DiscordREST {
     }
     /// List Public Archived Threads
     ///
-    /// > GET /channels/{channel.id}/threads/archived/public
+    /// > GET: `/channels/{channel.id}/threads/archived/public`
     func listPublicArchivedThreads<T: Decodable>(
         _ channelId: Snowflake
     ) async throws -> T {
@@ -448,7 +448,7 @@ public extension DiscordREST {
     }
     /// List Private Archived Threads
     ///
-    /// > GET /channels/{channel.id}/threads/archived/private
+    /// > GET: `/channels/{channel.id}/threads/archived/private`
     func listPrivateArchivedThreads<T: Decodable>(
         _ channelId: Snowflake
     ) async throws -> T {
@@ -458,7 +458,7 @@ public extension DiscordREST {
     }
     /// List Joined Private Archived Threads
     ///
-    /// > GET /channels/{channel.id}/users/@me/threads/archived/private
+    /// > GET: `/channels/{channel.id}/users/@me/threads/archived/private`
     func listJoinedPrivateArchivedThreads<T: Decodable>(
         _ channelId: Snowflake
     ) async throws -> T {

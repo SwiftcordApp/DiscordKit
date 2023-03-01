@@ -5,7 +5,7 @@ import Foundation
 public extension DiscordREST {
     /// Create Stage Instance
     ///
-    /// > POST /stage-instances
+    /// > POST: `/stage-instances`
     func createStageInstance<T: Decodable, B: Encodable>(_ body: B) async throws -> T {
         return try await postReq(
             path: "stage-instances",
@@ -14,7 +14,7 @@ public extension DiscordREST {
     }
     /// Get Stage Instance
     ///
-    /// > GET /stage-instances/{channel.id}
+    /// > GET: `/stage-instances/{channel.id}`
     func getStageInstance<T: Decodable>(
         _ channelId: Snowflake
     ) async throws -> T {
@@ -24,7 +24,7 @@ public extension DiscordREST {
     }
     /// Edit Stage Instance
     ///
-    /// > PATCH /stage-instances/{channel.id}
+    /// > PATCH: `/stage-instances/{channel.id}`
     func editStageInstance<B: Encodable>(
         _ channelId: Snowflake,
         _ body: B
@@ -36,7 +36,7 @@ public extension DiscordREST {
     }
     /// Delete Stage Instance
     ///
-    /// > DELETE /stage-instances/{channel.id}
+    /// > DELETE: `/stage-instances/{channel.id}`
     func deleteStageInstance(
         _ channelId: Snowflake
     ) async throws {
