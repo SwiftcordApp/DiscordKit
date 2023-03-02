@@ -30,7 +30,7 @@ public extension DiscordREST {
         _ inviteCode: String
     ) async throws -> T {
         return try await getReq(
-            path: "invites/\(inviteCode)/"
+            path: "invites/\(inviteCode)"
         )
     }
     /// Delete Invite
@@ -40,7 +40,7 @@ public extension DiscordREST {
         _ inviteCode: String
     ) async throws {
         try await deleteReq(
-            path: "invites/\(inviteCode)/"
+            path: "invites/\(inviteCode)"
         )
     }
 }

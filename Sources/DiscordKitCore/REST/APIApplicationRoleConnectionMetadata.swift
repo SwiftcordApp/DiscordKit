@@ -10,7 +10,7 @@ public extension DiscordREST {
         _ applicationId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "applications/\(applicationId)/role-connections/metadata/"
+            path: "applications/\(applicationId)/role-connections/metadata"
         )
     }
     /// Update Application Role Connection Metadata Records
@@ -21,7 +21,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await putReq(
-            path: "applications/\(applicationId)/role-connections/metadata/",
+            path: "applications/\(applicationId)/role-connections/metadata",
             body: body
         )
     }

@@ -10,7 +10,7 @@ public extension DiscordREST {
         _ applicationId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "applications/\(applicationId)/entitlements/"
+            path: "applications/\(applicationId)/entitlements"
         )
     }
     /// Get Entitlement
@@ -21,7 +21,7 @@ public extension DiscordREST {
         _ entitlementId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "applications/\(applicationId)/entitlements/\(entitlementId)/"
+            path: "applications/\(applicationId)/entitlements/\(entitlementId)"
         )
     }
     /// Get SKUs
@@ -31,18 +31,20 @@ public extension DiscordREST {
         _ applicationId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "applications/\(applicationId)/skus/"
+            path: "applications/\(applicationId)/skus"
         )
     }
     /// Consume SKU
     ///
     /// > POST: `/applications/{application.id}/entitlements/{entitlement.id}/consume`
-    func consumeSKU(
+    func consumeSKU<T: Decodable, B: Encodable>(
         _ applicationId: Snowflake,
-        _ entitlementId: Snowflake
-    ) async throws {
-        try await postReq(
-            path: "applications/\(applicationId)/entitlements/\(entitlementId)/consume/"
+        _ entitlementId: Snowflake,
+        _ body: B
+    ) async throws -> T {
+        return try await postReq(
+            path: "applications/\(applicationId)/entitlements/\(entitlementId)/consume",
+            body: body
         )
     }
     /// Delete Test Entitlement
@@ -53,19 +55,19 @@ public extension DiscordREST {
         _ entitlementId: Snowflake
     ) async throws {
         try await deleteReq(
-            path: "applications/\(applicationId)/entitlements/\(entitlementId)/"
+            path: "applications/\(applicationId)/entitlements/\(entitlementId)"
         )
     }
     /// Create Purchase Discount
     ///
     /// > PUT: `/store/skus/{sku.id}/discounts/{user.id}`
-    func createPurchaseDiscount<B: Encodable>(
+    func createPurchaseDiscount<T: Decodable, B: Encodable>(
         _ skuId: Snowflake,
         _ userId: Snowflake,
         _ body: B
-    ) async throws {
-        try await putReq(
-            path: "store/skus/\(skuId)/discounts/\(userId)/",
+    ) async throws -> T {
+        return try await putReq(
+            path: "store/skus/\(skuId)/discounts/\(userId)",
             body: body
         )
     }
@@ -77,7 +79,7 @@ public extension DiscordREST {
         _ userId: Snowflake
     ) async throws {
         try await deleteReq(
-            path: "store/skus/\(skuId)/discounts/\(userId)/"
+            path: "store/skus/\(skuId)/discounts/\(userId)"
         )
     }
 }

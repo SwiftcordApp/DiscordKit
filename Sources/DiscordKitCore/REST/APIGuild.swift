@@ -28,7 +28,7 @@ public extension DiscordREST {
     /// > POST: `/guilds`
     func createGuild<T: Decodable, B: Encodable>(_ body: B) async throws -> T {
         return try await postReq(
-            path: "guilds/",
+            path: "guilds",
             body: body
         )
     }
@@ -39,7 +39,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/preview/"
+            path: "guilds/\(guildId)/preview"
         )
     }
     /// Edit Guild
@@ -50,7 +50,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "guilds/\(guildId)/",
+            path: "guilds/\(guildId)",
             body: body
         )
     }
@@ -61,7 +61,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws {
         try await deleteReq(
-            path: "guilds/\(guildId)/"
+            path: "guilds/\(guildId)"
         )
     }
     /// Create Guild Channel
@@ -72,7 +72,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await postReq(
-            path: "guilds/\(guildId)/channels/",
+            path: "guilds/\(guildId)/channels",
             body: body
         )
     }
@@ -84,7 +84,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "guilds/\(guildId)/channels/",
+            path: "guilds/\(guildId)/channels",
             body: body
         )
     }
@@ -95,7 +95,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/threads/active/"
+            path: "guilds/\(guildId)/threads/active"
         )
     }
     /// Get Guild Member
@@ -106,7 +106,7 @@ public extension DiscordREST {
         _ userId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/members/\(userId)/"
+            path: "guilds/\(guildId)/members/\(userId)"
         )
     }
     /// List Guild Members
@@ -116,7 +116,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/members/"
+            path: "guilds/\(guildId)/members"
         )
     }
     /// Search Guild Members
@@ -126,7 +126,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/members/search/"
+            path: "guilds/\(guildId)/members/search"
         )
     }
     /// Add Guild Member
@@ -136,9 +136,9 @@ public extension DiscordREST {
         _ guildId: Snowflake,
         _ userId: Snowflake,
         _ body: B
-    ) async throws -> T? {
+    ) async throws -> T {
         return try await putReq(
-            path: "guilds/\(guildId)/members/\(userId)/",
+            path: "guilds/\(guildId)/members/\(userId)",
             body: body
         )
     }
@@ -151,7 +151,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "guilds/\(guildId)/members/\(userId)/",
+            path: "guilds/\(guildId)/members/\(userId)",
             body: body
         )
     }
@@ -163,7 +163,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "guilds/\(guildId)/members/@me/",
+            path: "guilds/\(guildId)/members/@me",
             body: body
         )
     }
@@ -175,22 +175,20 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "guilds/\(guildId)/members/@me/nick/",
+            path: "guilds/\(guildId)/members/@me/nick",
             body: body
         )
     }
     /// Add Guild Member Role
     ///
     /// > PUT: `/guilds/{guild.id}/members/{user.id}/roles/{role.id}`
-    func addGuildMemberRole<B: Encodable>(
+    func addGuildMemberRole(
         _ guildId: Snowflake,
         _ userId: Snowflake,
-        _ roleId: Snowflake,
-        _ body: B
+        _ roleId: Snowflake
     ) async throws {
-        try await putReq(
-            path: "guilds/\(guildId)/members/\(userId)/roles/\(roleId)/",
-            body: body
+        return try await putReq(
+            path: "guilds/\(guildId)/members/\(userId)/roles/\(roleId)"
         )
     }
     /// Remove Guild Member Role
@@ -202,7 +200,7 @@ public extension DiscordREST {
         _ roleId: Snowflake
     ) async throws {
         try await deleteReq(
-            path: "guilds/\(guildId)/members/\(userId)/roles/\(roleId)/"
+            path: "guilds/\(guildId)/members/\(userId)/roles/\(roleId)"
         )
     }
     /// Remove Guild Member
@@ -213,7 +211,7 @@ public extension DiscordREST {
         _ userId: Snowflake
     ) async throws {
         try await deleteReq(
-            path: "guilds/\(guildId)/members/\(userId)/"
+            path: "guilds/\(guildId)/members/\(userId)"
         )
     }
     /// Get Guild Bans
@@ -223,7 +221,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/bans/"
+            path: "guilds/\(guildId)/bans"
         )
     }
     /// Get Guild Ban
@@ -234,7 +232,7 @@ public extension DiscordREST {
         _ userId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/bans/\(userId)/"
+            path: "guilds/\(guildId)/bans/\(userId)"
         )
     }
     /// Create Guild Ban
@@ -246,7 +244,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await putReq(
-            path: "guilds/\(guildId)/bans/\(userId)/",
+            path: "guilds/\(guildId)/bans/\(userId)",
             body: body
         )
     }
@@ -258,7 +256,7 @@ public extension DiscordREST {
         _ userId: Snowflake
     ) async throws {
         try await deleteReq(
-            path: "guilds/\(guildId)/bans/\(userId)/"
+            path: "guilds/\(guildId)/bans/\(userId)"
         )
     }
     /// Create Guild Role
@@ -269,7 +267,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await postReq(
-            path: "guilds/\(guildId)/roles/",
+            path: "guilds/\(guildId)/roles",
             body: body
         )
     }
@@ -281,7 +279,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "guilds/\(guildId)/roles/",
+            path: "guilds/\(guildId)/roles",
             body: body
         )
     }
@@ -294,7 +292,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "guilds/\(guildId)/roles/\(roleId)/",
+            path: "guilds/\(guildId)/roles/\(roleId)",
             body: body
         )
     }
@@ -306,7 +304,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await postReq(
-            path: "guilds/\(guildId)/mfa/",
+            path: "guilds/\(guildId)/mfa",
             body: body
         )
     }
@@ -318,7 +316,7 @@ public extension DiscordREST {
         _ roleId: Snowflake
     ) async throws {
         try await deleteReq(
-            path: "guilds/\(guildId)/roles/\(roleId)/"
+            path: "guilds/\(guildId)/roles/\(roleId)"
         )
     }
     /// Get Guild Prune Count
@@ -328,7 +326,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/prune/"
+            path: "guilds/\(guildId)/prune"
         )
     }
     /// Begin Guild Prune
@@ -339,7 +337,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await postReq(
-            path: "guilds/\(guildId)/prune/",
+            path: "guilds/\(guildId)/prune",
             body: body
         )
     }
@@ -350,7 +348,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/regions/"
+            path: "guilds/\(guildId)/regions"
         )
     }
     /// Get Guild Invites
@@ -360,7 +358,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/invites/"
+            path: "guilds/\(guildId)/invites"
         )
     }
     /// Get Guild Integrations
@@ -370,7 +368,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/integrations/"
+            path: "guilds/\(guildId)/integrations"
         )
     }
     /// Delete Guild Integration
@@ -381,7 +379,7 @@ public extension DiscordREST {
         _ integrationId: Snowflake
     ) async throws {
         try await deleteReq(
-            path: "guilds/\(guildId)/integrations/\(integrationId)/"
+            path: "guilds/\(guildId)/integrations/\(integrationId)"
         )
     }
     /// Get Guild Widget Settings
@@ -391,7 +389,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/widget/"
+            path: "guilds/\(guildId)/widget"
         )
     }
     /// Edit Guild Widget
@@ -402,7 +400,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "guilds/\(guildId)/widget/",
+            path: "guilds/\(guildId)/widget",
             body: body
         )
     }
@@ -413,7 +411,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/widget.json/"
+            path: "guilds/\(guildId)/widget.json"
         )
     }
     /// Get Guild Vanity URL
@@ -423,7 +421,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/vanity-url/"
+            path: "guilds/\(guildId)/vanity-url"
         )
     }
     /// Get Guild Widget Image
@@ -433,7 +431,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/widget.png/"
+            path: "guilds/\(guildId)/widget.png"
         )
     }
     /// Get Guild Welcome Screen
@@ -443,7 +441,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/welcome-screen/"
+            path: "guilds/\(guildId)/welcome-screen"
         )
     }
     /// Edit Guild Welcome Screen
@@ -454,7 +452,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "guilds/\(guildId)/welcome-screen/",
+            path: "guilds/\(guildId)/welcome-screen",
             body: body
         )
     }
@@ -466,7 +464,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "guilds/\(guildId)/voice-states/@me/",
+            path: "guilds/\(guildId)/voice-states/@me",
             body: body
         )
     }
@@ -479,7 +477,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "guilds/\(guildId)/voice-states/\(userId)/",
+            path: "guilds/\(guildId)/voice-states/\(userId)",
             body: body
         )
     }

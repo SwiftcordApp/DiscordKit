@@ -6,15 +6,19 @@ public extension DiscordREST {
     /// Get Sticker
     ///
     /// > GET: `/stickers/{sticker.id}`
-    func getSticker(id: Snowflake) async throws -> Sticker {
-        return try await getReq(path: "stickers/\(id)")
+    func getSticker<T: Decodable>(
+        _ stickerId: Snowflake
+    ) async throws -> T {
+        return try await getReq(
+            path: "stickers/\(stickerId)"
+        )
     }
     /// List Nitro Sticker Packs
     ///
     /// > GET: `/sticker-packs`
     func listNitroStickerPacks<T: Decodable>() async throws -> T {
         return try await getReq(
-            path: "sticker-packs/"
+            path: "sticker-packs"
         )
     }
     /// List Guild Stickers
@@ -24,7 +28,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/stickers/"
+            path: "guilds/\(guildId)/stickers"
         )
     }
     /// Get Guild Sticker
@@ -35,7 +39,7 @@ public extension DiscordREST {
         _ stickerId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/stickers/\(stickerId)/"
+            path: "guilds/\(guildId)/stickers/\(stickerId)"
         )
     }
     /// Create Guild Sticker
@@ -46,7 +50,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await postReq(
-            path: "guilds/\(guildId)/stickers/",
+            path: "guilds/\(guildId)/stickers",
             body: body
         )
     }
@@ -59,7 +63,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "guilds/\(guildId)/stickers/\(stickerId)/",
+            path: "guilds/\(guildId)/stickers/\(stickerId)",
             body: body
         )
     }
@@ -71,7 +75,7 @@ public extension DiscordREST {
         _ stickerId: Snowflake
     ) async throws {
         try await deleteReq(
-            path: "guilds/\(guildId)/stickers/\(stickerId)/"
+            path: "guilds/\(guildId)/stickers/\(stickerId)"
         )
     }
 }

@@ -10,7 +10,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/audit-logs/"
+            path: "guilds/\(guildId)/audit-logs"
         )
     }
 }

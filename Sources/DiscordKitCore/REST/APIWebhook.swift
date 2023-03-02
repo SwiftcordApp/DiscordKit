@@ -11,7 +11,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await postReq(
-            path: "channels/\(channelId)/webhooks/",
+            path: "channels/\(channelId)/webhooks",
             body: body
         )
     }
@@ -22,7 +22,7 @@ public extension DiscordREST {
         _ channelId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "channels/\(channelId)/webhooks/"
+            path: "channels/\(channelId)/webhooks"
         )
     }
     /// Get Guild Webhooks
@@ -32,7 +32,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/webhooks/"
+            path: "guilds/\(guildId)/webhooks"
         )
     }
     /// Get Webhook
@@ -42,7 +42,7 @@ public extension DiscordREST {
         _ webhookId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "webhooks/\(webhookId)/"
+            path: "webhooks/\(webhookId)"
         )
     }
     /// Get Webhook with Token
@@ -53,7 +53,7 @@ public extension DiscordREST {
         _ webhookToken: String
     ) async throws -> T {
         return try await getReq(
-            path: "webhooks/\(webhookId)/\(webhookToken)/"
+            path: "webhooks/\(webhookId)/\(webhookToken)"
         )
     }
     /// Edit Webhook
@@ -64,7 +64,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "webhooks/\(webhookId)/",
+            path: "webhooks/\(webhookId)",
             body: body
         )
     }
@@ -77,7 +77,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "webhooks/\(webhookId)/\(webhookToken)/",
+            path: "webhooks/\(webhookId)/\(webhookToken)",
             body: body
         )
     }
@@ -88,7 +88,7 @@ public extension DiscordREST {
         _ webhookId: Snowflake
     ) async throws {
         try await deleteReq(
-            path: "webhooks/\(webhookId)/"
+            path: "webhooks/\(webhookId)"
         )
     }
     /// Delete Webhook with Token
@@ -99,7 +99,7 @@ public extension DiscordREST {
         _ webhookToken: String
     ) async throws {
         try await deleteReq(
-            path: "webhooks/\(webhookId)/\(webhookToken)/"
+            path: "webhooks/\(webhookId)/\(webhookToken)"
         )
     }
     /// Execute Webhook
@@ -108,10 +108,10 @@ public extension DiscordREST {
     func executeWebhook<T: Decodable, B: Encodable>(
         _ webhookId: Snowflake,
         _ webhookToken: String,
-        _ body: B // TODO: Return type depends on `wait` param
-    ) async throws -> T? {
+        _ body: B
+    ) async throws -> T {
         return try await postReq(
-            path: "webhooks/\(webhookId)/\(webhookToken)/",
+            path: "webhooks/\(webhookId)/\(webhookToken)",
             body: body
         )
     }
@@ -124,7 +124,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await postReq(
-            path: "webhooks/\(webhookId)/\(webhookToken)/slack/",
+            path: "webhooks/\(webhookId)/\(webhookToken)/slack",
             body: body
         )
     }
@@ -137,7 +137,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await postReq(
-            path: "webhooks/\(webhookId)/\(webhookToken)/github/",
+            path: "webhooks/\(webhookId)/\(webhookToken)/github",
             body: body
         )
     }
@@ -150,7 +150,7 @@ public extension DiscordREST {
         _ messageId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)/"
+            path: "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
         )
     }
     /// Edit Webhook Message
@@ -163,7 +163,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)/",
+            path: "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)",
             body: body
         )
     }
@@ -176,7 +176,7 @@ public extension DiscordREST {
         _ messageId: Snowflake
     ) async throws {
         try await deleteReq(
-            path: "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)/"
+            path: "webhooks/\(webhookId)/\(webhookToken)/messages/\(messageId)"
         )
     }
 }
