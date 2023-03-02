@@ -10,7 +10,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/scheduled-events/"
+            path: "guilds/\(guildId)/scheduled-events"
         )
     }
     /// Create Guild Scheduled Event
@@ -21,7 +21,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await postReq(
-            path: "guilds/\(guildId)/scheduled-events/",
+            path: "guilds/\(guildId)/scheduled-events",
             body: body
         )
     }
@@ -33,7 +33,7 @@ public extension DiscordREST {
         _ guild_scheduled_eventId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/scheduled-events/\(guild_scheduled_eventId)/"
+            path: "guilds/\(guildId)/scheduled-events/\(guild_scheduled_eventId)"
         )
     }
     /// Edit Guild Scheduled Event
@@ -45,7 +45,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "guilds/\(guildId)/scheduled-events/\(guild_scheduled_eventId)/",
+            path: "guilds/\(guildId)/scheduled-events/\(guild_scheduled_eventId)",
             body: body
         )
     }
@@ -57,7 +57,7 @@ public extension DiscordREST {
         _ guild_scheduled_eventId: Snowflake
     ) async throws {
         try await deleteReq(
-            path: "guilds/\(guildId)/scheduled-events/\(guild_scheduled_eventId)/"
+            path: "guilds/\(guildId)/scheduled-events/\(guild_scheduled_eventId)"
         )
     }
     /// Get Guild Scheduled Event Users
@@ -68,7 +68,7 @@ public extension DiscordREST {
         _ guild_scheduled_eventId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/scheduled-events/\(guild_scheduled_eventId)/users/"
+            path: "guilds/\(guildId)/scheduled-events/\(guild_scheduled_eventId)/users"
         )
     }
 }

@@ -8,7 +8,7 @@ public extension DiscordREST {
     /// > GET: `/oauth2/applications/@me`
     func getCurrentBotApplicationInformation<T: Decodable>() async throws -> T {
         return try await getReq(
-            path: "oauth2/applications/@me/"
+            path: "oauth2/applications/@me"
         )
     }
     /// Get Current Authorization Information
@@ -16,7 +16,7 @@ public extension DiscordREST {
     /// > GET: `/oauth2/@me`
     func getCurrentAuthorizationInformation<T: Decodable>() async throws -> T {
         return try await getReq(
-            path: "oauth2/@me/"
+            path: "oauth2/@me"
         )
     }
 }

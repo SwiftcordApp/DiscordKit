@@ -8,7 +8,7 @@ public extension DiscordREST {
     /// > GET: `/voice/regions`
     func listVoiceRegions<T: Decodable>() async throws -> T {
         return try await getReq(
-            path: "voice/regions/"
+            path: "voice/regions"
         )
     }
 }

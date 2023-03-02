@@ -10,7 +10,7 @@ public extension DiscordREST {
         _ templateCode: String
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/templates/\(templateCode)/"
+            path: "guilds/templates/\(templateCode)"
         )
     }
     /// Create Guild from Guild Template
@@ -21,7 +21,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await postReq(
-            path: "guilds/templates/\(templateCode)/",
+            path: "guilds/templates/\(templateCode)",
             body: body
         )
     }
@@ -32,7 +32,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/templates/"
+            path: "guilds/\(guildId)/templates"
         )
     }
     /// Create Guild Template
@@ -43,7 +43,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await postReq(
-            path: "guilds/\(guildId)/templates/",
+            path: "guilds/\(guildId)/templates",
             body: body
         )
     }
@@ -56,7 +56,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await putReq(
-            path: "guilds/\(guildId)/templates/\(templateCode)/",
+            path: "guilds/\(guildId)/templates/\(templateCode)",
             body: body
         )
     }
@@ -69,7 +69,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "guilds/\(guildId)/templates/\(templateCode)/",
+            path: "guilds/\(guildId)/templates/\(templateCode)",
             body: body
         )
     }
@@ -81,7 +81,7 @@ public extension DiscordREST {
         _ templateCode: String
     ) async throws {
         try await deleteReq(
-            path: "guilds/\(guildId)/templates/\(templateCode)/"
+            path: "guilds/\(guildId)/templates/\(templateCode)"
         )
     }
 }

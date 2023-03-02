@@ -6,13 +6,13 @@ public extension DiscordREST {
     /// Create Interaction Response
     ///
     /// > POST: `/interactions/{interaction.id}/{interaction.token}/callback`
-    func createInteractionResponse<B: Encodable>(
+    func createInteractionResponse<T: Decodable, B: Encodable>(
         _ interactionId: Snowflake,
         _ interactionToken: String,
         _ body: B
-    ) async throws {
+    ) async throws -> T {
         return try await postReq(
-            path: "interactions/\(interactionId)/\(interactionToken)/callback/",
+            path: "interactions/\(interactionId)/\(interactionToken)/callback",
             body: body
         )
     }
@@ -24,7 +24,7 @@ public extension DiscordREST {
         _ interactionToken: String
     ) async throws -> T {
         return try await getReq(
-            path: "webhooks/\(applicationId)/\(interactionToken)/messages/@original/"
+            path: "webhooks/\(applicationId)/\(interactionToken)/messages/@original"
         )
     }
     /// Edit Original Interaction Response
@@ -36,7 +36,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "webhooks/\(applicationId)/\(interactionToken)/messages/@original/",
+            path: "webhooks/\(applicationId)/\(interactionToken)/messages/@original",
             body: body
         )
     }
@@ -48,7 +48,7 @@ public extension DiscordREST {
         _ interactionToken: String
     ) async throws {
         try await deleteReq(
-            path: "webhooks/\(applicationId)/\(interactionToken)/messages/@original/"
+            path: "webhooks/\(applicationId)/\(interactionToken)/messages/@original"
         )
     }
     /// Create Followup Message
@@ -60,7 +60,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await postReq(
-            path: "webhooks/\(applicationId)/\(interactionToken)/",
+            path: "webhooks/\(applicationId)/\(interactionToken)",
             body: body
         )
     }
@@ -73,7 +73,7 @@ public extension DiscordREST {
         _ messageId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "webhooks/\(applicationId)/\(interactionToken)/messages/\(messageId)/"
+            path: "webhooks/\(applicationId)/\(interactionToken)/messages/\(messageId)"
         )
     }
     /// Edit Followup Message
@@ -86,7 +86,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "webhooks/\(applicationId)/\(interactionToken)/messages/\(messageId)/",
+            path: "webhooks/\(applicationId)/\(interactionToken)/messages/\(messageId)",
             body: body
         )
     }
@@ -99,7 +99,7 @@ public extension DiscordREST {
         _ messageId: Snowflake
     ) async throws {
         try await deleteReq(
-            path: "webhooks/\(applicationId)/\(interactionToken)/messages/\(messageId)/"
+            path: "webhooks/\(applicationId)/\(interactionToken)/messages/\(messageId)"
         )
     }
 }

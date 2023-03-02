@@ -10,7 +10,7 @@ public extension DiscordREST {
         _ applicationId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "applications/\(applicationId)/commands/"
+            path: "applications/\(applicationId)/commands"
         )
     }
     /// Create Global Application Command
@@ -21,7 +21,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await postReq(
-            path: "applications/\(applicationId)/commands/",
+            path: "applications/\(applicationId)/commands",
             body: body
         )
     }
@@ -33,7 +33,7 @@ public extension DiscordREST {
         _ commandId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "applications/\(applicationId)/commands/\(commandId)/"
+            path: "applications/\(applicationId)/commands/\(commandId)"
         )
     }
     /// Edit Global Application Command
@@ -45,7 +45,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "applications/\(applicationId)/commands/\(commandId)/",
+            path: "applications/\(applicationId)/commands/\(commandId)",
             body: body
         )
     }
@@ -57,7 +57,7 @@ public extension DiscordREST {
         _ commandId: Snowflake
     ) async throws {
         try await deleteReq(
-            path: "applications/\(applicationId)/commands/\(commandId)/"
+            path: "applications/\(applicationId)/commands/\(commandId)"
         )
     }
     /// Bulk Overwrite Global Application Commands
@@ -68,7 +68,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await putReq(
-            path: "applications/\(applicationId)/commands/",
+            path: "applications/\(applicationId)/commands",
             body: body
         )
     }
@@ -80,7 +80,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "applications/\(applicationId)/guilds/\(guildId)/commands/"
+            path: "applications/\(applicationId)/guilds/\(guildId)/commands"
         )
     }
     /// Create Guild Application Command
@@ -92,7 +92,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await postReq(
-            path: "applications/\(applicationId)/guilds/\(guildId)/commands/",
+            path: "applications/\(applicationId)/guilds/\(guildId)/commands",
             body: body
         )
     }
@@ -105,7 +105,7 @@ public extension DiscordREST {
         _ commandId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)/"
+            path: "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)"
         )
     }
     /// Edit Guild Application Command
@@ -118,7 +118,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)/",
+            path: "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)",
             body: body
         )
     }
@@ -131,7 +131,7 @@ public extension DiscordREST {
         _ commandId: Snowflake
     ) async throws {
         try await deleteReq(
-            path: "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)/"
+            path: "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)"
         )
     }
     /// Bulk Overwrite Guild Application Commands
@@ -143,7 +143,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await putReq(
-            path: "applications/\(applicationId)/guilds/\(guildId)/commands/",
+            path: "applications/\(applicationId)/guilds/\(guildId)/commands",
             body: body
         )
     }
@@ -155,7 +155,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "applications/\(applicationId)/guilds/\(guildId)/commands/permissions/"
+            path: "applications/\(applicationId)/guilds/\(guildId)/commands/permissions"
         )
     }
     /// Get Application Command Permissions
@@ -167,7 +167,7 @@ public extension DiscordREST {
         _ commandId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)/permissions/"
+            path: "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)/permissions"
         )
     }
     /// Edit Application Command Permissions
@@ -180,7 +180,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await putReq(
-            path: "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)/permissions/",
+            path: "applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)/permissions",
             body: body
         )
     }
@@ -193,7 +193,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await putReq(
-            path: "applications/\(applicationId)/guilds/\(guildId)/commands/permissions/",
+            path: "applications/\(applicationId)/guilds/\(guildId)/commands/permissions",
             body: body
         )
     }

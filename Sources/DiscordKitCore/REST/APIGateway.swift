@@ -8,7 +8,7 @@ public extension DiscordREST {
     /// > GET: `/gateway`
     func getGateway<T: Decodable>() async throws -> T {
         return try await getReq(
-            path: "gateway/"
+            path: "gateway"
         )
     }
     /// Get Gateway Bot
@@ -16,7 +16,7 @@ public extension DiscordREST {
     /// > GET: `/gateway/bot`
     func getGatewayBot<T: Decodable>() async throws -> T {
         return try await getReq(
-            path: "gateway/bot/"
+            path: "gateway/bot"
         )
     }
 }

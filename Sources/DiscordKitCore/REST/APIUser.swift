@@ -3,7 +3,7 @@
 import Foundation
 
 public extension DiscordREST {
-        /// Get Current User
+    /// Get Current User
     ///
     /// `GET /users/@me`
     func getCurrentUser() async throws -> User {
@@ -83,20 +83,12 @@ public extension DiscordREST {
     func logOut(provider: String? = nil, voipProvider: String? = nil) async throws {
         return try await postReq(path: "auth/logout", body: LogOut(provider: provider, voip_provider: voipProvider))
     }
-    /// Get Current User
-    ///
-    /// > GET: `/users/@me`
-    func getCurrentUser<T: Decodable>() async throws -> T {
-        return try await getReq(
-            path: "users/@me/"
-        )
-    }
     /// Edit Current User
     ///
     /// > PATCH: `/users/@me`
     func editCurrentUser<B: Encodable>(_ body: B) async throws {
         try await patchReq(
-            path: "users/@me/",
+            path: "users/@me",
             body: body
         )
     }
@@ -105,7 +97,7 @@ public extension DiscordREST {
     /// > POST: `/users/@me/channels`
     func createDM<T: Decodable, B: Encodable>(_ body: B) async throws -> T {
         return try await postReq(
-            path: "users/@me/channels/",
+            path: "users/@me/channels",
             body: body
         )
     }
@@ -114,7 +106,7 @@ public extension DiscordREST {
     /// > POST: `/users/@me/channels`
     func createGroupDM<T: Decodable, B: Encodable>(_ body: B) async throws -> T {
         return try await postReq(
-            path: "users/@me/channels/",
+            path: "users/@me/channels",
             body: body
         )
     }
@@ -123,7 +115,7 @@ public extension DiscordREST {
     /// > GET: `/users/@me/connections`
     func getUserConnections<T: Decodable>() async throws -> T {
         return try await getReq(
-            path: "users/@me/connections/"
+            path: "users/@me/connections"
         )
     }
     /// Get User Application Role Connection
@@ -133,7 +125,7 @@ public extension DiscordREST {
         _ applicationId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "users/@me/applications/\(applicationId)/role-connection/"
+            path: "users/@me/applications/\(applicationId)/role-connection"
         )
     }
     /// Update User Application Role Connection
@@ -144,7 +136,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await putReq(
-            path: "users/@me/applications/\(applicationId)/role-connection/",
+            path: "users/@me/applications/\(applicationId)/role-connection",
             body: body
         )
     }

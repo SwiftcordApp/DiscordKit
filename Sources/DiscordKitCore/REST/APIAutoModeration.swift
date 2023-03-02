@@ -10,7 +10,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/auto-moderation/rules/"
+            path: "guilds/\(guildId)/auto-moderation/rules"
         )
     }
     /// Get Auto Moderation Rule
@@ -21,7 +21,7 @@ public extension DiscordREST {
         _ auto_moderation_ruleId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/auto-moderation/rules/\(auto_moderation_ruleId)/"
+            path: "guilds/\(guildId)/auto-moderation/rules/\(auto_moderation_ruleId)"
         )
     }
     /// Create Auto Moderation Rule
@@ -32,7 +32,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await postReq(
-            path: "guilds/\(guildId)/auto-moderation/rules/",
+            path: "guilds/\(guildId)/auto-moderation/rules",
             body: body
         )
     }
@@ -45,7 +45,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "guilds/\(guildId)/auto-moderation/rules/\(auto_moderation_ruleId)/",
+            path: "guilds/\(guildId)/auto-moderation/rules/\(auto_moderation_ruleId)",
             body: body
         )
     }
@@ -57,7 +57,7 @@ public extension DiscordREST {
         _ auto_moderation_ruleId: Snowflake
     ) async throws {
         try await deleteReq(
-            path: "guilds/\(guildId)/auto-moderation/rules/\(auto_moderation_ruleId)/"
+            path: "guilds/\(guildId)/auto-moderation/rules/\(auto_moderation_ruleId)"
         )
     }
 }

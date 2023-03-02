@@ -10,7 +10,7 @@ public extension DiscordREST {
         _ guildId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/emojis/"
+            path: "guilds/\(guildId)/emojis"
         )
     }
     /// Get Guild Emoji
@@ -21,7 +21,7 @@ public extension DiscordREST {
         _ emojiId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/emojis/\(emojiId)/"
+            path: "guilds/\(guildId)/emojis/\(emojiId)"
         )
     }
     /// Create Guild Emoji
@@ -32,7 +32,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await postReq(
-            path: "guilds/\(guildId)/emojis/",
+            path: "guilds/\(guildId)/emojis",
             body: body
         )
     }
@@ -45,7 +45,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "guilds/\(guildId)/emojis/\(emojiId)/",
+            path: "guilds/\(guildId)/emojis/\(emojiId)",
             body: body
         )
     }
@@ -57,7 +57,7 @@ public extension DiscordREST {
         _ emojiId: Snowflake
     ) async throws {
         try await deleteReq(
-            path: "guilds/\(guildId)/emojis/\(emojiId)/"
+            path: "guilds/\(guildId)/emojis/\(emojiId)"
         )
     }
 }

@@ -8,7 +8,7 @@ public extension DiscordREST {
     /// > POST: `/lobbies`
     func createLobby<T: Decodable, B: Encodable>(_ body: B) async throws -> T {
         return try await postReq(
-            path: "lobbies/",
+            path: "lobbies",
             body: body
         )
     }
@@ -20,7 +20,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "lobbies/\(lobbyId)/",
+            path: "lobbies/\(lobbyId)",
             body: body
         )
     }
@@ -31,7 +31,7 @@ public extension DiscordREST {
         _ lobbyId: Snowflake
     ) async throws {
         try await deleteReq(
-            path: "lobbies/\(lobbyId)/"
+            path: "lobbies/\(lobbyId)"
         )
     }
     /// Update Lobby Member
@@ -43,7 +43,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "lobbies/\(lobbyId)/members/\(userId)/",
+            path: "lobbies/\(lobbyId)/members/\(userId)",
             body: body
         )
     }
@@ -52,7 +52,7 @@ public extension DiscordREST {
     /// > POST: `/lobbies/search`
     func createLobbySearch<T: Decodable, B: Encodable>(_ body: B) async throws -> T {
         return try await postReq(
-            path: "lobbies/search/",
+            path: "lobbies/search",
             body: body
         )
     }
@@ -64,7 +64,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await postReq(
-            path: "lobbies/\(lobbyId)/send/",
+            path: "lobbies/\(lobbyId)/send",
             body: body
         )
     }

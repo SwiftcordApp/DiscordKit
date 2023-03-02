@@ -10,7 +10,7 @@ public extension DiscordREST {
         _ applicationId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "applications/\(applicationId)/achievements/"
+            path: "applications/\(applicationId)/achievements"
         )
     }
     /// Get Achievement
@@ -21,7 +21,7 @@ public extension DiscordREST {
         _ achievementId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "applications/\(applicationId)/achievements/\(achievementId)/"
+            path: "applications/\(applicationId)/achievements/\(achievementId)"
         )
     }
     /// Create Achievement
@@ -32,7 +32,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await postReq(
-            path: "applications/\(applicationId)/achievements/",
+            path: "applications/\(applicationId)/achievements",
             body: body
         )
     }
@@ -45,7 +45,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws {
         try await patchReq(
-            path: "applications/\(applicationId)/achievements/\(achievementId)/",
+            path: "applications/\(applicationId)/achievements/\(achievementId)",
             body: body
         )
     }
@@ -57,7 +57,7 @@ public extension DiscordREST {
         _ achievementId: Snowflake
     ) async throws {
         try await deleteReq(
-            path: "applications/\(applicationId)/achievements/\(achievementId)/"
+            path: "applications/\(applicationId)/achievements/\(achievementId)"
         )
     }
     /// Update User Achievement
@@ -70,7 +70,7 @@ public extension DiscordREST {
         _ body: B
     ) async throws -> T {
         return try await putReq(
-            path: "users/\(userId)/applications/\(applicationId)/achievements/\(achievementId)/",
+            path: "users/\(userId)/applications/\(applicationId)/achievements/\(achievementId)",
             body: body
         )
     }
@@ -81,7 +81,7 @@ public extension DiscordREST {
         _ applicationId: Snowflake
     ) async throws -> T {
         return try await getReq(
-            path: "users/@me/applications/\(applicationId)/achievements/"
+            path: "users/@me/applications/\(applicationId)/achievements"
         )
     }
 }
