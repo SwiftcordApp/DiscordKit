@@ -26,7 +26,7 @@
 
 DiscordKit is a Swift package for creating Discord bots in Swift.
 
-**If DiscordKit has helped you, please give it a ⭐ star, or consider sponsoring! It
+**If DiscordKit has helped you, please give it a ⭐ star and consider sponsoring! It
 keeps me motivated to continue developing this and other projects.**
 
 ## Installation
@@ -38,7 +38,7 @@ keeps me motivated to continue developing this and other projects.**
 
   Add the following to your `Package.swift`:
   ```swift
-  .package(url: "https://github.com/SwiftcordApp/DiscordKit", branch: "bot-support")
+  .package(url: "https://github.com/SwiftcordApp/DiscordKit", branch: "main")
   ```
 </details>
 <details>
@@ -53,7 +53,7 @@ keeps me motivated to continue developing this and other projects.**
 
   **Branch:**
   ```
-  bot-support
+  main
   ```
 
   **Product:**
@@ -68,21 +68,22 @@ in the DiscordKit guide.
 Create a simple bot with a **/ping** command:
 
 ```swift
-
 import DiscordKitBot
 
 let bot = Client(intents: .unprivileged)
 
+// Guild to register commands in. If the COMMAND_GUILD_ID environment variable is set, commands are scoped
+// to that server and update instantly, useful for debugging. Otherwise, they are registered globally.
+let commandGuildID = ProcessInfo.processInfo.environment["COMMAND_GUILD_ID"]
+
 bot.ready.listen {
     print("Logged in as \(bot.user!.username)#\(bot.user!.discriminator)!")
 
-    print("Started refreshing application (/) commands.")
-    try? await bot.registerApplicationCommands(guild: ProcessInfo.processInfo.environment["COMMAND_GUILD_ID"]) {
+    try? await bot.registerApplicationCommands(guild: commandGuildID) {
         NewAppCommand("ping", description: "Ping me!") { interaction in
             try? await interaction.reply("Pong!")
         }
     }
-    print("Successfully reloaded application (/) commands.")
 }
 
 bot.login() // Reads the bot token from the DISCORD_TOKEN environment variable and logs in with the token
@@ -101,7 +102,7 @@ all the steps to create your own Discord bot!
 Here are some (WIP) resources that might be useful while developing with DiscordKit.
 
 * [DiscordKit Guide](https://swiftcord.gitbook.io/discordkit-guide/)
-* [Developer Documentation](https://swiftcordapp.github.io/DiscordKit/documentation/discordkit/)
+* [Developer Documentation](https://swiftcordapp.github.io/DiscordKit/documentation/discordkitbot/) (Built with DocC)
 
 ## Platform Support
 
