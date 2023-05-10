@@ -3,62 +3,87 @@ name: Generate DocC
 on:
   push:
     branches: [ main ]
+
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-permissions:
-  write-all
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 env:
   GH_USER: cryptoAlgorithm
+  BUILD_TARGET: DiscordKitBot
 
 jobs:
-  generate_DocC:
+  generate:
     runs-on: macos-12
+    env:
+      BUILD_DIR: _docs/
+
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
-      - uses: webfactory/ssh-agent@v0.5.4
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      - name: Init submodules
-        env:
-          TOKEN: ${{ secrets.GH_TOKEN }}
-          USER: ${{ env.GH_USER }}
-        run: |
-          git config --system credential.helper store
-          echo "https://$USER:$TOKEN@github.com" > ~/.git-credentials
-          git submodule update --init
+      # - uses: webfactory/ssh-agent@v0.5.4
+      #   with:
+      #     ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      # - name: Init submodules
+      #   env:
+      #     TOKEN: ${{ secrets.GH_TOKEN }}
+      #     USER: ${{ env.GH_USER }}
+      #   run: |
+      #     git config --system credential.helper store
+      #     echo "https://$USER:$TOKEN@github.com" > ~/.git-credentials
+      #     git submodule update --init
 
-      - name: Xcode Select
-        uses: devbotsxyz/xcode-select@v1.1.0
-        with:
-          version: 13.3.1
+      ##########################
+      ## Select Xcode
+      ##########################
+      - name: Select Xcode 14.2
+        run: sudo xcode-select -s /Applications/Xcode_14.2.app
 
+      ##########################
+      ## Cache
+      ##########################
+      - name: Cache Swift Build
+        uses: actions/cache@v3
+        with:
+          path: .build
+          key: swift-build-cache
+
+      ##########################
+      ## Generate Docs
+      ##########################
       - name: Generate DocC
-        run: mkdir -p $TMPDIR/docs/ &&
-             swift package --allow-writing-to-directory $TMPDIR/docs/
-               generate-documentation --target DiscordKit --disable-indexing --transform-for-static-hosting
-               --hosting-base-path DiscordKit --output-path $TMPDIR/docs/
+        run: mkdir -p ${{ env.BUILD_DIR }} &&
+             swift package --allow-writing-to-directory ${{ env.BUILD_DIR }}
+               generate-documentation --target ${{ env.BUILD_TARGET }} --disable-indexing --transform-for-static-hosting
+               --hosting-base-path DiscordKit --output-path ${{ env.BUILD_DIR }}
 
-      - name: Copy docs build into gh-pages branch
-        run: |
-          git checkout -f gh-pages
-          rm -Rf *
-          rsync -aI $TMPDIR/docs .
-
-      - name: Add .nojekyll file
-        run: touch ./docs/.nojekyll
-
-      - name: Commit updated DocC
-        run: |
-          git add .
-          git commit -m "Update Documentation Site"
-
-      - name: Push changes
-        uses: ad-m/github-push-action@master
+      ##########################
+      ## Upload generated pages
+      ##########################
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
         with:
-         github_token: ${{ secrets.GITHUB_TOKEN }}
-         branch: gh-pages
+          path: ${{ env.BUILD_DIR }}
+
+  deploy:
+    needs: generate
+
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v2
