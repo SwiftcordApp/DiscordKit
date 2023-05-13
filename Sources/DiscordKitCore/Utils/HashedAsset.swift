@@ -83,6 +83,21 @@ public extension HashedAsset {
         return HashedAsset.joinPaths(with: format, "icons", guildID, self)
             .setSize(size: size)
     }
+    
+    /// Returns the icon URL of a sticker pack banner
+    ///
+    /// > This resource will not be animated.
+    ///
+    /// - Parameters:
+    ///  - format: Format of banner (PNG, JPEG, WebP)
+    ///  - size: Size of asset, a power of 2 from 16 to 4096
+    func stickerPackBannerURL(
+        with format: AssetFormat = .png,
+        size: Int? = nil
+    ) -> URL {
+        return HashedAsset.joinPaths(with: format, "app-assets", "710982414301790216", "store", self)
+            .setSize(size: size)
+    }
 }
 
 public extension HashedAsset {

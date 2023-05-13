@@ -2,6 +2,10 @@
 
 import Foundation
 
+private struct StickerPacks: Codable, GatewayData {
+    public let sticker_packs: [StickerPack]
+}
+
 public extension DiscordREST {
     /// Get Sticker
     ///
@@ -16,10 +20,11 @@ public extension DiscordREST {
     /// List Nitro Sticker Packs
     ///
     /// > GET: `/sticker-packs`
-    func listNitroStickerPacks<T: Decodable>() async throws -> T {
-        return try await getReq(
+    func listNitroStickerPacks() async throws -> [StickerPack] {
+        let stickerPacks: StickerPacks = try await getReq(
             path: "sticker-packs"
         )
+        return stickerPacks.sticker_packs
     }
     /// List Guild Stickers
     ///

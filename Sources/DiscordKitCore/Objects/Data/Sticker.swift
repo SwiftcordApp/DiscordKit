@@ -39,3 +39,13 @@ public struct StickerItem: Codable, Identifiable {
     public let name: String
     public let format_type: StickerFormat
 }
+
+public struct StickerPack: Codable, GatewayData {
+    public let id: Snowflake
+    public let stickers: [StickerItem]
+    public let name: String
+    public let sku_id: Snowflake
+    public let cover_sticker_id: Snowflake?
+    public let description: String
+    public let banner_asset_id: HashedAsset?
+}
