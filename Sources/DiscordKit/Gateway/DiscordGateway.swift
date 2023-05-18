@@ -200,7 +200,7 @@ public class DiscordGateway: ObservableObject {
         var modifiedGuild = updatedGuild
 
         // ``GatewayEvent.guildUpdate`` events are missing data that is only present in the initial ``GatewayEvent.ready`` event, so we need to copy those properties over manually.
-        modifiedGuild.joined_at = existingGuild.joined_at
+        /*modifiedGuild.joined_at = existingGuild.joined_at
         modifiedGuild.large = existingGuild.large
         modifiedGuild.unavailable = existingGuild.unavailable
         modifiedGuild.member_count = existingGuild.member_count
@@ -210,9 +210,9 @@ public class DiscordGateway: ObservableObject {
         modifiedGuild.threads = existingGuild.threads
         modifiedGuild.presences = existingGuild.presences
         modifiedGuild.stage_instances = existingGuild.stage_instances
-        modifiedGuild.guild_scheduled_events = existingGuild.guild_scheduled_events
+        modifiedGuild.guild_scheduled_events = existingGuild.guild_scheduled_events*/
 
-        cache.appendOrReplace(modifiedGuild)
+        // cache.appendOrReplace(modifiedGuild)
     }
 
     private func handleProtoUpdate(proto: String) {
@@ -260,14 +260,14 @@ public class DiscordGateway: ObservableObject {
             }
 
         // MARK: Guild events
-        case .guildCreate(let guild): cache.appendOrReplace(guild)
+        // case .guildCreate(let guild): cache.appendOrReplace(guild)
 
         case .guildDelete(let guild): cache.remove(guild)
 
         case .guildUpdate(let guild): handleGuildUpdate(guild)
 
         // MARK: User updates
-        case .userUpdate(let currentUser): cache.user = currentUser
+        case .userUpdate(let currentUser): cache.replace(currentUser)
 
         case .settingsProtoUpdate(let protoUpdate):
             guard !protoUpdate.partial else {

@@ -112,8 +112,13 @@ public struct SubscribeGuildEvts: OutgoingGatewayData {
 ///
 /// > Warning: This should only be sent in identify payloads for user accounts. Bot accounts don't need this!
 struct ClientState: OutgoingGatewayData {
-    let guild_hashes: GuildHashes
+    struct GuildVersion: OutgoingGatewayData { }
+
+    let api_code_version: Int
+    let guild_versions: GuildVersion
     let highest_last_message_id: Snowflake
+    let initial_guild_id: Snowflake?
+    let private_channels_version: String
     let read_state_version: Int
     let user_guild_settings_version: Int
     let user_settings_version: Int

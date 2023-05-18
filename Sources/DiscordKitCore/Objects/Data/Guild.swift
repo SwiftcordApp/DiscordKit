@@ -58,8 +58,6 @@ public struct Guild: GatewayData, Equatable, Identifiable {
 		self.verification_level = verification_level
 		self.default_message_notifications = default_message_notifications
 		self.explicit_content_filter = explicit_content_filter
-		self.roles = roles
-		self.emojis = emojis
 		self.features = features
 		self.mfa_level = mfa_level
 		self.application_id = application_id
@@ -71,9 +69,6 @@ public struct Guild: GatewayData, Equatable, Identifiable {
 		self.unavailable = unavailable
 		self.member_count = member_count
 		self.voice_states = voice_states
-		self.members = members
-		self.channels = channels
-		self.threads = threads
 		self.presences = presences
 		self.max_presences = max_presences
 		self.max_members = max_members
@@ -90,13 +85,12 @@ public struct Guild: GatewayData, Equatable, Identifiable {
 		self.welcome_screen = welcome_screen
 		self.nsfw_level = nsfw_level
 		self.stage_instances = stage_instances
-		self.stickers = stickers
-		self.guild_scheduled_events = guild_scheduled_events
+        self.guild_scheduled_events = guild_scheduled_events
 		self.premium_progress_bar_enabled = premium_progress_bar_enabled
 	}
 
     public static func == (lhs: Guild, rhs: Guild) -> Bool {
-        lhs.id == rhs.id && lhs.name == rhs.name && lhs.channels == rhs.channels
+        lhs.id == rhs.id && lhs.name == rhs.name
     }
 
     public let id: Snowflake
@@ -116,8 +110,6 @@ public struct Guild: GatewayData, Equatable, Identifiable {
     public let verification_level: VerificationLevel
     public let default_message_notifications: MessageNotifLevel
     public let explicit_content_filter: ExplicitContentFilterLevel
-    public let roles: [DecodableThrowable<Role>]
-    public let emojis: [DecodableThrowable<Emoji>]
     public let features: [DecodableThrowable<GuildFeature>]
     public let mfa_level: MFALevel
     public let application_id: Snowflake? // For bot-created guilds
@@ -129,9 +121,6 @@ public struct Guild: GatewayData, Equatable, Identifiable {
     public var unavailable: Bool? // If guild is unavailable due to an outage
     public var member_count: Int?
     public var voice_states: [VoiceState]?
-    public var members: [Member]?
-    public var channels: [Channel]?
-    public var threads: [Channel]?
     public var presences: [PresenceUpdate]?
     public let max_presences: Int? // null is always returned, apart from the largest of guilds
     public let max_members: Int?
@@ -148,9 +137,33 @@ public struct Guild: GatewayData, Equatable, Identifiable {
     public let welcome_screen: GuildWelcomeScreen?
     public let nsfw_level: NSFWLevel
     public var stage_instances: [StageInstance]?
-    public let stickers: [Sticker]?
     public var guild_scheduled_events: [GuildScheduledEvent]?
     public let premium_progress_bar_enabled: Bool
+}
+
+/// Guild received in initial ready payload, contains more info than what can be found in ``Guild``
+///
+/// > Not all fields have been added below, only the required ones
+public struct PreloadedGuild: GatewayData, Identifiable, Equatable {
+    public static func == (lhs: PreloadedGuild, rhs: PreloadedGuild) -> Bool {
+        lhs.properties == rhs.properties && lhs.id == rhs.id
+    }
+
+    public let version: Int
+    public let channels: [Channel]
+    public let emojis: [DecodableThrowable<Emoji>]
+    public let id: Snowflake
+    public let joined_at: Date
+    public let large: Bool
+    public let lazy: Bool
+    public let member_count: Int
+
+    /// Number of "boosts" the server has
+    public let premium_subscription_count: Int
+    public let properties: Guild
+    public let roles: [DecodableThrowable<Role>]
+    public let stickers: [Sticker]
+    // public let threads:
 }
 
 // Partial Guild, returned when listing guilds

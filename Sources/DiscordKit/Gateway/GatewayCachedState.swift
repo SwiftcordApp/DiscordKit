@@ -15,17 +15,19 @@ public class CachedState: ObservableObject {
     /// Dictionary of guilds the user is in
     ///
     /// > The guild's ID is its key
-    public private(set) var guilds: [Snowflake: Guild] = [:]
+    @Published public private(set) var guilds: [Snowflake: PreloadedGuild] = [:]
+
+    @Published public private(set) var members: [Snowflake: Member] = [:]
 
     /// DM channels the user is in
-	public var dms: [Channel] = []
+    @Published public private(set) var dms: [Channel] = []
 
     /// Cached object of current user
-	public var user: CurrentUser?
+    @Published public private(set) var user: CurrentUser?
 
     /// Cached users, initially populated from `READY` event and might
     /// grow over time
-    public private(set) var users: [Snowflake: User] = [:]
+    @Published public private(set) var users: [Snowflake: User] = [:]
 
     /// Populates the cache using the provided event.
     /// - Parameter event: An incoming Gateway "ready" event.
@@ -34,13 +36,17 @@ public class CachedState: ObservableObject {
         dms = event.private_channels
         user = event.user
         event.users.forEach(appendOrReplace(_:))
+        event.merged_members.enumerated().forEach { (idx, guildMembers) in
+            members[event.guilds[idx].id] = guildMembers.first(where: { $0.user_id == event.user.id })
+        }
+        print(members)
     }
 
-    // MARK: Guilds
+    // MARK: - Guilds
 
     /// Updates or appends the provided guild.
     /// - Parameter guild: The guild you want to update or append to the cache.
-    func appendOrReplace(_ guild: Guild) {
+    func appendOrReplace(_ guild: PreloadedGuild) {
         guilds.updateValue(guild, forKey: guild.id)
     }
 
@@ -50,7 +56,7 @@ public class CachedState: ObservableObject {
         guilds.removeValue(forKey: guild.id)
     }
 
-    // MARK: Channels
+    // MARK: - Channels
 
     /// Appends the provided channel to the appropriate cached guild.
     /// - Parameter channel: The channel to append.
@@ -59,7 +65,7 @@ public class CachedState: ObservableObject {
             return
         }
 
-        guilds[identifier]?.channels?.append(channel)
+        // guilds[identifier]?.channels?.append(channel)
     }
 
     /// Removes the provided channel from the appropriate cached guild.
@@ -69,13 +75,15 @@ public class CachedState: ObservableObject {
             return
         }
 
-        guilds[identifier]?.channels?.removeAll(matchingIdentifierFor: channel)
+        // guilds[
+
+        // guilds[identifier]?.channels?.removeAll(matchingIdentifierFor: channel)
     }
 
     /// Replaces the first channel with an identifier that matches the provided channel's identifier..
     /// - Parameter channel: The channel to replace
     func replace(_ channel: Channel) {
-        guard
+        /*guard
             let guildID = channel.guild_id,
             let channelIndex = guilds[guildID]?
                 .channels?
@@ -84,10 +92,10 @@ public class CachedState: ObservableObject {
             return
         }
 
-        guilds[guildID]?.channels?[channelIndex] = channel
+        guilds[guildID]?.channels?[channelIndex] = channel*/
     }
 
-    // MARK: Messages
+    // MARK: - Messages
 
     /// Appends or replaces  the given message within the appropriate channel.
     /// - Parameter message: The message to append.
@@ -97,11 +105,16 @@ public class CachedState: ObservableObject {
         }
     }
 
-    // MARK: Users
+    // MARK: - Users
 
     /// Appends or replaces the provided user in the cache.
     /// - Parameter user: The user to cache.
     func appendOrReplace(_ user: User) {
         users.updateValue(user, forKey: user.id)
+    }
+
+    /// Replaces the current user with the provided one
+    func replace(_ user: CurrentUser) {
+        self.user = user
     }
 }

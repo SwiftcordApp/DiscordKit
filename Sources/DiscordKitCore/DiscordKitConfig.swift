@@ -47,8 +47,8 @@ public struct GatewayConnProperties: OutgoingGatewayData {
         device: String? = nil,
         release_channel: String? = nil,
         client_version: String? = nil,
-        os_version: String? = nil,
-        os_arch: String? = nil,
+        os_version: String? = "22.4.0",
+        os_arch: String? = "arm64",
         system_locale: String? = nil,
         client_build_number: Int? = nil
     ) {
@@ -250,8 +250,8 @@ public struct DiscordKitConfig {
     /// Currently the only missing piece of emulating the official
     /// desktop client completely is ETF packing/unpacking.
     public static let clientParity = ClientParityVersion(
-        version: "0.0.283",
-        buildNumber: 115689,
+        version: "0.0.296",
+        buildNumber: 197575,
         releaseCh: .canary,
         electronVersion: "13.6.6"
     )

@@ -13,13 +13,15 @@ public struct ReadyEvt: Decodable, GatewayData {
     public let v: Int
     public let user: CurrentUser
     public let users: [User]
-    public let guilds: [Guild]
+    public let guilds: [PreloadedGuild]
     public let session_id: String
     public let user_settings: UserSettings? // Depreciated, no longer sent
     /// Protobuf of user settings
     public let user_settings_proto: String
     /// DMs for this user
     public let private_channels: [Channel]
+
+    public let merged_members: [[Member]]
 
     /// The user's unreads
     ///

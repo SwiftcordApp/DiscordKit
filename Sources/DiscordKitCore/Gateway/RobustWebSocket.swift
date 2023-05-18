@@ -163,28 +163,31 @@ public class RobustWebSocket: NSObject {
     }
 
     private func attachSockReceiveListener() {
-        socket.receive { [weak self] result in
+        socket.receive { [unowned self] result in
             // print(result)
             switch result {
             case .success(let message):
                 do {
                     switch message {
                     case .data(let data):
-                        if let decompressed = self?.decompressor.push_data(data) {
-                            try self?.handleMessage(with: decompressed)
-                        } else { Self.log.trace("Decompression did not return any result - compressed packet is not complete") }
-                    case .string(let str): try self?.handleMessage(with: str)
+                        if let decompressed = decompressor.push_data(data) {
+                            // print(decompressed)
+                            try handleMessage(with: decompressed)
+                        } else {
+                            Self.log.trace("Decompression did not return any result - compressed packet is not complete")
+                        }
+                    case .string(let str): try handleMessage(with: str)
                     @unknown default: Self.log.warning("Unknown sock message case!")
                     }
                 } catch {
                     // TODO: Add handler for decoding errors
                     Self.log.warning("Error decoding message", metadata: ["error": "\(error)"])
                 }
-                self?.attachSockReceiveListener()
+                attachSockReceiveListener()
             case .failure(let error):
                 // If an error is encountered here, the connection is probably broken
                 Self.log.error("Receive error", metadata: ["error": "\(error.localizedDescription)"])
-                self?.forceClose()
+                forceClose()
             }
         }
     }
@@ -342,6 +345,11 @@ public class RobustWebSocket: NSObject {
         super.init()
         session = URLSession(configuration: .default, delegate: self, delegateQueue: queue)
         connect()
+    }
+
+    // Gracefully disconnect when deinitialised
+    deinit {
+        close(code: .normalClosure)
     }
 }
 

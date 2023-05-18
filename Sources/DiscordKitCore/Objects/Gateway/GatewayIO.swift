@@ -213,11 +213,12 @@ public struct GatewayIncoming: Decodable {
             // Cue the long switch case to parse every single event
             switch type {
             case .ready:
-                if let userReady = try? values.decode(ReadyEvt.self, forKey: .data) {
+                /*if let userReady = try? values.decode(ReadyEvt.self, forKey: .data) {
                     data = .userReady(userReady)
                 } else {
                     data = .botReady(try values.decode(BotReadyEvt.self, forKey: .data))
-                }
+                }*/
+                data = .userReady(try values.decode(ReadyEvt.self, forKey: .data))
             case .readySupplemental: data = .readySupplemental(try values.decode(ReadySuppEvt.self, forKey: .data))
             case .resumed: data = .resumed
 

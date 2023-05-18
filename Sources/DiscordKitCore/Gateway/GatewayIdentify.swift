@@ -19,21 +19,24 @@ public extension RobustWebSocket {
     /// not present in the keychain
     internal func getIdentify() -> GatewayIdentify? {
         return GatewayIdentify(
-            token: self.token,
+            token: token,
             properties: DiscordKitConfig.default.properties,
             compress: false,
             large_threshold: nil,
             shard: nil,
             presence: GatewayPresenceUpdate(since: 0, activities: [], status: .online, afk: false),
             client_state: DiscordKitConfig.default.isBot ? nil : ClientState( // Just a dummy client_state
-                guild_hashes: GuildHashes(),
+                api_code_version: 0,
+                guild_versions: .init(),
                 highest_last_message_id: "0",
+                initial_guild_id: nil,
+                private_channels_version: "0",
                 read_state_version: 0,
                 user_guild_settings_version: -1,
                 user_settings_version: -1
             ),
-            capabilities: DiscordKitConfig.default.isBot ? nil : 0b1111111101, // TODO: Reverse engineer this
-            intents: DiscordKitConfig.default.intents
+            capabilities: DiscordKitConfig.default.isBot ? nil : 8189, // TODO: Reverse engineer this
+            intents: DiscordKitConfig.default.isBot ? DiscordKitConfig.default.intents : nil
         )
     }
 
