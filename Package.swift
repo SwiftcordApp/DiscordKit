@@ -29,10 +29,10 @@ let package = Package(
                 .product(name: "Reachability", package: "Reachability.swift", condition: .when(platforms: [.macOS])),
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
                 .product(name: "Logging", package: "swift-log"),
-                .product(name: "OpenCombine", package: "OpenCombine"),
-                .product(name: "OpenCombineFoundation", package: "OpenCombine"),
-                .product(name: "SWCompression", package: "SWCompression"),
-                .product(name: "WebSocket", package: "WebSocket.swift")
+                .product(name: "OpenCombine", package: "OpenCombine", condition: .when(platforms: [.linux])),
+                .product(name: "OpenCombineFoundation", package: "OpenCombine", condition: .when(platforms: [.linux])),
+                .product(name: "SWCompression", package: "SWCompression", condition: .when(platforms: [.linux])),
+                .product(name: "WebSocket", package: "WebSocket.swift", condition: .when(platforms: [.linux]))
             ],
             exclude: [
                 "REST/README.md",

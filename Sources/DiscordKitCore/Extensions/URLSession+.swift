@@ -10,7 +10,7 @@ import Foundation
 import FoundationNetworking
 #endif
 
-@available(macOS, deprecated: 12.0, message: "Use the built-in API instead")
+@available(macOS, deprecated: 12.0, message: "Use the built-in API instead") // still needed on Linux for right now
 public extension URLSession {
     func data(for request: URLRequest) async throws -> (Data, URLResponse) {
         try await withCheckedThrowingContinuation { continuation in

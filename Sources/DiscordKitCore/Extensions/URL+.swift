@@ -15,7 +15,7 @@ public extension URL {
         #if canImport(UniformTypeIdentifiers)
 		UTType(filenameExtension: self.pathExtension)?.preferredMIMEType ?? "application/octet-stream"
         #else
-        "application/octet-stream"
+        "application/octet-stream" // This should be fixed later
         #endif
     }
 

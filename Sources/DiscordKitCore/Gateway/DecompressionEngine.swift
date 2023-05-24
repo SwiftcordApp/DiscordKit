@@ -7,7 +7,7 @@
 
 #if os(macOS)
 import Foundation
-//import Compression
+import Compression
 import Logging
 
 /// Decompresses `zlib-stream`-compressed payloads received
@@ -150,8 +150,7 @@ public extension DecompressionEngine {
 }
 #endif
 
-#if os(Linux)
-
+#if os(Linux) // Consider using this on macOS.
 import Foundation
 import Logging
 import SWCompression
