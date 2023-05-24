@@ -6,8 +6,16 @@
 //
 
 import Foundation
-import Reachability
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+//import Reachability
+#if canImport(Comcine)
 import Combine
+#else
+import OpenCombine
+import OpenCombineFoundation
+#endif
 import Logging
 
 /// A robust WebSocket that handles resuming, reconnection and heartbeats
@@ -46,7 +54,7 @@ public class RobustWebSocket: NSObject {
     public let onSessionInvalid = EventDispatch<Void>()
 
     private var session: URLSession!, socket: URLSessionWebSocketTask!, decompressor: DecompressionEngine!
-	private let reachability = try! Reachability()
+	//private let reachability = try! Reachability()
 
     // Logger instance
     private static let log = Logger(label: "RobustWebSocket", level: nil)
@@ -163,27 +171,25 @@ public class RobustWebSocket: NSObject {
     }
 
     private func attachSockReceiveListener() {
-        socket.receive { [weak self] result in
-            // print(result)
-            switch result {
-            case .success(let message):
+        Task() {
+            do {
+                let message = try await socket.receive()
                 do {
                     switch message {
                     case .data(let data):
-                        if let decompressed = self?.decompressor.push_data(data) {
-                            try self?.handleMessage(with: decompressed)
+                        if let decompressed = self.decompressor.push_data(data) {
+                            try self.handleMessage(with: decompressed)
                         } else { Self.log.trace("Decompression did not return any result - compressed packet is not complete") }
-                    case .string(let str): try self?.handleMessage(with: str)
-                    @unknown default: Self.log.warning("Unknown sock message case!")
+                    case .string(let str): try self.handleMessage(with: str)
                     }
                 } catch {
                     Self.log.warning("Error decoding message", metadata: ["error": "\(error.localizedDescription)"])
                 }
-                self?.attachSockReceiveListener()
-            case .failure(let error):
+                self.attachSockReceiveListener()
+            } catch {
                 // If an error is encountered here, the connection is probably broken
                 Self.log.error("Receive error", metadata: ["error": "\(error.localizedDescription)"])
-                self?.forceClose()
+                self.forceClose()
             }
         }
     }
@@ -223,7 +229,7 @@ public class RobustWebSocket: NSObject {
         decompressor = DecompressionEngine()
         socket!.resume()
 
-        setupReachability()
+        //setupReachability()
         attachSockReceiveListener()
     }
 
@@ -389,27 +395,27 @@ extension RobustWebSocket: URLSessionWebSocketDelegate {
 }
 
 // MARK: - Reachability
-public extension RobustWebSocket {
-    private func setupReachability() {
-        reachability.whenReachable = { [weak self] _ in
-            self?.reachable = true
-            Self.log.debug("Reset backoff", metadata: ["reason": "connection is reachable"])
-            self?.clearPendingReconnectIfNeeded()
-            self?.attempts = 0
-            self?.reconnect(code: nil)
-        }
-        reachability.whenUnreachable = { [weak self] _ in
-            self?.reachable = false
-            Self.log.warning("Connection unreachable, sending expedited heartbeat")
-            self?.sendHeartbeat(4*4)
-        }
-        do { try reachability.startNotifier() } catch { Self.log.error("Starting reachability notifier failed!") }
-    }
-}
+// public extension RobustWebSocket {
+//     private func setupReachability() {
+//         reachability.whenReachable = { [weak self] _ in
+//             self?.reachable = true
+//             Self.log.debug("Reset backoff", metadata: ["reason": "connection is reachable"])
+//             self?.clearPendingReconnectIfNeeded()
+//             self?.attempts = 0
+//             self?.reconnect(code: nil)
+//         }
+//         reachability.whenUnreachable = { [weak self] _ in
+//             self?.reachable = false
+//             Self.log.warning("Connection unreachable, sending expedited heartbeat")
+//             self?.sendHeartbeat(4*4)
+//         }
+//         do { try reachability.startNotifier() } catch { Self.log.error("Starting reachability notifier failed!") }
+//     }
+// }
 
 // MARK: - Heartbeating
 public extension RobustWebSocket {
-    @objc private func sendHeartbeat(_ interval: TimeInterval) {
+    private func sendHeartbeat(_ interval: TimeInterval) {
         guard connected else { return }
         if let hbTimeout = hbTimeout, hbTimeout.isValid {
             Self.log.warning("Skipping sending heartbeat", metadata: ["reason": "already waiting for one"])
@@ -500,7 +506,7 @@ public extension RobustWebSocket {
         connected = false
         sessionID = nil
         seq = nil
-        reachability.stopNotifier()
+        //reachability.stopNotifier()
 
         socket.cancel(with: code, reason: nil)
     }
@@ -546,10 +552,16 @@ public extension RobustWebSocket {
             "seq": "\(seq ?? -1)"
         ])
 
-        socket.send(.data(encoded), completionHandler: completionHandler ?? { err in
-            if let err = err { Self.log.error("Socket send error", metadata: [
-                "error": "\(err.localizedDescription)"
-            ]) }
-        })
+        Task() {
+            do {
+                try await socket.send(.data(encoded))
+            } catch {
+                if let completionHandler = completionHandler {
+                    completionHandler(error)
+                } else {
+                    Self.log.error("Socket send error", metadata: ["error": "\(error.localizedDescription)"])
+                }
+            }
+        }
     }
 }
