@@ -5,8 +5,9 @@
 //  Created by Vincent Kwok on 13/5/22.
 //
 
+#if os(macOS)
 import Foundation
-import Compression
+//import Compression
 import Logging
 
 /// Decompresses `zlib-stream`-compressed payloads received
@@ -147,3 +148,32 @@ public extension DecompressionEngine {
         return decompressed
     }
 }
+#endif
+
+#if os(Linux)
+
+import Foundation
+import Logging
+import SWCompression
+
+public class DecompressionEngine {
+    private var buf = Data()
+
+    private static let ZLIB_SUFFIX = Data([0x00, 0x00, 0xff, 0xff]), BUFFER_SIZE = 32_768
+    private static let log = Logger(label: "DecompressionEngine", level: nil)
+
+    public func push_data(_ data: Data) -> String? {
+        buf.append(data)
+
+        guard buf.count >= 4, buf.suffix(4) == DecompressionEngine.ZLIB_SUFFIX else {
+            Self.log.debug("Appending to buf", metadata: ["buf.count": "\(buf.count)"])
+            return nil
+        }
+
+        guard let output = try? ZlibArchive.unarchive(archive: buf) else { return nil }
+        buf.removeAll()
+
+        return String(decoding: output, as: UTF8.self)
+    }
+}
+#endif
