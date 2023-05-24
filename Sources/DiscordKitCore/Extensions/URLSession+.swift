@@ -6,6 +6,9 @@
 //
 
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 @available(macOS, deprecated: 12.0, message: "Use the built-in API instead")
 public extension URLSession {
