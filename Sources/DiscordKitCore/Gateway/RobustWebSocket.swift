@@ -17,6 +17,7 @@ import OpenCombine
 import OpenCombineFoundation
 #endif
 import Logging
+import WebSocket
 
 /// A robust WebSocket that handles resuming, reconnection and heartbeats
 /// with the Discord Gateway
@@ -53,7 +54,7 @@ public class RobustWebSocket: NSObject {
     /// be attempted if/when this happens.
     public let onSessionInvalid = EventDispatch<Void>()
 
-    private var session: URLSession!, socket: URLSessionWebSocketTask!, decompressor: DecompressionEngine!
+    private var session: URLSession!, socket: WebSocket!, decompressor: DecompressionEngine!
 	//private let reachability = try! Reachability()
 
     // Logger instance
@@ -171,33 +172,53 @@ public class RobustWebSocket: NSObject {
     }
 
     private func attachSockReceiveListener() {
-        Task() {
+        socket.onData = { message, _ in
             do {
-                let message = try await socket.receive()
-                do {
-                    switch message {
-                    case .data(let data):
-                        if let decompressed = self.decompressor.push_data(data) {
-                            try self.handleMessage(with: decompressed)
-                        } else { Self.log.trace("Decompression did not return any result - compressed packet is not complete") }
-                    case .string(let str): try self.handleMessage(with: str)
-                    }
-                } catch {
-                    Self.log.warning("Error decoding message", metadata: ["error": "\(error.localizedDescription)"])
+                switch message {
+                case .binary(let data):
+                    if let decompressed = self.decompressor.push_data(data) {
+                        try self.handleMessage(with: decompressed)
+                    } else { Self.log.trace("Decompression did not return any result - compressed packet is not complete") }
+                case .text(let str): try self.handleMessage(with: str)
                 }
-                self.attachSockReceiveListener()
             } catch {
-                // If an error is encountered here, the connection is probably broken
-                Self.log.error("Receive error", metadata: ["error": "\(error.localizedDescription)"])
-                self.forceClose()
+                 Self.log.warning("Error decoding message", metadata: ["error": "\(error.localizedDescription)"])
             }
+
         }
+
+        socket.onError = {error, _ in
+            Self.log.error("Receive error", metadata: ["error": "\(error.localizedDescription)"])
+            self.forceClose()
+        }
+        // Task() {
+        //     do {
+        //         let message = try await socket.receive()
+        //         do {
+        //             switch message {
+        //             case .data(let data):
+        //                 if let decompressed = self.decompressor.push_data(data) {
+        //                     try self.handleMessage(with: decompressed)
+        //                 } else { Self.log.trace("Decompression did not return any result - compressed packet is not complete") }
+        //             case .string(let str): try self.handleMessage(with: str)
+        //             }
+        //         } catch {
+        //             Self.log.warning("Error decoding message", metadata: ["error": "\(error.localizedDescription)"])
+        //         }
+        //         self.attachSockReceiveListener()
+        //     } catch {
+        //         // If an error is encountered here, the connection is probably broken
+        //         Self.log.error("Receive error", metadata: ["error": "\(error.localizedDescription)"])
+        //         self.forceClose()
+        //     }
+        // }
     }
     private func connect() {
         guard !explicitlyClosed else { return }
-        if socket?.state == .running {
+        
+        if socket?.isConnected == true {
             Self.log.warning("Closing existing socket connection")
-            socket.cancel()
+            socket.disconnect()
         }
 
         Self.log.info("[CONNECT]", metadata: [
@@ -209,8 +230,9 @@ public class RobustWebSocket: NSObject {
         var gatewayReq = URLRequest(url: URL(string: DiscordKitConfig.default.gateway)!)
         // The difference in capitalisation is intentional
         gatewayReq.setValue(DiscordKitConfig.default.userAgent, forHTTPHeaderField: "User-Agent")
-        socket = session.webSocketTask(with: gatewayReq)
-        socket!.maximumMessageSize = maxMsgSize
+        socket = WebSocket()
+        try! socket.connect(to: DiscordKitConfig.default.gateway, headers: HTTPHeaders(dictionaryLiteral: ("User-Agent", DiscordKitConfig.default.userAgent)))//session.webSocketTask(with: gatewayReq)
+        //socket. = maxMsgSize
 
         DispatchQueue.main.async { [weak self] in
             self?.connTimeout = Timer.scheduledTimer(withTimeInterval: self!.timeout, repeats: false) { [weak self] _ in
@@ -227,7 +249,6 @@ public class RobustWebSocket: NSObject {
         // Create new instance of decompressor
         // It's best to do it here, before resuming the task since sometimes, messages arrive before the compressor is initialised in the socket open handler.
         decompressor = DecompressionEngine()
-        socket!.resume()
 
         //setupReachability()
         attachSockReceiveListener()
@@ -480,7 +501,7 @@ public extension RobustWebSocket {
         shouldReconnect: Bool = true
     ) {
         Self.log.warning("Forcibly closing connection")
-        socket.cancel(with: code, reason: nil)
+        socket.disconnect()//.cancel(with: code, reason: nil)
         connected = false
         /*if shouldReconnect {
             log.info("[RECONNECT] Preemptively attempting reconnection")
@@ -508,7 +529,7 @@ public extension RobustWebSocket {
         seq = nil
         //reachability.stopNotifier()
 
-        socket.cancel(with: code, reason: nil)
+        socket.disconnect()//.cancel(with: code, reason: nil)
     }
 
     /// Initiates a Gateway socket connection
@@ -519,7 +540,7 @@ public extension RobustWebSocket {
     /// it has been closed with `close()`. This method has no effect if the socket
     /// is already opened.
     final func open() {
-        guard socket.state != .running else { return }
+        guard !socket.isConnected else { return }
         clearPendingReconnectIfNeeded()
         explicitlyClosed = false
 
@@ -552,16 +573,18 @@ public extension RobustWebSocket {
             "seq": "\(seq ?? -1)"
         ])
 
-        Task() {
-            do {
-                try await socket.send(.data(encoded))
-            } catch {
-                if let completionHandler = completionHandler {
-                    completionHandler(error)
-                } else {
-                    Self.log.error("Socket send error", metadata: ["error": "\(error.localizedDescription)"])
-                }
-            }
-        }
+        socket.send(encoded)
+
+        // Task() {
+        //     do {
+        //         socket.send(encoded)
+        //     } catch {
+        //         if let completionHandler = completionHandler {
+        //             completionHandler(error)
+        //         } else {
+        //             Self.log.error("Socket send error", metadata: ["error": "\(error.localizedDescription)"])
+        //         }
+        //     }
+        // }
     }
 }

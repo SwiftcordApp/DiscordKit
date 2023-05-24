@@ -23,7 +23,7 @@ public struct NCWrapper<Data> {
     }
 
     public func listen(listener: @escaping (Data) -> Void) {
-        notificationCenter.addObserver(forName: name, object: nil, queue: nil) { notif in
+        _ = notificationCenter.addObserver(forName: name, object: nil, queue: nil) { notif in
             guard let obj = notif.object as? Data else { return }
             listener(obj)
         }
