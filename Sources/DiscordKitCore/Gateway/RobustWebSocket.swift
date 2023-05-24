@@ -65,6 +65,11 @@ public class RobustWebSocket: NSObject {
     private var session: URLSession!, decompressor: DecompressionEngine!
 
     #if canImport(WebSocket)
+    // We're using a 3rd party library on Linux because URLSessionWebSocketTask uses libcurl for its web socket communication.
+    // However, libcurl's websocket implementation is currently experimental, and you must build and install curl from source to use it.
+    // Because that is really bad UX, I elected to include an extremely hefty library to do our websocket stuff.
+    // It absolutely kills compile times, and inflates binary size unneccessarlly.
+    // When curl includes websocket support on its stable build, this dependency should be dropped in favor of URLSessionWebSocketTask.
     private var socket: WebSocket!
     #else
     private var socket: URLSessionWebSocketTask!
@@ -630,7 +635,7 @@ public extension RobustWebSocket {
         #else
         guard socket.state != .running else { return }
         #endif
-        
+
         clearPendingReconnectIfNeeded()
         explicitlyClosed = false
 
