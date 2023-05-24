@@ -12,10 +12,11 @@ public struct User: Codable, GatewayData, Identifiable, Equatable {
     }
 
     // To work around the default access level
-    public init(id: Snowflake, username: String, discriminator: String, avatar: HashedAsset?, bot: Bool?, bio: String?, system: Bool?, mfa_enabled: Bool?, banner: HashedAsset?, accent_color: Int?, locale: Locale?, verified: Bool?, flags: User.Flags?, premium_type: PremiumType?, public_flags: User.Flags?) {
+    public init(id: Snowflake, username: String, discriminator: String, global_name: String?, avatar: HashedAsset?, bot: Bool?, bio: String?, system: Bool?, mfa_enabled: Bool?, banner: HashedAsset?, accent_color: Int?, locale: Locale?, verified: Bool?, flags: User.Flags?, premium_type: PremiumType?, public_flags: User.Flags?) {
         self.id = id
         self.username = username
         self.discriminator = discriminator
+        self.global_name = global_name
         self.avatar = avatar
         self.bot = bot
         self.bio = bio
@@ -40,6 +41,9 @@ public struct User: Codable, GatewayData, Identifiable, Equatable {
     ///
     /// A string in the format #0000
     public let discriminator: String
+    
+    /// User's Global Name
+    public let global_name: String?
 
     /// User's avatar hash
     public let avatar: HashedAsset?
@@ -109,6 +113,9 @@ public struct CurrentUser: Codable, GatewayData, Equatable {
     ///
     /// A string in the format #0000
     public let discriminator: String
+    
+    /// Global Name of this user
+    public let global_name: String?
 
     /// The flags of this user
     ///
@@ -197,6 +204,7 @@ public extension User {
             id: user.id,
             username: user.username,
             discriminator: user.discriminator,
+            global_name: user.global_name,
             avatar: user.avatar,
             bot: false,
             bio: user.bio,
