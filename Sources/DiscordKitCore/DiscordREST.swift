@@ -8,6 +8,10 @@
 import Foundation
 import Logging
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 public class DiscordREST {
     static let log = Logger(label: "DiscordREST", level: nil)
     // How empty, everything is broken into smaller files (for now xD)

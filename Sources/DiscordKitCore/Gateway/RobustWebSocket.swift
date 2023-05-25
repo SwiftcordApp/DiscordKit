@@ -6,9 +6,26 @@
 //
 
 import Foundation
-import Reachability
-import Combine
 import Logging
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
+#if canImport(Reachability)
+import Reachability
+#endif
+
+#if canImport(Combine)
+import Combine
+#else
+import OpenCombine
+import OpenCombineFoundation
+#endif
+
+#if canImport(WebSocket)
+import WebSocket
+#endif
 
 /// A robust WebSocket that handles resuming, reconnection and heartbeats
 /// with the Discord Gateway
@@ -25,6 +42,8 @@ import Logging
 /// > Use ``DiscordGateway`` instead of this class - it uses ``RobustWebSocket``
 /// > underlyingly and is higher-level for more ease of use.
 public class RobustWebSocket: NSObject {
+    // swiftlint:disable:previous type_body_length
+
     /// An ``EventDispatch`` that is notified when an event dispatch
     /// is received from the Gateway
     public let onEvent = EventDispatch<GatewayIncoming.Data>()
@@ -45,8 +64,23 @@ public class RobustWebSocket: NSObject {
     /// be attempted if/when this happens.
     public let onSessionInvalid = EventDispatch<Void>()
 
-    private var session: URLSession!, socket: URLSessionWebSocketTask!, decompressor: DecompressionEngine!
+    private var session: URLSession!, decompressor: DecompressionEngine!
+
+    #if canImport(WebSocket)
+    // We're using a 3rd party library on Linux because URLSessionWebSocketTask uses libcurl for its web socket communication.
+    // However, libcurl's websocket implementation is currently experimental, and you must build and install curl from source to use it.
+    // Because that is really bad UX, I elected to include an extremely hefty library to do our websocket stuff.
+    // It absolutely kills compile times, and inflates binary size unneccessarlly.
+    // When curl includes websocket support on its stable build, this dependency should be dropped in favor of URLSessionWebSocketTask.
+    private var socket: WebSocket!
+    #else
+    private var socket: URLSessionWebSocketTask!
+    #endif
+
+    #if canImport(Reachability)
+    // swiftlint:disable:next force_try
 	private let reachability = try! Reachability()
+    #endif
 
     // Logger instance
     private static let log = Logger(label: "RobustWebSocket", level: nil)
@@ -163,40 +197,67 @@ public class RobustWebSocket: NSObject {
     }
 
     private func attachSockReceiveListener() {
-        socket.receive { [unowned self] result in
-            // print(result)
-            switch result {
-            case .success(let message):
+        #if canImport(WebSocket)
+        socket.onData = { message, _ in
+            do {
+                switch message {
+                case .binary(let data):
+                    if let decompressed = self.decompressor.push_data(data) {
+                        try self.handleMessage(with: decompressed)
+                    } else { Self.log.trace("Decompression did not return any result - compressed packet is not complete") }
+                case .text(let str): try self.handleMessage(with: str)
+                }
+            } catch {
+                 Self.log.warning("Error decoding message", metadata: ["error": "\(error.localizedDescription)"])
+            }
+
+        }
+
+        socket.onError = {error, _ in
+            Self.log.error("Receive error", metadata: ["error": "\(error.localizedDescription)"])
+            self.forceClose()
+        }
+
+        #else
+
+        Task {
+            do {
+                let message = try await socket.receive()
                 do {
                     switch message {
                     case .data(let data):
-                        if let decompressed = decompressor.push_data(data) {
-                            // print(decompressed)
-                            try handleMessage(with: decompressed)
-                        } else {
-                            Self.log.trace("Decompression did not return any result - compressed packet is not complete")
-                        }
-                    case .string(let str): try handleMessage(with: str)
+                        if let decompressed = self.decompressor.push_data(data) {
+                            try self.handleMessage(with: decompressed)
+                        } else { Self.log.trace("Decompression did not return any result - compressed packet is not complete") }
+                    case .string(let str): try self.handleMessage(with: str)
                     @unknown default: Self.log.warning("Unknown sock message case!")
                     }
                 } catch {
-                    // TODO: Add handler for decoding errors
-                    Self.log.warning("Error decoding message", metadata: ["error": "\(error)"])
+                    Self.log.warning("Error decoding message", metadata: ["error": "\(error.localizedDescription)"])
                 }
-                attachSockReceiveListener()
-            case .failure(let error):
+                self.attachSockReceiveListener()
+            } catch {
                 // If an error is encountered here, the connection is probably broken
                 Self.log.error("Receive error", metadata: ["error": "\(error.localizedDescription)"])
-                forceClose()
+                self.forceClose()
             }
         }
+        #endif
     }
+
     private func connect() {
         guard !explicitlyClosed else { return }
-        if socket?.state == .running {
+        #if canImport(WebSocket)
+        if socket?.isConnected == true {
+            Self.log.warning("Closing existing socket connection")
+            socket.disconnect()
+        }
+        #else
+        if socket?.state == .running == true {
             Self.log.warning("Closing existing socket connection")
             socket.cancel()
         }
+        #endif
 
         Self.log.info("[CONNECT]", metadata: [
             "ws": "\(DiscordKitConfig.default.gateway)",
@@ -204,17 +265,27 @@ public class RobustWebSocket: NSObject {
         ])
         pendingReconnect = nil
 
+        #if canImport(WebSocket)
+        socket = WebSocket()
+        do {
+            try socket.connect(to: DiscordKitConfig.default.gateway, headers: HTTPHeaders(dictionaryLiteral: ("User-Agent", DiscordKitConfig.default.userAgent)))
+        } catch {
+            Self.log.critical("Failed to connect to Gateway", metadata: ["Reason": "\(error.localizedDescription)"])
+        }
+        #else
         var gatewayReq = URLRequest(url: URL(string: DiscordKitConfig.default.gateway)!)
         // The difference in capitalisation is intentional
         gatewayReq.setValue(DiscordKitConfig.default.userAgent, forHTTPHeaderField: "User-Agent")
-        socket = session.webSocketTask(with: gatewayReq)
         socket!.maximumMessageSize = maxMsgSize
+        #endif
 
         DispatchQueue.main.async { [weak self] in
             self?.connTimeout = Timer.scheduledTimer(withTimeInterval: self!.timeout, repeats: false) { [weak self] _ in
                 self?.connTimeout = nil
                 guard self?.connected != true else { return }
-                // reachability.stopNotifier()
+                #if canImport(Reachability)
+                reachability.stopNotifier()
+                #endif
                 Self.log.warning("Connection timed out", metadata: ["timeout": "\(self?.timeout ?? -1)"])
                 self?.forceClose()
                 Self.log.info("[RECONNECT] Preemptively attempting reconnection")
@@ -225,13 +296,18 @@ public class RobustWebSocket: NSObject {
         // Create new instance of decompressor
         // It's best to do it here, before resuming the task since sometimes, messages arrive before the compressor is initialised in the socket open handler.
         decompressor = DecompressionEngine()
+        #if !canImport(WebSocket)
         socket!.resume()
+        #endif
 
+        #if canImport(Reachability)
         setupReachability()
+        #endif
         attachSockReceiveListener()
     }
 
     // MARK: - Handlers
+    // swiftlint:disable:next function_body_length
     private func handleMessage(with message: String) throws {
         guard let msgData = message.data(using: .utf8) else { return }
 		let decoded = try DiscordREST.decoder.decode(GatewayIncoming.self, from: msgData)
@@ -377,6 +453,8 @@ extension RobustWebSocket: URLSessionWebSocketDelegate {
 }
 
 // MARK: - Reachability
+// Reachability does not support Linux, and does not seem vital for bots, so im not gonna bother
+#if canImport(Reachability)
 public extension RobustWebSocket {
     private func setupReachability() {
         reachability.whenReachable = { [weak self] _ in
@@ -394,10 +472,60 @@ public extension RobustWebSocket {
         do { try reachability.startNotifier() } catch { Self.log.error("Starting reachability notifier failed!") }
     }
 }
+#endif
 
 // MARK: - Heartbeating
 public extension RobustWebSocket {
+    // @objc errors on linux. Im not sure why it's used here, but i'll keep it.
+    #if os(macOS)
     @objc private func sendHeartbeat(_ interval: TimeInterval) {
+        guard connected else { return }
+        if let hbTimeout = hbTimeout, hbTimeout.isValid {
+            Self.log.warning("Skipping sending heartbeat", metadata: ["reason": "already waiting for one"])
+            return
+        }
+
+        Self.log.debug("[HEARTBEAT] Sending heartbeat")
+        send(.heartbeat, data: GatewayHeartbeat(seq))
+
+        hbTimeout?.invalidate()
+        DispatchQueue.main.async { [weak self] in
+            self?.hbTimeout = Timer.scheduledTimer(withTimeInterval: interval * 0.25, repeats: false) { [weak self] _ in
+                Self.log.warning("[HEARTBEAT] Force-closing connection", metadata: ["reason": "socket timed out"])
+                self?.forceClose()
+            }
+        }
+    }
+
+    @objc private func startHeartbeating(interval: TimeInterval) {
+        Self.log.debug("Start heartbeating", metadata: ["interval": "\(interval)"])
+
+        if let hbCancellable = hbCancellable {
+            Self.log.debug("Cancelling existing heartbeat timer")
+            hbCancellable.cancel()
+        }
+        if let hbTimeout = hbTimeout {
+            Self.log.debug("Cancelling existing hbTimeout timer")
+            hbTimeout.invalidate()
+        }
+
+        // First heartbeat after interval * jitter where jitter is a value from 0-1
+        // ~ Discord API docs
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + interval * Double.random(in: 0...1),
+            qos: .utility,
+            flags: .enforceQoS
+        ) {
+            // Only ever start 1 publishing timer
+            self.sendHeartbeat(interval)
+
+            self.hbCancellable = Timer.publish(every: interval, tolerance: 2, on: .main, in: .common)
+                .autoconnect()
+                .sink { _ in self.sendHeartbeat(interval) }
+        }
+    }
+    #else
+    private func sendHeartbeat(_ interval: TimeInterval) {
         guard connected else { return }
         if let hbTimeout = hbTimeout, hbTimeout.isValid {
             Self.log.warning("Skipping sending heartbeat", metadata: ["reason": "already waiting for one"])
@@ -443,6 +571,7 @@ public extension RobustWebSocket {
                 .sink { _ in self.sendHeartbeat(interval) }
         }
     }
+    #endif
 }
 
 // MARK: - Extension with public exposed methods
@@ -462,7 +591,11 @@ public extension RobustWebSocket {
         shouldReconnect: Bool = true
     ) {
         Self.log.warning("Forcibly closing connection")
+        #if canImport(WebSocket)
+        socket.disconnect()
+        #else
         socket.cancel(with: code, reason: nil)
+        #endif
         connected = false
         /*if shouldReconnect {
             log.info("[RECONNECT] Preemptively attempting reconnection")
@@ -488,9 +621,16 @@ public extension RobustWebSocket {
         connected = false
         sessionID = nil
         seq = nil
-        reachability.stopNotifier()
 
+        #if canImport(Reachability)
+        reachability.stopNotifier()
+        #endif
+
+        #if canImport(WebSocket)
+        socket.disconnect()
+        #else
         socket.cancel(with: code, reason: nil)
+        #endif
     }
 
     /// Initiates a Gateway socket connection
@@ -501,7 +641,12 @@ public extension RobustWebSocket {
     /// it has been closed with `close()`. This method has no effect if the socket
     /// is already opened.
     final func open() {
+        #if canImport(WebSocket)
+        guard !socket.isConnected else { return }
+        #else
         guard socket.state != .running else { return }
+        #endif
+
         clearPendingReconnectIfNeeded()
         explicitlyClosed = false
 
@@ -534,10 +679,20 @@ public extension RobustWebSocket {
             "seq": "\(seq ?? -1)"
         ])
 
-        socket.send(.data(encoded), completionHandler: completionHandler ?? { err in
-            if let err = err { Self.log.error("Socket send error", metadata: [
-                "error": "\(err.localizedDescription)"
-            ]) }
-        })
+        #if canImport(WebSocket)
+        socket.send(encoded)
+        #else
+        Task {
+            do {
+                try await socket.send(.data(encoded))
+            } catch {
+                if let completionHandler = completionHandler {
+                    completionHandler(error)
+                } else {
+                    Self.log.error("Socket send error", metadata: ["error": "\(error.localizedDescription)"])
+                }
+            }
+        }
+        #endif
     }
 }

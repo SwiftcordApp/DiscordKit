@@ -32,4 +32,3 @@ public struct ActionRow: Component {
         }
     }
 }
-

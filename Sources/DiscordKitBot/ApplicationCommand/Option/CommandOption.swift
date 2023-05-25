@@ -25,7 +25,7 @@ public protocol CommandOption: Encodable {
     /// If this command is required
     var required: Bool? { get set }
 
-    /// Channel types to restrict visibility of command to
+    // Channel types to restrict visibility of command to
     // var channel_types: ChannelType? { get }
 }
 

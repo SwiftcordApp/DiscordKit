@@ -4,6 +4,7 @@ disabled_rules:
   - multiple_closures_with_trailing_closure
   - large_tuple
   - todo # TODOs are precisely for reminding me of tasks I'll have to do in the future. If they are flagged as violations, it completely defeats the point.
+  - file_length
 opt_in_rules:
 
 force_cast: warning

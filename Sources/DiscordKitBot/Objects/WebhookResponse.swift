@@ -63,7 +63,7 @@ public struct WebhookResponse: Encodable {
         try container.encodeIfPresent(username, forKey: .username)
         try container.encodeIfPresent(avatar_url, forKey: .avatar_url)
         try container.encodeIfPresent(tts, forKey: .tts)
-        try container.encodeIfPresent(embeds, forKey:.embeds)
+        try container.encodeIfPresent(embeds, forKey: .embeds)
         try container.encodeIfPresent(allowed_mentions, forKey: .allowed_mentions)
         try container.encodeIfPresent(attachments, forKey: .attachments)
         try container.encodeIfPresent(flags, forKey: .flags)

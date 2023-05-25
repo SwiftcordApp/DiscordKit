@@ -6,11 +6,16 @@
 //
 
 import Foundation
+#if canImport(UniformTypeIdentifiers)
 import UniformTypeIdentifiers
-
+#endif
 public extension URL {
 	var mimeType: String {
+		#if canImport(UniformTypeIdentifiers)
 		UTType(filenameExtension: self.pathExtension)?.preferredMIMEType ?? "application/octet-stream"
+        #else
+        "application/octet-stream" // We'll just assume this for now, since UniformTypeIdentifiers isn't available on linux at the moment
+        #endif
     }
 
     /// Appends one or more query items to the URL

@@ -47,7 +47,7 @@ public extension User {
 
         /// Discord Certified Moderator
         public static let certifiedModerator = Flags(rawValue: 1 << 18)
-        
+
         public static let activeDeveloper = Flags(rawValue: 1 << 22)
 
         /// Bot uses only [HTTP interactions](https://discord.com/developers/docs/interactions/receiving-and-responding#receiving-an-interaction) and is shown in the online member list
