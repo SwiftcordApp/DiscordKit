@@ -32,7 +32,7 @@ let package = Package(
                 .product(name: "OpenCombine", package: "OpenCombine", condition: .when(platforms: [.linux])),
                 .product(name: "OpenCombineFoundation", package: "OpenCombine", condition: .when(platforms: [.linux])),
                 .product(name: "SWCompression", package: "SWCompression", condition: .when(platforms: [.linux])),
-                .product(name: "WebSocket", package: "WebSocket.swift", condition: .when(platforms: [.macOS]))
+                .product(name: "WebSocket", package: "WebSocket.swift", condition: .when(platforms: [.linux]))
             ],
             exclude: [
                 "REST/README.md",

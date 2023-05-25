@@ -253,7 +253,7 @@ public class RobustWebSocket: NSObject {
             socket.disconnect()
         }
         #else
-        if socket?.state == .running == true {
+        if socket?.state == .running {
             Self.log.warning("Closing existing socket connection")
             socket.cancel()
         }
