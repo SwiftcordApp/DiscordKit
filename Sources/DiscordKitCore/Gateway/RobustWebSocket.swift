@@ -284,7 +284,7 @@ public class RobustWebSocket: NSObject {
                 self?.connTimeout = nil
                 guard self?.connected != true else { return }
                 #if canImport(Reachability)
-                reachability.stopNotifier()
+                self.reachability.stopNotifier()
                 #endif
                 Self.log.warning("Connection timed out", metadata: ["timeout": "\(self?.timeout ?? -1)"])
                 self?.forceClose()
