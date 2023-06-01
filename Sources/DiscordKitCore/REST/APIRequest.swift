@@ -6,6 +6,9 @@
 //
 
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// Utility wrappers for easy request-making
 public extension DiscordREST {
@@ -213,7 +216,7 @@ public extension DiscordREST {
             method: .put
         )
     }
-    
+
     /// Make a `PUT` request to the Discord REST API
     ///
     /// For endpoints that returns a 204 empty response and doesn't have any body

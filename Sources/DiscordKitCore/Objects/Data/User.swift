@@ -41,7 +41,7 @@ public struct User: Codable, GatewayData, Identifiable, Equatable {
     ///
     /// A string in the format #0000
     public let discriminator: String
-    
+
     /// User's Global Name
     public let global_name: String?
 
@@ -113,7 +113,7 @@ public struct CurrentUser: Codable, GatewayData, Equatable {
     ///
     /// A string in the format #0000
     public let discriminator: String
-    
+
     /// Global Name of this user
     public let global_name: String?
 

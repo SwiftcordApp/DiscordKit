@@ -83,7 +83,7 @@ public extension HashedAsset {
         return HashedAsset.joinPaths(with: format, "icons", guildID, self)
             .setSize(size: size)
     }
-    
+
     /// Returns the icon URL of a sticker pack banner
     ///
     /// > This resource will not be animated.

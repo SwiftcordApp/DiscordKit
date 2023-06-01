@@ -192,8 +192,6 @@ public struct GatewayIncoming: Decodable {
         case unknown
     }
 
-    // Nothing I can do here too, really.
-    // swiftlint:disable:next function_body_length
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         let action = try values.decode(GatewayIncomingOpcodes.self, forKey: .opcode)
@@ -213,12 +211,12 @@ public struct GatewayIncoming: Decodable {
             // Cue the long switch case to parse every single event
             switch type {
             case .ready:
-                /*if let userReady = try? values.decode(ReadyEvt.self, forKey: .data) {
+                if let userReady = try? values.decode(ReadyEvt.self, forKey: .data) {
                     data = .userReady(userReady)
                 } else {
                     data = .botReady(try values.decode(BotReadyEvt.self, forKey: .data))
-                }*/
-                data = .userReady(try values.decode(ReadyEvt.self, forKey: .data))
+                }
+                // data = .userReady(try values.decode(ReadyEvt.self, forKey: .data))
             case .readySupplemental: data = .readySupplemental(try values.decode(ReadySuppEvt.self, forKey: .data))
             case .resumed: data = .resumed
 

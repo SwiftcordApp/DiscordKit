@@ -50,7 +50,7 @@ public struct InteractionResponse: Encodable {
             public let flags: DiscordKitCore.Message.Flags?
             public let components: [Component]?
             public let attachments: [NewAttachment]?
-            
+
             enum CodingKeys: CodingKey {
                 case content
                 case tts
