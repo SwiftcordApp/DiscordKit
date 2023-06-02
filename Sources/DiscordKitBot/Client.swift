@@ -25,7 +25,7 @@ public final class Client {
     private let notificationCenter = NotificationCenter()
     public let ready: NCWrapper<()>
     public let messageCreate: NCWrapper<BotMessage>
-    public let guildMemberAdd: NCWrapper<Member>
+    public let guildMemberAdd: NCWrapper<BotMember>
 
     // MARK: Configuration Members
     public let intents: Intents
@@ -151,7 +151,8 @@ extension Client {
             default: break
             }
         case .guildMemberAdd(let member):
-            guildMemberAdd.emit(value: member)
+            let botMember = BotMember(from: member, rest: rest)
+            guildMemberAdd.emit(value: botMember)
         default:
             break
         }
