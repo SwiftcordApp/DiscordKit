@@ -25,6 +25,7 @@ public final class Client {
     private let notificationCenter = NotificationCenter()
     public let ready: NCWrapper<()>
     public let messageCreate: NCWrapper<BotMessage>
+    public let guildMemberAdd: NCWrapper<Member>
 
     // MARK: Configuration Members
     public let intents: Intents
@@ -51,6 +52,7 @@ public final class Client {
         // Init event wrappers
         ready = .init(.ready, notificationCenter: notificationCenter)
         messageCreate = .init(.messageCreate, notificationCenter: notificationCenter)
+        guildMemberAdd = .init(.guildMemberAdd, notificationCenter: notificationCenter)
     }
 
     deinit {
@@ -148,6 +150,8 @@ extension Client {
                 print("Component interaction: \(componentData.custom_id)")
             default: break
             }
+        case .guildMemberAdd(let member):
+            guildMemberAdd.emit(value: member)
         default:
             break
         }

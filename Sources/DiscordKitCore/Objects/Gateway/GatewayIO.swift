@@ -83,6 +83,8 @@ public struct GatewayIncoming: Decodable {
         /// > This event may also be dispatched when a guild becomes unavailable due to a
         /// > server outage.
         case guildDelete(GuildUnavailable)
+        /// Guild member join event
+        case guildMemberAdd(Member)
 
         // MARK: - Channels
 
@@ -238,6 +240,7 @@ public struct GatewayIncoming: Decodable {
             case .guildCreate: data = .guildCreate(try values.decode(Guild.self, forKey: .data))
             case .guildUpdate: data = .guildUpdate(try values.decode(Guild.self, forKey: .data))
             case .guildDelete: data = .guildDelete(try values.decode(GuildUnavailable.self, forKey: .data))
+            case .guildMemberAdd: data = .guildMemberAdd(try values.decode(Member.self, forKey: .data))
 /*
             case .guildBanAdd, .guildBanRemove: data = try values.decode(GuildBan.self, forKey: .data)
             case .guildEmojisUpdate: data = try values.decode(GuildEmojisUpdate.self, forKey: .data)
