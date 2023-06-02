@@ -108,6 +108,6 @@ Here are some (WIP) resources that might be useful while developing with Discord
 
 Currently, DiscordKit only offically supports macOS versions 11 and up. Theoretically, you should be able to compile and use DiscordKit on any Apple platform with equivalent APIs, however this has not been tested and is considered an unsupported setup.
 
-Linux and Windows is not supported at the moment, primarily due to our reliance on Apple's `Combine` framework. We have not blocked building DiscordKit on other platforms in the event that support for those frameworks is added to Swift's corelibs in the future.
+DiscordKitBot and DiscordKitCore is supported on Linux, but not DiscordKit itself. However, you are able to develop and host bots made with DiscordKit on Linux. 
 
-Linux support is planned, and will arrive sometime in the future. Unfortunately, we do not have a timeline for that at the moment.
+Windows is not supported natively at the moment. The recommended method is to use Windows Subsystem for Linux to do any development/hosting of DiscordKit bots on Windows. Native support may come in the future.
