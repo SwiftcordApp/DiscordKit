@@ -40,6 +40,7 @@ public final class Client {
     ///
     /// This is used for registering application commands, among other actions.
     public fileprivate(set) var applicationID: String?
+    public fileprivate(set) var guilds: [Snowflake]?
 
     public init(intents: Intents = .unprivileged) {
         self.intents = intents
@@ -130,6 +131,7 @@ extension Client {
             // Set several members with info about the bot
             applicationID = readyEvt.application.id
             user = readyEvt.user
+            guilds = readyEvt.guilds.map({ $0.id })
             if firstTime {
                 Self.logger.info("Bot client ready", metadata: [
                     "user.id": "\(readyEvt.user.id)",
@@ -137,6 +139,7 @@ extension Client {
                 ])
                 ready.emit()
             }
+            
         case .messageCreate(let message):
             let botMessage = BotMessage(from: message, rest: rest)
             messageCreate.emit(value: botMessage)
@@ -185,5 +188,9 @@ public extension Client {
             }
             appCommandHandlers[registeredCommand.id] = command.handler
         }
+    }
+    
+    func getGuild(id: Snowflake) async throws -> Guild {
+        return try await rest.getGuild(id: id)
     }
 }

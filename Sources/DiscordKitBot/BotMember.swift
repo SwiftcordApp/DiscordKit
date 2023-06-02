@@ -45,7 +45,13 @@ public struct BotMember {
 }
 
 public extension BotMember {
-    func changeNickname() async throws {
-        try await rest?.editGuildMember(guild_id!, user!.id, ["nick":"test"])
+    func changeNickname(_ nickname: String) async throws {
+        try await rest?.editGuildMember(guild_id!, user!.id, ["nick":nickname])
+    }
+    
+    func addRole(_ role: Snowflake) async throws {
+        var roles = roles
+        roles.append(role)
+        try await rest?.editGuildMember(guild_id!, user!.id, ["roles":roles])
     }
 }
