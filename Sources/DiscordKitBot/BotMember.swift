@@ -46,6 +46,6 @@ public struct BotMember {
 
 public extension BotMember {
     func changeNickname() async throws {
-        try await rest?.editGuildMember(guild_id!, user_id!, ["nick":"test"])
+        try await rest?.editGuildMember(guild_id!, user!.id, ["nick":"test"])
     }
 }
