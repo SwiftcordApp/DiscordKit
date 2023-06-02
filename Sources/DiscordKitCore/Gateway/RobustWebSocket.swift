@@ -276,6 +276,7 @@ public class RobustWebSocket: NSObject {
         var gatewayReq = URLRequest(url: URL(string: DiscordKitConfig.default.gateway)!)
         // The difference in capitalisation is intentional
         gatewayReq.setValue(DiscordKitConfig.default.userAgent, forHTTPHeaderField: "User-Agent")
+        socket = session.webSocketTask(with: gatewayReq)
         socket!.maximumMessageSize = maxMsgSize
         #endif
 
