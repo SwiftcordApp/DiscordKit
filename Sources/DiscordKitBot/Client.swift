@@ -203,8 +203,8 @@ public extension Client {
         }
     }
     
-    func getGuild(id: Snowflake) async throws -> Guild {
-        return try await rest.getGuild(id: id)
+    func getGuild(id: Snowflake) async throws -> BotGuild {
+        return try await BotGuild(rest.getGuild(id: id))
     }
     
     func getGuildRoles(id: Snowflake) async throws -> [Role] {
