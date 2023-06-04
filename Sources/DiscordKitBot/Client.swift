@@ -78,9 +78,9 @@ public final class Client {
         }
         
         let signalCallback: sig_t = { signal in
-            Client.logger.info("Got signal: \(signal)")
+            print("Gracefully stopping...")
             Client.client?.disconnect()
-            sleep(0)
+            sleep(0) // give other threads a tiny amount of time to finish up
             exit(signal)
         }
 
