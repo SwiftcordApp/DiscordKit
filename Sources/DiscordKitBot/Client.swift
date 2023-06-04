@@ -76,11 +76,11 @@ public final class Client {
         evtHandlerID = gateway?.onEvent.addHandler { [weak self] data in
             self?.handleEvent(data)
         }
-        
+        Client.client = self
         let signalCallback: sig_t = { signal in
             print("Gracefully stopping...")
             Client.client?.disconnect()
-            sleep(0) // give other threads a tiny amount of time to finish up
+            sleep(1) // give other threads a tiny amount of time to finish up
             exit(signal)
         }
 
@@ -99,7 +99,6 @@ public final class Client {
         precondition(!token!.isEmpty, "The \"DISCORD_TOKEN\" environment variable is empty.")
         // We force unwrap here since that's the best way to inform the developer that they're missing a token
         login(token: token!)
-        Client.client = self
     }
 
     /// Disconnect from the gateway, undoes ``login(token:)``
