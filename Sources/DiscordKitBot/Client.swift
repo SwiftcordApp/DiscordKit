@@ -41,6 +41,9 @@ public final class Client {
     /// This is used for registering application commands, among other actions.
     public fileprivate(set) var applicationID: String?
     public fileprivate(set) var guilds: [Snowflake]?
+    
+    // Static refrence to the client.
+    private static var client: Client?
 
     public init(intents: Intents = .unprivileged) {
         self.intents = intents
@@ -73,6 +76,15 @@ public final class Client {
         evtHandlerID = gateway?.onEvent.addHandler { [weak self] data in
             self?.handleEvent(data)
         }
+        
+        let signalCallback: sig_t = { signal in
+            Client.logger.info("Got signal: \(signal)")
+            Client.client?.disconnect()
+            sleep(0)
+            exit(signal)
+        }
+
+        signal(SIGINT, signalCallback)
     }
     /// Login to the Discord API with a token from the environment
     ///
@@ -87,6 +99,7 @@ public final class Client {
         precondition(!token!.isEmpty, "The \"DISCORD_TOKEN\" environment variable is empty.")
         // We force unwrap here since that's the best way to inform the developer that they're missing a token
         login(token: token!)
+        Client.client = self
     }
 
     /// Disconnect from the gateway, undoes ``login(token:)``
@@ -103,6 +116,7 @@ public final class Client {
         rest.setToken(token: nil)
         applicationID = nil
         user = nil
+        Client.client = nil
     }
 }
 
