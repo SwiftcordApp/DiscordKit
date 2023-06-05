@@ -676,7 +676,7 @@ public extension RobustWebSocket {
 
         Self.log.trace("Outgoing Payload", metadata: [
             "opcode": "\(opcode)",
-            "data": "\(data)",
+            "data": "\((T.self == GatewayIdentify.self ? nil : data))", // Don't log tokens.
             "seq": "\(seq ?? -1)"
         ])
 
