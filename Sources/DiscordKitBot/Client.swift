@@ -87,14 +87,19 @@ public final class Client {
             self?.handleEvent(data)
         }
         Client.current = self
+
+        // Handle exit with SIGINT
         let signalCallback: sig_t = { signal in
             print("Gracefully stopping...")
             Client.current?.disconnect()
             sleep(1) // give other threads a tiny amount of time to finish up
             exit(signal)
         }
-
         signal(SIGINT, signalCallback)
+
+        // Block thread to prevent exit
+        RunLoop.main.run()
+
     }
 
     /// Login to the Discord API with a token stored in a file
