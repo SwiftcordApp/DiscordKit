@@ -9,7 +9,7 @@ import Foundation
 import Logging
 import DiscordKitCore
 
-/// The main client class for bots to interact with Discord's API
+/// The main client class for bots to interact with Discord's API. Only one client is allowed to be logged in at a time.
 public final class Client {
     // REST handler
     private let rest = DiscordREST()
@@ -42,8 +42,8 @@ public final class Client {
     public fileprivate(set) var applicationID: String?
     public fileprivate(set) var guilds: [Snowflake]?
     
-    // Static refrence to the client.
-    private static var client: Client?
+    /// Static reference to the currently logged in client.
+    public fileprivate(set) static var current: Client?
 
     public init(intents: Intents = .unprivileged) {
         self.intents = intents
@@ -63,42 +63,96 @@ public final class Client {
         disconnect()
     }
 
-    /// Login to the Discord API with a token
+    /// Login to the Discord API with a manually provided token
     ///
-    /// Calling this function will cause a connection to the Gateway to be attempted.
+    /// Calling this function will cause a connection to the Gateway to be attempted, using the provided token.
     ///
-    /// > Warning: Ensure this function is called _before_ any calls to the API are made,
+    /// > Important: Ensure this function is called _before_ any calls to the API are made,
     /// > and _after_ all event sinks have been registered. API calls made before this call
     /// > will fail, and no events will be received while the gateway is disconnected.
+    /// 
+    /// > Warning: Calling this method while a bot is already logged in will disconnect that bot and 
+    /// > replace it with the new one. You cannot have 2 bots logged in at the same time.
+    /// 
+    /// ## See Also
+    /// - ``login(filePath:)``
+    /// - ``login()``
     public func login(token: String) {
+        if Client.current != nil {
+            Client.current?.disconnect()
+        }
         rest.setToken(token: token)
         gateway = .init(token: token)
         evtHandlerID = gateway?.onEvent.addHandler { [weak self] data in
             self?.handleEvent(data)
         }
-        Client.client = self
+        Client.current = self
         let signalCallback: sig_t = { signal in
             print("Gracefully stopping...")
-            Client.client?.disconnect()
+            Client.current?.disconnect()
             sleep(1) // give other threads a tiny amount of time to finish up
             exit(signal)
         }
 
         signal(SIGINT, signalCallback)
     }
+
+    /// Login to the Discord API with a token stored in a file
+    ///
+    /// This method attempts to retrieve the token from the file provided,
+    /// and calls ``login(token:)`` if it was found.
+    ///
+    /// > Important: Ensure this function is called _before_ any calls to the API are made,
+    /// > and _after_ all event sinks have been registered. API calls made before this call
+    /// > will fail, and no events will be received while the gateway is disconnected.
+    /// 
+    /// > Warning: Calling this method while a bot is already logged in will disconnect that bot and 
+    /// > replace it with the new one. You cannot have 2 bots logged in at the same time.
+    ///
+    /// - Parameter filePath: A path to the file that contains your Discord bot's token
+    ///
+    /// - Throws: `AuthError.emptyToken` if the file is empty.
+    ///
+    /// ## See Also
+    /// - ``login()``
+    /// - ``login(token:)``
+    public func login(filePath: String) throws {
+        let token = try String(contentsOfFile: filePath).trimmingCharacters(in: .whitespacesAndNewlines)
+        if token.isEmpty {
+            throw AuthError.emptyToken
+        }
+        login(token: token)
+    }
+
     /// Login to the Discord API with a token from the environment
     ///
     /// This method attempts to retrieve the token from the `DISCORD_TOKEN` environment
     /// variable, and calls ``login(token:)`` if it was found.
+    /// 
+    /// > Important: Ensure this function is called _before_ any calls to the API are made,
+    /// > and _after_ all event sinks have been registered. API calls made before this call
+    /// > will fail, and no events will be received while the gateway is disconnected.
+    /// 
+    /// > Warning: Calling this method while a bot is already logged in will disconnect that bot and 
+    /// > replace it with the new one. You cannot have 2 bots logged in at the same time.
+    /// 
+    /// - Throws: `AuthError.emptyToken` if the `DISCORD_TOKEN` environment variable is empty. 
+    /// `AuthError.missingEnvVar` if the `DISCORD_TOKEN` environment variable does not exist.
     ///
     /// ## See Also
-    /// - ``login(token:)`` If you'd like to manually provide a token instead
-    public func login() {
+    /// - ``login(filePath:)``
+    /// - ``login(token:)``
+    /// 
+    public func login() throws {
         let token = ProcessInfo.processInfo.environment["DISCORD_TOKEN"]?.trimmingCharacters(in: .whitespacesAndNewlines)
-        precondition(token != nil, "The \"DISCORD_TOKEN\" environment variable was not found.")
-        precondition(!token!.isEmpty, "The \"DISCORD_TOKEN\" environment variable is empty.")
-        // We force unwrap here since that's the best way to inform the developer that they're missing a token
-        login(token: token!)
+        if let token = token {
+            if token.isEmpty {
+                throw AuthError.emptyToken
+            }
+            login(token: token)
+        } else {
+            throw AuthError.missingEnvVar
+        }
     }
 
     /// Disconnect from the gateway, undoes ``login(token:)``
@@ -115,9 +169,32 @@ public final class Client {
         rest.setToken(token: nil)
         applicationID = nil
         user = nil
-        Client.client = nil
+        Client.current = nil
     }
 }
+
+enum AuthError: Error {
+    case invalidToken
+    case missingFile
+    case missingEnvVar
+    case emptyToken
+}
+
+extension AuthError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .invalidToken:
+            return NSLocalizedString("A user-friendly description of the error.", comment: "My error")
+        case .missingFile:
+            return NSLocalizedString("The file does not exist, or your bot does not have read access to it.", comment: "File access error.")
+        case .missingEnvVar:
+            return NSLocalizedString("The \"DISCORD_TOKEN\" environment variable was not found.", comment: "ENV VAR access error.")
+        case .emptyToken:
+            return NSLocalizedString("The token provided is empty.", comment: "Invalid token.")
+        }
+    }
+}
+
 
 // Gateway API
 extension Client {
