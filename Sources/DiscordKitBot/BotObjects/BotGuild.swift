@@ -49,7 +49,7 @@ public struct BotGuild {
     public var stage_instances: [StageInstance]?
     public var guild_scheduled_events: [GuildScheduledEvent]?
     public let premium_progress_bar_enabled: Bool
-    
+
     public init(_ guild: Guild) {
         id = guild.id
         name = guild.name

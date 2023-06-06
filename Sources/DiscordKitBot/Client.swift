@@ -231,8 +231,10 @@ extension Client {
             }
             
         case .messageCreate(let message):
-            let botMessage = BotMessage(from: message, rest: rest)
-            messageCreate.emit(value: botMessage)
+            Task {
+                let botMessage = await  BotMessage(from: message, rest: rest)
+                messageCreate.emit(value: botMessage)
+            }
         case .interaction(let interaction):
             Self.logger.trace("Received interaction", metadata: ["interaction.id": "\(interaction.id)"])
             // Handle interactions based on type
