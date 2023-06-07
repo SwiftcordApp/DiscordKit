@@ -103,16 +103,14 @@ public extension DiscordREST {
     /// Crosspost Message
     ///
     /// > POST: `/channels/{channel.id}/messages/{message.id}/crosspost`
-    func crosspostMessage<T: Decodable, B: Encodable>(
+    func crosspostMessage<T: Decodable>(
         _ channelId: Snowflake,
-        _ messageId: Snowflake,
-        _ body: B
+        _ messageId: Snowflake
     ) async throws -> T {
         return try await postReq(
-            path: "channels/\(channelId)/messages/\(messageId)/crosspost",
-            body: body
-        )
+            path: "channels/\(channelId)/messages/\(messageId)/crosspost")
     }
+
     /// Create Reaction
     ///
     /// > PUT: `/channels/{channel.id}/messages/{message.id}/reactions/{emoji}/@me`

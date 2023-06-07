@@ -133,7 +133,8 @@ public extension CommandData {
     /// reply in clients. However, if a call to ``deferReply()`` was made, this
     /// edits the loading message with the content provided.
     func followUp(content: String?, embeds: [BotEmbed]?, components: [Component]?) async throws -> Message {
-        try await rest!.sendInteractionFollowUp(.init(content: content, embeds: embeds, components: components), applicationID: applicationID, token: token)
+        let coreMessage = try await rest!.sendInteractionFollowUp(.init(content: content, embeds: embeds, components: components), applicationID: applicationID, token: token)
+        return await Message(from: coreMessage, rest: rest!)
     }
 
     /// Defer the reply to this interaction - the user sees a loading state

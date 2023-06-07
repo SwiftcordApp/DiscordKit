@@ -174,6 +174,23 @@ public extension DiscordREST {
         )
     }
 
+    /// Make a `POST` request to the Discord REST APIfor endpoints
+    /// that require no payload
+    func postReq<T: Decodable>(
+        path: String
+    ) async throws -> T {
+        let respData = try await makeRequest(
+            path: path,
+            body: nil,
+            method: .post
+        )
+        do {
+            return try DiscordREST.decoder.decode(T.self, from: respData)
+        } catch {
+            throw RequestError.jsonDecodingError(error: error)
+        }
+    }
+
     /// Make a `POST` request to the Discord REST API, for endpoints
     /// that both require no payload and returns a 204 empty response
     func postReq(path: String) async throws {

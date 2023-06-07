@@ -23,12 +23,27 @@ public final class Client {
 
     // MARK: Event publishers
     private let notificationCenter = NotificationCenter()
+    /// An event that is fired when the bot is connected to discord and ready to do bot-like things
     public let ready: NCWrapper<()>
-    public let messageCreate: NCWrapper<BotMessage>
-    public let guildMemberAdd: NCWrapper<BotMember>
+    /// An event that is fired whenever a message is created in any channel the bot has access to.
+    public let messageCreate: NCWrapper<Message>
+    /// An event that is fired when a new user joins a guild that the bot is in.
+    public let guildMemberAdd: NCWrapper<Member>
 
     // MARK: Configuration Members
+    /// The intents configured for this client.
+    /// 
+    /// ## See also 
+    /// - [Intents on the Discord Developer documentation](https://discord.com/developers/docs/topics/gateway#gateway-intents)
     public let intents: Intents
+    /// Set this to false to disable blocking the main thread when calling ``login(token:)``.
+    /// 
+    /// This is an advanced use case, and considered unsafe to disable, however we provide the option to do so if you wish.
+    /// It is strongly recommended to instead use a listener on ``ready`` to perform operations after your bot is logged in.
+    /// 
+    /// ## See also
+    /// - ``ready``
+    public var blockOnLogin: Bool = true
 
     // Logger
     private static let logger = Logger(label: "Client", level: nil)
@@ -40,8 +55,11 @@ public final class Client {
     ///
     /// This is used for registering application commands, among other actions.
     public fileprivate(set) var applicationID: String?
+    /// A list of Guild IDs of the guilds that the bot is in.
+    /// 
+    /// To get the full ``Guild`` object, call ``getGuild(id:)``.
     public fileprivate(set) var guilds: [Snowflake]?
-    
+
     /// Static reference to the currently logged in client.
     public fileprivate(set) static var current: Client?
 
@@ -67,9 +85,9 @@ public final class Client {
     ///
     /// Calling this function will cause a connection to the Gateway to be attempted, using the provided token.
     ///
-    /// > Important: Ensure this function is called _before_ any calls to the API are made,
-    /// > and _after_ all event sinks have been registered. API calls made before this call
-    /// > will fail, and no events will be received while the gateway is disconnected.
+    /// > Important: This method will block the main thread for the rest of the execution time.
+    /// > This means that any code after this call in the main thread will never run, and should be considered unreachable.
+    /// > If you want to perform operations immediately after your bot is logged in, add a listener to ``ready``.
     /// 
     /// > Warning: Calling this method while a bot is already logged in will disconnect that bot and 
     /// > replace it with the new one. You cannot have 2 bots logged in at the same time.
@@ -97,19 +115,21 @@ public final class Client {
         }
         signal(SIGINT, signalCallback)
 
-        // Block thread to prevent exit
-        RunLoop.main.run()
+        if blockOnLogin {
+            // Block thread to prevent exit
+            RunLoop.main.run()
+        }
 
     }
 
     /// Login to the Discord API with a token stored in a file
     ///
     /// This method attempts to retrieve the token from the file provided,
-    /// and calls ``login(token:)`` if it was found.
+    /// and calls ``login(token:)`` if it was found. Any API calls made before this method is ran will fail.
     ///
-    /// > Important: Ensure this function is called _before_ any calls to the API are made,
-    /// > and _after_ all event sinks have been registered. API calls made before this call
-    /// > will fail, and no events will be received while the gateway is disconnected.
+    /// > Important: This method will block the main thread for the rest of the execution time.
+    /// > This means that any code after this call in the main thread will never run, and should be considered unreachable.
+    /// > If you want to perform operations immediately after your bot is logged in, add a listener to ``ready``.
     /// 
     /// > Warning: Calling this method while a bot is already logged in will disconnect that bot and 
     /// > replace it with the new one. You cannot have 2 bots logged in at the same time.
@@ -132,13 +152,13 @@ public final class Client {
     /// Login to the Discord API with a token from the environment
     ///
     /// This method attempts to retrieve the token from the `DISCORD_TOKEN` environment
-    /// variable, and calls ``login(token:)`` if it was found.
+    /// variable, and calls ``login(token:)`` if it was found. Any API calls made before this method is ran will fail.
     /// 
-    /// > Important: Ensure this function is called _before_ any calls to the API are made,
-    /// > and _after_ all event sinks have been registered. API calls made before this call
-    /// > will fail, and no events will be received while the gateway is disconnected.
+    /// > Important: This method will block the main thread for the rest of the execution time.
+    /// > This means that any code after this call in the main thread will never run, and should be considered unreachable.
+    /// > If you want to perform operations immediately after your bot is logged in, add a listener to ``ready``.
     /// 
-    /// > Warning: Calling this method while a bot is already logged in will disconnect that bot and 
+    /// > Warning: Calling this method while a bot is already logged in will disconnect that bot's session and 
     /// > replace it with the new one. You cannot have 2 bots logged in at the same time.
     /// 
     /// - Throws: `AuthError.emptyToken` if the `DISCORD_TOKEN` environment variable is empty. 
@@ -147,7 +167,6 @@ public final class Client {
     /// ## See Also
     /// - ``login(filePath:)``
     /// - ``login(token:)``
-    /// 
     public func login() throws {
         let token = ProcessInfo.processInfo.environment["DISCORD_TOKEN"]?.trimmingCharacters(in: .whitespacesAndNewlines)
         if let token = token {
@@ -200,9 +219,9 @@ extension AuthError: LocalizedError {
     }
 }
 
-
 // Gateway API
 extension Client {
+    /// `true` if the bot is connected to discord and ready to do bot-like things.
     public var isReady: Bool { gateway?.sessionOpen == true }
 
     /// Invoke the handler associated with the respective commands
@@ -234,10 +253,9 @@ extension Client {
                 ])
                 ready.emit()
             }
-            
         case .messageCreate(let message):
             Task {
-                let botMessage = await  BotMessage(from: message, rest: rest)
+                let botMessage = await Message(from: message, rest: rest)
                 messageCreate.emit(value: botMessage)
             }
         case .interaction(let interaction):
@@ -251,7 +269,7 @@ extension Client {
             default: break
             }
         case .guildMemberAdd(let member):
-            let botMember = BotMember(from: member, rest: rest)
+            let botMember = Member(from: member, rest: rest)
             guildMemberAdd.emit(value: botMember)
         default:
             break
@@ -286,11 +304,14 @@ public extension Client {
             appCommandHandlers[registeredCommand.id] = command.handler
         }
     }
-    
-    func getGuild(id: Snowflake) async throws -> BotGuild {
-        return try await BotGuild(rest.getGuild(id: id))
+    /// Gets a ``Guild`` object from a guild ID.
+    /// 
+    /// - Parameter id: The Snowflake ID of a Guild that your bot is in.
+    /// - Returns: A ``Guild`` object containing information about the guild.
+    func getGuild(id: Snowflake) async throws -> Guild {
+        return try await Guild(rest.getGuild(id: id))
     }
-    
+
     func getGuildRoles(id: Snowflake) async throws -> [Role] {
         return try await rest.getGuildRoles(id: id)
     }

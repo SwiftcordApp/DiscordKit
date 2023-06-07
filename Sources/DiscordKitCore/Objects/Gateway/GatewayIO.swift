@@ -84,7 +84,7 @@ public struct GatewayIncoming: Decodable {
         /// > server outage.
         case guildDelete(GuildUnavailable)
         /// Guild member join event
-        case guildMemberAdd(Member)
+        case guildMemberAdd(DiscordKitCore.Member)
 
         // MARK: - Channels
 
