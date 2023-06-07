@@ -8,7 +8,7 @@
 import Foundation
 import DiscordKitCore
 
-public struct BotGuild {
+public struct Guild {
     public let id: Snowflake
     public let name: String
     public let icon: HashedAsset? // Icon hash
@@ -50,7 +50,7 @@ public struct BotGuild {
     public var guild_scheduled_events: [GuildScheduledEvent]?
     public let premium_progress_bar_enabled: Bool
 
-    public init(_ guild: Guild) {
+    public init(_ guild: DiscordKitCore.Guild) {
         id = guild.id
         name = guild.name
         icon = guild.icon
@@ -94,6 +94,6 @@ public struct BotGuild {
     }
 }
 
-public extension BotGuild {
-    
+public extension Guild {
+
 }
