@@ -63,6 +63,18 @@ public extension Member {
         try await rest!.editGuildMember(guildID!, user!.id, ["communication_disabled_until" : time])
     }
 
+    func kick() async throws {
+        try await rest!.removeGuildMember(guildID!, user!.id)
+    }
+
+    func ban(messageDeleteSeconds: Int = 0) async throws {
+        try await rest!.createGuildBan(guildID!, user!.id, ["delete_message_seconds":messageDeleteSeconds])
+    }
+
+    func unban() async throws {
+        try await rest!.removeGuildBan(guildID!, user!.id)
+    }
+
     /// Creates a DM with this user.
     ///
     /// Important: You should not use this endpoint to DM everyone in a server about something.
