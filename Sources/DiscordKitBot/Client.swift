@@ -12,7 +12,7 @@ import DiscordKitCore
 /// The main client class for bots to interact with Discord's API. Only one client is allowed to be logged in at a time.
 public final class Client {
     // REST handler
-    private let rest = DiscordREST()
+    public let rest = DiscordREST()
 
     // MARK: Gateway vars
     fileprivate var gateway: RobustWebSocket?

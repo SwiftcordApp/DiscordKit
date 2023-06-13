@@ -3,7 +3,21 @@
 import Foundation
 
 public extension DiscordREST {
-        /// Get Channel Messages
+    /// Get channel
+    ///
+    /// > DELETE: `/channels/{channel.id}`
+    func getChannel(id: Snowflake) async throws -> Channel {
+        return try await getReq(path: "channels/\(id)")
+    }
+
+    /// Delete channel
+    ///
+    /// > DELETE: `/channels/{channel.id}`
+    func deleteChannel(id: Snowflake) async throws {
+        try await deleteReq(path: "channels/\(id)")
+    }
+
+    /// Get Channel Messages
     ///
     /// > GET: `/channels/{channel.id}/messages`
     func getChannelMsgs(
@@ -199,11 +213,11 @@ public extension DiscordREST {
     /// Bulk Delete Messages
     ///
     /// > POST: `/channels/{channel.id}/messages/bulk-delete`
-    func bulkDeleteMessages<T: Decodable, B: Encodable>(
+    func bulkDeleteMessages<B: Encodable>(
         _ channelId: Snowflake,
         _ body: B
-    ) async throws -> T {
-        return try await postReq(
+    ) async throws {
+        try await postReq(
             path: "channels/\(channelId)/messages/bulk-delete",
             body: body
         )
