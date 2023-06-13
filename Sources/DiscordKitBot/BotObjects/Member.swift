@@ -9,6 +9,7 @@ import Foundation
 import DiscordKitCore
 
 public struct Member {
+    public let id: Snowflake?
     public let user: User?
     public let nick: String?
     public let avatar: String?
@@ -21,7 +22,6 @@ public struct Member {
     public let permissions: String? // Total permissions of the member in the channel, including overwrites, returned when in the interaction object
     public let timedOutUntil: Date? // When the user's timeout will expire and the user will be able to communicate in the guild again, null or a time in the past if the user is not timed out
     public let guildID: Snowflake?
-    public let userID: Snowflake?
 
     fileprivate weak var rest: DiscordREST?
 
@@ -38,7 +38,7 @@ public struct Member {
         permissions = member.permissions
         timedOutUntil = member.communication_disabled_until
         guildID = member.guild_id
-        userID = member.user_id
+        id = member.user_id
 
         self.rest = rest
     }
@@ -81,7 +81,7 @@ public extension Member {
     /// DMs should generally be initiated by a user action. If you open a significant
     /// amount of DMs too quickly, your bot may be rate limited or blocked from opening new ones.
     /// 
-    /// - Returns: The DM ``Channel``
+    /// - Returns: The newly created DM Channel
     func createDM() async throws -> Channel {
         return try await rest!.createDM(["recipient_id":user!.id])
     }

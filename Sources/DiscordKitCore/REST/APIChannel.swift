@@ -225,12 +225,12 @@ public extension DiscordREST {
     /// Edit Channel Permissions
     ///
     /// > PUT: `/channels/{channel.id}/permissions/{overwrite.id}`
-    func editChannelPermissions<T: Decodable, B: Encodable>(
+    func editChannelPermissions<B: Encodable>(
         _ channelId: Snowflake,
         _ overwriteId: Snowflake,
         _ body: B
-    ) async throws -> T {
-        return try await putReq(
+    ) async throws {
+        try await putReq(
             path: "channels/\(channelId)/permissions/\(overwriteId)",
             body: body
         )

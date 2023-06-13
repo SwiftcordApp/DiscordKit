@@ -9,14 +9,18 @@ public class CategoryChannel: GuildChannel {
     public let stageChannels: [StageChannel]? = nil
     public let nsfw: Bool
 
-    override init(from channel: DiscordKitCore.Channel, rest: DiscordREST) async {
-        coreChannels = try? await rest.getGuildChannels(id: channel.guild_id!).compactMap({ try? $0.result.get() })
-        channels = await coreChannels?.asyncMap({ await GuildChannel(from: $0, rest: rest) })
-        textChannels = await coreChannels?.asyncMap({ await TextChannel(from: $0, rest: rest) })
-
+    override init(from channel: DiscordKitCore.Channel, rest: DiscordREST) async throws {
+        coreChannels = try await rest.getGuildChannels(id: channel.guild_id!).compactMap({ try $0.result.get() })
+        channels = try await coreChannels?.asyncMap({ try await GuildChannel(from: $0, rest: rest) })
+        textChannels = try await coreChannels?.asyncMap({ try await TextChannel(from: $0, rest: rest) })
         nsfw = channel.nsfw ?? false
-        await super.init(from: channel, rest: rest)
 
+        try await super.init(from: channel, rest: rest)
+    }
+
+    convenience init(from id: Snowflake) async throws {
+        let coreChannel = try await Client.current!.rest.getChannel(id: id)
+        try await self.init(from: coreChannel, rest: Client.current!.rest)
     }
 
 }
