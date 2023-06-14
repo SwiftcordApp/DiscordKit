@@ -19,10 +19,14 @@ public class Guild {
     public let splash: HashedAsset?
     /// The guild's discovery splash asset.
     public let discoverySplash: HashedAsset?
+    /// The bot's member object.
+    public let me: Member
     /// The ID of the guild's owner.
     public let ownerID: Snowflake
     /// The member that owns the guild.
     public fileprivate(set) var owner: Member
+    /// The time that the guild was created.
+    public let createdAt: Date
     /// The AFK Voice Channel.
     public fileprivate(set) var afkChannel: GuildChannel? = nil
     /// The number of seconds until someone is moved to the afk channel.
@@ -44,15 +48,24 @@ public class Guild {
     /// The guild's rules channel.
     public fileprivate(set) var rulesChannel: GuildChannel? = nil
     /// If the guild is a "large" guild.
-    public var large: Bool?
-    /// if the guild is unavailable due to an outage.
-    public var unavailable: Bool?
+    public let large: Bool?
+    /// If the guild is unavailable due to an outage.
+    public let unavailable: Bool?
+    /// A list of the guild's members.
+    public let members: [Member]?
     /// The number of members in this guild, if available. May be out of date.
     /// 
     /// Note: Due to Discord API restrictions, you must have the `Intents.members` intent for this number to be up-to-date and accurate.
-    public var memberCount: Int?
+    public let memberCount: Int?
+    /// If the guild is "chunked"
+    /// 
+    /// A chunked guild means that ``memberCount`` is equal to the number of members stored in the internal ``members`` cache.
+    /// If this value is false, you should request for offline members.
+    public fileprivate(set) var chunked: Bool = false
     /// The maximum number of members that can join this guild.
     public let maxMembers: Int?
+    /// The maximum number of presences for the guild.
+    public let maxPresences: Int?
     /// The guild's vanity URL code.
     public let vanityURLCode: String?
     /// The guild's vanity invite URL.
@@ -78,9 +91,9 @@ public class Guild {
     /// The guild's NSFW level.
     public let nsfwLevel: NSFWLevel
     /// The stage instances in the guild that are currently running.
-    public var stageInstances: [StageInstance]?
+    public let stageInstances: [StageInstance]?
     /// The scheduled events in the guild.
-    public var scheduledEvents: [GuildScheduledEvent]?
+    public let scheduledEvents: [GuildScheduledEvent]?
     /// If the guild has the server boost progress bar enabled.
     public let premiumProgressBarEnabled: Bool
 
@@ -114,6 +127,7 @@ public class Guild {
         stageInstances = guild.stage_instances
         scheduledEvents = guild.guild_scheduled_events
         premiumProgressBarEnabled = guild.premium_progress_bar_enabled
+        maxPresences = guild.max_presences
 
         if let afk_channel_id = guild.afk_channel_id {
             afkChannel = try? await GuildChannel(from: afk_channel_id)
@@ -140,6 +154,18 @@ public class Guild {
         }
 
         owner = try await Member(guildID: id, userID: ownerID)
+
+        let coreMembers: [DiscordKitCore.Member] = try await rest.listGuildMembers(id)
+        members = coreMembers.map({ Member(from: $0, rest: rest)})
+
+        if let members = members {
+            chunked = memberCount == members.count
+        }
+
+        createdAt = id.creationTime()
+
+        let coreMe = try await rest.getGuildMember(guild: id)
+        me = Member(from: coreMe, rest: rest)
     }
 
     /// Get a guild object from a guild ID.
