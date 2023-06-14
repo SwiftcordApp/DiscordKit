@@ -9,7 +9,7 @@ So you want to make a Discord bot in Swift, I hear?
         alt: "A technology icon representing the SlothCreator framework.")
 }
 
-``DiscordKitBot`` is a swift library for creating Discord bots in Swift. It aims to make a first-class discord bot building experience in Swift, while also being computationally and memory efficient. 
+``DiscordKitBot`` is a library for creating Discord bots in Swift. It aims to make a first-class discord bot building experience in Swift, while also being computationally and memory efficient. 
 
 You are currently at the symbol documentation for ``DiscordKitBot``, which is useful if you just need a quick reference for the library. If you are looking for a getting started guide, we have one that walks you through creating your first bot [over here](https://swiftcord.gitbook.io/discordkit-guide/).
 

@@ -63,6 +63,8 @@ public final class Client {
     /// Static reference to the currently logged in client.
     public fileprivate(set) static var current: Client?
 
+    /// Create a new Client, with the intents provided.
+    /// - Parameter intents: The intents the bot should have. If no value is passed, `Intents.unprivileged`. Use array notation to pass multiple.
     public init(intents: Intents = .unprivileged) {
         self.intents = intents
         // Override default config for bots

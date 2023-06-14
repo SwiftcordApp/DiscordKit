@@ -98,17 +98,17 @@ public extension GuildChannel {
     /// - Parameter member: The member to get overrides for.
     /// - Returns: The permission overrides for that member.
     func overridesFor(_ member: Member) -> [PermOverwrite]? {
-        return overwrites?.filter({ $0.id == member.id && $0.type == .member})
+        return overwrites?.filter({ $0.id == member.user!.id && $0.type == .member})
     }
 
     /// Sets the permissions for a member.
     /// - Parameters:
     ///   - member: The member to set permissions for
-    ///   - allow: The permissions you want to allow, as an array of Permissions objects
-    ///   - deny: The permissions you want to deny, as an array of Permissions objects
-    func setPermissions(for member: Member, allow: [Permissions], deny: [Permissions]) async throws {
-        let body = EditChannelPermissionsReq(allow: Permissions(allow), deny: Permissions(deny), type: .member)
-        try await rest.editChannelPermissions(id, member.id!, body)
+    ///   - allow: The permissions you want to allow, use array notation to pass multiple
+    ///   - deny: The permissions you want to deny, use array notation to pass multiple
+    func setPermissions(for member: Member, allow: Permissions, deny: Permissions) async throws {
+        let body = EditChannelPermissionsReq(allow: allow, deny: deny, type: .member)
+        try await rest.editChannelPermissions(id, member.user!.id, body)
     }
 }
 
