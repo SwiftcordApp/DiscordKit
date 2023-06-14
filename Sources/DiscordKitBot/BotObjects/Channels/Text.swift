@@ -4,20 +4,20 @@ import DiscordKitCore
 /// Represents a Discord Text Channel, and contains convenience methods for working with them.
 public class TextChannel: GuildChannel {
     /// The last message sent in this channel. It may not represent a valid message.
-    let lastMessage: Message?
+    public let lastMessage: Message?
     /// The id of the last message sent in this channel. It may not point to a valid message.
-    let lastMessageID: Snowflake?
+    public let lastMessageID: Snowflake?
     // fileprivate(set) var members: [Member]? = nil
     /// If the channel is marked as “not safe for work” or “age restricted”.
-    let nsfw: Bool
+    public let nsfw: Bool
     /// All the threads that your bot can see.
-    fileprivate(set) var threads: [TextChannel]? = nil
+    public fileprivate(set) var threads: [TextChannel]? = nil
     /// The topic of the channel
-    let topic: String?
+    public let topic: String?
     /// The number of seconds a member must wait between sending messages in this channel. 
     /// A value of 0 denotes that it is disabled. 
     /// Bots and users with manage_channels or manage_messages bypass slowmode.
-    let slowmodeDelay: Int
+    public let slowmodeDelay: Int
     private let rest: DiscordREST
 
     internal override init(from channel: Channel, rest: DiscordREST) async throws {
