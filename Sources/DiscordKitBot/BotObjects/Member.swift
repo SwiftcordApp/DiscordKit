@@ -1,13 +1,7 @@
-//
-//  File.swift
-//  
-//
-//  Created by Andrew Glaze on 6/2/23.
-//
-
 import Foundation
 import DiscordKitCore
 
+/// Represents a Member in a ``Guild``, and contains methods for working with them.
 public class Member {
     /// The User object of this member.
     public let user: User?

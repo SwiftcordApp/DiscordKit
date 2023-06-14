@@ -31,10 +31,7 @@ You are currently at the symbol documentation for ``DiscordKitBot``, which is us
 
 - ``GuildChannel``
 - ``TextChannel``
-- ``VoiceChannel``
 - ``CategoryChannel``
-- ``StageChannel``
-- ``ForumChannel``
 
 ### Working with Messages
 - ``Message``

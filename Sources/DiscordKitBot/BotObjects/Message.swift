@@ -20,9 +20,8 @@ public struct Message {
     public let channelID: Snowflake
 
     /// The guild the message was sent in
-    public let guild: Guild?
-    /// ID of the guild the message was sent in
-    public let guildID: Snowflake?
+    public fileprivate(set) var guild: Guild? = nil
+    //public let guildID: Snowflake?
 
     /// The author of this message (not guaranteed to be a valid user, see discussion)
     ///
@@ -141,7 +140,6 @@ public struct Message {
         content = message.content
         channelID = message.channel_id
         id = message.id
-        guildID = message.guild_id
         author = message.author
         if let messageMember = message.member {
             member = Member(from: messageMember, rest: rest)
@@ -173,7 +171,9 @@ public struct Message {
 
         self.rest = rest
 
-        guild = try? await Client.current?.getGuild(id: guildID ?? "")
+        if let guildID = message.guild_id {
+            guild = try? await Guild(id: guildID)
+        }
 
         // jumpURL = nil
     }

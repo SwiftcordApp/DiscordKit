@@ -21,6 +21,9 @@ public class TextChannel: GuildChannel {
     private let rest: DiscordREST
 
     internal override init(from channel: Channel, rest: DiscordREST) async throws {
+        if channel.type != .text {
+            throw GuildChannelError.BadChannelType
+        }
         nsfw = channel.nsfw ?? false
         slowmodeDelay = channel.rate_limit_per_user ?? 0
 
@@ -49,8 +52,11 @@ public class TextChannel: GuildChannel {
 
     }
 
+    /// Initialize a TextChannel from a Snowflake ID.
+    /// - Parameter id: The Snowflake ID of the channel.
+    /// - Throws: `GuildChannelError.BadChannelType` if the ID does not correlate with a text channel.
     public convenience init(from id: Snowflake) async throws {
-        let coreChannel = try! await Client.current!.rest.getChannel(id: id)
+        let coreChannel = try await Client.current!.rest.getChannel(id: id)
         try await self.init(from: coreChannel, rest: Client.current!.rest)
     }
 }

@@ -34,7 +34,7 @@ public class GuildChannel {
         self.name = channel.name
         self.createdAt = channel.id.creationTime()
         if let guildID = channel.guild_id {
-            self.guild = try await Client.current?.getGuild(id: guildID)
+            self.guild = try await Guild(id: guildID)
         }
         position = channel.position
         type = channel.type
@@ -110,5 +110,9 @@ public extension GuildChannel {
         let body = EditChannelPermissionsReq(allow: allow, deny: deny, type: .member)
         try await rest.editChannelPermissions(id, member.user!.id, body)
     }
+}
+
+enum GuildChannelError: Error {
+    case BadChannelType
 }
 

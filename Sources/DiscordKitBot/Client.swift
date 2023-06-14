@@ -11,7 +11,12 @@ import DiscordKitCore
 
 /// The main client class for bots to interact with Discord's API. Only one client is allowed to be logged in at a time.
 public final class Client {
-    // REST handler
+    /// Low level access to the Discord REST API. Used internally to power the higher level classes. Intended only for advanced users.
+    ///
+    /// This is provided to you so that you can access the raw discord API if you so choose.
+    /// This should be considered advanced usage for advanced users only, as you pretty much have to do everything yourself.
+    /// The methods in this object are basically undocumented, however they closely resemble [the official api docs](https://discord.com/developers/docs/intro).
+    /// The methods in this object return "DiscordKitCore" objects, which do not contain the support methods found in "DiscordKitBot" objects.
     public let rest = DiscordREST()
 
     // MARK: Gateway vars
@@ -305,13 +310,6 @@ public extension Client {
             }
             appCommandHandlers[registeredCommand.id] = command.handler
         }
-    }
-    /// Gets a ``Guild`` object from a guild ID.
-    /// 
-    /// - Parameter id: The Snowflake ID of a Guild that your bot is in.
-    /// - Returns: A ``Guild`` object containing information about the guild.
-    func getGuild(id: Snowflake) async throws -> Guild {
-        return try await Guild(rest.getGuild(id: id))
     }
 
     func getGuildRoles(id: Snowflake) async throws -> [Role] {
