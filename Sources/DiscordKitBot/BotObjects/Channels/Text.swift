@@ -4,51 +4,50 @@ import DiscordKitCore
 /// Represents a Discord Text Channel, and contains convenience methods for working with them.
 public class TextChannel: GuildChannel {
     /// The last message sent in this channel. It may not represent a valid message.
-    public let lastMessage: Message?
+    public var lastMessage: Message? {
+        get async throws {
+            if let lastMessageID = lastMessageID {
+                let coreMessage = try? await rest.getChannelMsg(id: coreChannel.id, msgID: lastMessageID)
+                if let coreMessage = coreMessage {
+                    return await Message(from: coreMessage, rest: rest)
+                } else {
+                    return nil
+                }
+            } else {
+                return nil
+            }
+        }
+    }
     /// The id of the last message sent in this channel. It may not point to a valid message.
     public let lastMessageID: Snowflake?
     // fileprivate(set) var members: [Member]? = nil
     /// If the channel is marked as “not safe for work” or “age restricted”.
     public let nsfw: Bool
     /// All the threads that your bot can see.
-    public fileprivate(set) var threads: [TextChannel]? = nil
+    public var threads: [TextChannel]? {
+        get async throws {
+            let coreThreads = try await rest.getGuildChannels(id: coreChannel.guild_id!)
+                .compactMap({ try? $0.result.get() }).filter({ $0.type == .publicThread || $0.type == .privateThread })
+
+            return try await coreThreads.asyncMap({ try TextChannel(from: $0, rest: rest) })
+        }
+    }
     /// The topic of the channel
     public let topic: String?
     /// The number of seconds a member must wait between sending messages in this channel. 
     /// A value of 0 denotes that it is disabled. 
     /// Bots and users with manage_channels or manage_messages bypass slowmode.
     public let slowmodeDelay: Int
-    private let rest: DiscordREST
 
-    internal override init(from channel: Channel, rest: DiscordREST) async throws {
-        if channel.type != .text {
-            throw GuildChannelError.BadChannelType
-        }
+    internal override init(from channel: Channel, rest: DiscordREST) throws {
+        if channel.type != .text { throw GuildChannelError.BadChannelType }
         nsfw = channel.nsfw ?? false
         slowmodeDelay = channel.rate_limit_per_user ?? 0
-
         lastMessageID = channel.last_message_id
-        if let lastMessageID = lastMessageID {
-            let coreMessage = try? await rest.getChannelMsg(id: channel.id, msgID: lastMessageID)
-            if let coreMessage = coreMessage {
-                lastMessage = await Message(from: coreMessage, rest: rest)
-            } else {
-                lastMessage = nil
-            }
-        } else {
-            lastMessage = nil
-        }
 
         topic = channel.topic
 
-        let coreThreads = try? await rest.getGuildChannels(id: channel.guild_id!)
-            .compactMap({ try? $0.result.get() }).filter({ $0.type == .publicThread || $0.type == .privateThread })
-
-        threads = try await coreThreads!.asyncMap({ try await TextChannel(from: $0, rest: rest) })
-
-        self.rest = rest
-
-        try await super.init(from: channel, rest: rest)
+        try super.init(from: channel, rest: rest)
 
     }
 
@@ -57,7 +56,7 @@ public class TextChannel: GuildChannel {
     /// - Throws: `GuildChannelError.BadChannelType` if the ID does not correlate with a text channel.
     public convenience init(from id: Snowflake) async throws {
         let coreChannel = try await Client.current!.rest.getChannel(id: id)
-        try await self.init(from: coreChannel, rest: Client.current!.rest)
+        try self.init(from: coreChannel, rest: Client.current!.rest)
     }
 }
 

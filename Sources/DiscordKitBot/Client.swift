@@ -211,21 +211,6 @@ enum AuthError: Error {
     case emptyToken
 }
 
-extension AuthError: LocalizedError {
-    public var errorDescription: String? {
-        switch self {
-        case .invalidToken:
-            return NSLocalizedString("A user-friendly description of the error.", comment: "My error")
-        case .missingFile:
-            return NSLocalizedString("The file does not exist, or your bot does not have read access to it.", comment: "File access error.")
-        case .missingEnvVar:
-            return NSLocalizedString("The \"DISCORD_TOKEN\" environment variable was not found.", comment: "ENV VAR access error.")
-        case .emptyToken:
-            return NSLocalizedString("The token provided is empty.", comment: "Invalid token.")
-        }
-    }
-}
-
 // Gateway API
 extension Client {
     /// `true` if the bot is connected to discord and ready to do bot-like things.

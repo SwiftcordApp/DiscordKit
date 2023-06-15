@@ -1,16 +1,30 @@
 import Foundation
 import DiscordKitCore
 
-/// Represents a channel in a guild, a superclass to all other types of channel.
-public class GuildChannel {
+/// Represents a channel in a guild, a superclass to all guild channel types.
+public class GuildChannel: Identifiable {
     /// The name of the channel.
     public let name: String?
     /// The category the channel is located in, if any.
-    public fileprivate(set) var category: CategoryChannel? = nil
+    public var category: CategoryChannel? {
+        get async throws {
+            if let categoryID = coreChannel.parent_id {
+                return try await CategoryChannel(from: categoryID)
+            }
+            return nil
+        }
+    }
     /// When the channel was created.
     public let createdAt: Date?
     /// The guild that the channel belongs to.
-    public fileprivate(set) var guild: Guild? = nil
+    public var guild: Guild {
+        get async throws {
+            if let guildID = coreChannel.guild_id {
+                return try await Guild(id: guildID)
+            }
+            throw GuildChannelError.NotAGuildChannel // This should be inaccessible
+        }
+    }
     // let jumpURL: URL
     /// A string you can put in message contents to mention the channel.
     public let mention: String
@@ -19,41 +33,41 @@ public class GuildChannel {
     /// Permission overwrites for this channel.
     public let overwrites: [PermOverwrite]?
     /// Whether or not the permissions for this channel are synced with the category it belongs to.
-    public fileprivate(set) var permissionsSynced: Bool = false
+    public var permissionsSynced: Bool {
+        get async throws {
+            if let category = try await category {
+                return coreChannel.permissions == category.coreChannel.permissions
+            }
+            return false
+        }
+    }
     /// The Type of the channel.
     public let type: ChannelType
     /// The `Snowflake` ID of the channel.
     public let id: Snowflake
 
-
-    private let rest: DiscordREST
+    internal let rest: DiscordREST
     internal let coreChannel: DiscordKitCore.Channel
 
-    internal init(from channel: DiscordKitCore.Channel, rest: DiscordREST) async throws {
+    internal init(from channel: DiscordKitCore.Channel, rest: DiscordREST) throws {
+        guard channel.guild_id == nil else { throw GuildChannelError.NotAGuildChannel }
         self.coreChannel = channel
         self.name = channel.name
         self.createdAt = channel.id.creationTime()
-        if let guildID = channel.guild_id {
-            self.guild = try await Guild(id: guildID)
-        }
         position = channel.position
         type = channel.type
         id = channel.id
         self.rest = rest
         self.mention = "<#\(id)>"
         self.overwrites = channel.permission_overwrites
-        if let categoryID = channel.parent_id {
-            let coreCategory = try await rest.getChannel(id: categoryID)
-            self.category = try await CategoryChannel(from: coreCategory, rest: rest)
-            self.permissionsSynced = channel.permissions == coreCategory.permissions
-        }
     }
 
     /// Initialize an Channel using an ID.
     /// - Parameter id: The `Snowflake` ID of the channel you want to get.
+    /// - Throws: `GuildChannelError.NotAGuildChannel` when the channel ID points to a channel that is not in a guild.
     public convenience init(from id: Snowflake) async throws {
         let coreChannel = try await Client.current!.rest.getChannel(id: id)
-        try await self.init(from: coreChannel, rest: Client.current!.rest)
+        try self.init(from: coreChannel, rest: Client.current!.rest)
     }
 }
 
@@ -90,8 +104,8 @@ public extension GuildChannel {
     /// - Returns: The newly cloned channel.
     func clone(name: String) async throws -> GuildChannel {
         let body = CreateGuildChannelRed(name: name, type: coreChannel.type, topic: coreChannel.topic, bitrate: coreChannel.bitrate, user_limit: coreChannel.user_limit, rate_limit_per_user: coreChannel.rate_limit_per_user, position: coreChannel.position, permission_overwrites: coreChannel.permission_overwrites, parent_id: coreChannel.parent_id, nsfw: coreChannel.nsfw, rtc_region: coreChannel.rtc_region, video_quality_mode: coreChannel.video_quality_mode, default_auto_archive_duration: coreChannel.default_auto_archive_duration)
-        let newCh: DiscordKitCore.Channel = try await rest.createGuildChannel(guild!.id, body)
-        return try await GuildChannel(from: newCh, rest: rest)
+        let newCh: DiscordKitCore.Channel = try await rest.createGuildChannel(guild.id, body)
+        return try GuildChannel(from: newCh, rest: rest)
     }
 
     /// Gets the permission overrides for a specific member.
@@ -114,5 +128,6 @@ public extension GuildChannel {
 
 enum GuildChannelError: Error {
     case BadChannelType
+    case NotAGuildChannel
 }
 
