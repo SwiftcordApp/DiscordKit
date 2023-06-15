@@ -36,7 +36,7 @@ public class CategoryChannel: GuildChannel {
     public let nsfw: Bool
 
     override init(from channel: DiscordKitCore.Channel, rest: DiscordREST) throws {
-        if channel.type != .category { throw GuildChannelError.BadChannelType }
+        if channel.type != .category { throw GuildChannelError.badChannelType }
         nsfw = channel.nsfw ?? false
 
         try super.init(from: channel, rest: rest)

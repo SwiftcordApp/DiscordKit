@@ -22,7 +22,7 @@ public class GuildChannel: Identifiable {
             if let guildID = coreChannel.guild_id {
                 return try await Guild(id: guildID)
             }
-            throw GuildChannelError.NotAGuildChannel // This should be inaccessible
+            throw GuildChannelError.notAGuildChannel // This should be inaccessible
         }
     }
     // let jumpURL: URL
@@ -50,7 +50,7 @@ public class GuildChannel: Identifiable {
     internal let coreChannel: DiscordKitCore.Channel
 
     internal init(from channel: DiscordKitCore.Channel, rest: DiscordREST) throws {
-        guard channel.guild_id == nil else { throw GuildChannelError.NotAGuildChannel }
+        guard channel.guild_id != nil else { throw GuildChannelError.notAGuildChannel }
         self.coreChannel = channel
         self.name = channel.name
         self.createdAt = channel.id.creationTime()
@@ -127,7 +127,7 @@ public extension GuildChannel {
 }
 
 enum GuildChannelError: Error {
-    case BadChannelType
-    case NotAGuildChannel
+    case badChannelType
+    case notAGuildChannel
 }
 

@@ -40,7 +40,7 @@ public class TextChannel: GuildChannel {
     public let slowmodeDelay: Int
 
     internal override init(from channel: Channel, rest: DiscordREST) throws {
-        if channel.type != .text { throw GuildChannelError.BadChannelType }
+        if channel.type != .text { throw GuildChannelError.badChannelType }
         nsfw = channel.nsfw ?? false
         slowmodeDelay = channel.rate_limit_per_user ?? 0
         lastMessageID = channel.last_message_id
