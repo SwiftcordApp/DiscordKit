@@ -113,10 +113,13 @@ public extension DiscordREST {
     ///
     /// > GET: `/guilds/{guild.id}/members`
     func listGuildMembers<T: Decodable>(
-        _ guildId: Snowflake
+        _ guildId: Snowflake,
+        _ limit: Int = 50,
+        _ after: Snowflake?
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/members"
+            path: "/guilds/\(guildId)/members",
+            query: [URLQueryItem(name: "limit", value: String(limit)), URLQueryItem(name: "after", value: after)]
         )
     }
     /// Search Guild Members

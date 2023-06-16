@@ -20,7 +20,6 @@ public class TextChannel: GuildChannel {
     }
     /// The id of the last message sent in this channel. It may not point to a valid message.
     public let lastMessageID: Snowflake?
-    // fileprivate(set) var members: [Member]? = nil
     /// If the channel is marked as “not safe for work” or “age restricted”.
     public let nsfw: Bool
     /// All the threads that your bot can see.
@@ -35,6 +34,7 @@ public class TextChannel: GuildChannel {
     /// The topic of the channel
     public let topic: String?
     /// The number of seconds a member must wait between sending messages in this channel. 
+    /// 
     /// A value of 0 denotes that it is disabled. 
     /// Bots and users with manage_channels or manage_messages bypass slowmode.
     public let slowmodeDelay: Int

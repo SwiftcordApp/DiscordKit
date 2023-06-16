@@ -185,7 +185,7 @@ public class Guild: Identifiable {
         }
     }
 
-    /// A list of the guild's members.
+    /// A list of the guild's first 50 members.
     public var members: [Member] {
         get async throws {
             return try await coreMembers.map({ Member(from: $0, rest: rest)})

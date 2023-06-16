@@ -25,7 +25,9 @@ public class GuildChannel: Identifiable {
             throw GuildChannelError.notAGuildChannel // This should be inaccessible
         }
     }
-    // let jumpURL: URL
+
+    /// A link that opens this channel in discord.
+    let jumpURL: URL
     /// A string you can put in message contents to mention the channel.
     public let mention: String
     /// The position of the channel in the Guild's channel list
@@ -60,6 +62,7 @@ public class GuildChannel: Identifiable {
         self.rest = rest
         self.mention = "<#\(id)>"
         self.overwrites = channel.permission_overwrites
+        self.jumpURL = URL(string: "https://discord.com/channels/\(channel.guild_id!)/\(id)")!
     }
 
     /// Initialize an Channel using an ID.

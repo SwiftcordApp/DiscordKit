@@ -148,7 +148,7 @@ public struct Message: Identifiable {
     public var call: CallMessageComponent?
 
     /// The url to jump to this message
-    public var jumpURL: URL?
+    public var jumpURL: URL
 
     // The REST handler associated with this message, used for message actions
     private var rest: DiscordREST
@@ -188,7 +188,7 @@ public struct Message: Identifiable {
         self.rest = rest
         self.coreMessage = message
 
-        // jumpURL = nil
+        jumpURL = URL(string: "https://discord.com/channels/\(message.guild_id!)/\(message.channel_id)/\(id)")!
     }
 }
 
