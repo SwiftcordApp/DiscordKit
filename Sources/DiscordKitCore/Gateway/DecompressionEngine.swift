@@ -71,6 +71,7 @@ public class DecompressionEngine {
 }
 
 public extension DecompressionEngine {
+    // swiftlint:disable:next function_body_length
     fileprivate func decompress(_ data: Data) -> Data {
         guard !decompressing else {
             Self.log.warning("Another decompression is currently taking place, skipping")

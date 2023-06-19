@@ -245,6 +245,7 @@ public class RobustWebSocket: NSObject {
         #endif
     }
 
+    // swiftlint:disable:next function_body_length
     private func connect() {
         guard !explicitlyClosed else { return }
         #if canImport(WebSocket)

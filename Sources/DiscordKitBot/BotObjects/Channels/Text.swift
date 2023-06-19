@@ -119,7 +119,7 @@ public extension TextChannel {
     /// - Parameter messages: An array of ``Message``s to delete.
     func deleteMessages(messages: [Message]) async throws {
         let snowflakes = messages.map({ $0.id })
-        try await rest.bulkDeleteMessages(id, ["messages":snowflakes])
+        try await rest.bulkDeleteMessages(id, ["messages": snowflakes])
     }
 
 }

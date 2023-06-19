@@ -280,11 +280,11 @@ public extension Message {
         return await Message(from: coreMessage, rest: rest)
     }
 
-    static func ==(lhs: Message, rhs: Message) -> Bool {
+    static func == (lhs: Message, rhs: Message) -> Bool {
         return lhs.id == rhs.id
     }
 
-    static func !=(lhs: Message, rhs: Message) -> Bool {
+    static func != (lhs: Message, rhs: Message) -> Bool {
         return lhs.id != rhs.id
     }
 }

@@ -133,4 +133,3 @@ enum GuildChannelError: Error {
     case badChannelType
     case notAGuildChannel
 }
-

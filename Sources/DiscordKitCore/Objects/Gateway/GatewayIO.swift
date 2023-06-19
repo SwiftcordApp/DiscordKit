@@ -194,6 +194,7 @@ public struct GatewayIncoming: Decodable {
         case unknown
     }
 
+    // swiftlint:disable:next function_body_length
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         let action = try values.decode(GatewayIncomingOpcodes.self, forKey: .opcode)

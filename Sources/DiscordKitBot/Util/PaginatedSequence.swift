@@ -12,7 +12,7 @@ import DiscordKitCore
 /// ```
 /// 
 /// We handle all of the paging code internally, so there's nothing you have to worry about.
-public struct PaginatedSequence<Element> : AsyncSequence {
+public struct PaginatedSequence<Element>: AsyncSequence {
     private let pageFetch: (Snowflake?) async throws -> [Element]
     private let snowflakeGetter: (Element) -> Snowflake
 
@@ -41,7 +41,7 @@ public struct PaginatedSequence<Element> : AsyncSequence {
 
         private var buffer: [Element] = []
         private var currentIndex: Int = 0
-        private var after: Snowflake? = nil
+        private var after: Snowflake?
 
         public mutating func next() async throws -> Element? {
             if currentIndex >= buffer.count || buffer.isEmpty {

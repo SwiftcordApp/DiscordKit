@@ -58,12 +58,10 @@ public class Guild: Identifiable {
     public let vanityURLCode: String?
     /// The guild's vanity invite URL.
     public var vanityURL: URL? {
-        get {
-            if let vanity_url_code = vanityURLCode {
-                return URL(string: "https://discord.gg/\(vanity_url_code)")
-            }
-            return nil
+        if let vanity_url_code = vanityURLCode {
+            return URL(string: "https://discord.gg/\(vanity_url_code)")
         }
+        return nil
     }
     /// The guild's description.
     public let description: String?
@@ -180,27 +178,21 @@ public class Guild: Identifiable {
     }
 
     private var coreMembers: PaginatedSequence<DiscordKitCore.Member> {
-        get {
-            return PaginatedSequence({ try await self.rest.listGuildMembers(self.id, $0) }, { $0.user!.id })
-        }
+        return PaginatedSequence({ try await self.rest.listGuildMembers(self.id, $0) }, { $0.user!.id })
     }
 
     /// A list of the guild's first 50 members.
     public var members: AsyncMapSequence<PaginatedSequence<DiscordKitCore.Member>, Member> {
-        get {
-            return coreMembers.map({ Member(from: $0, rest: self.rest)})
-        }
+        return coreMembers.map({ Member(from: $0, rest: self.rest)})
     }
-    
+
     /// A list of users that have been banned from this guild.
     public var bans: PaginatedSequence<GuildBanEntry> {
-        get {
-            return PaginatedSequence({ try await self.rest.getGuildBans(self.id, $0)}, { $0.user.id })
-        }
+        return PaginatedSequence({ try await self.rest.getGuildBans(self.id, $0)}, { $0.user.id })
     }
 
     /// The bot's member object.
-    public var me: Member {
+    public var me: Member { // swiftlint:disable:this identifier_name
         get async throws {
             return Member(from: try await rest.getGuildMember(guild: id), rest: rest)
         }
@@ -259,7 +251,7 @@ public extension Guild {
     ///   - userID: The Snowflake ID of the user to ban.
     ///   - messageDeleteSeconds: The number of seconds worth of messages to delete from the user in the guild. Defaults to `86400` (1 day) if no value is passed. The minimum value is `0` and the maximum value is `604800` (7 days).
     func ban(_ userID: Snowflake, deleteMessageSeconds: Int = 86400) async throws {
-        try await rest.createGuildBan(id, userID, ["delete_message_seconds":deleteMessageSeconds])
+        try await rest.createGuildBan(id, userID, ["delete_message_seconds": deleteMessageSeconds])
     }
 
     /// Bans the member from the guild.
@@ -267,7 +259,7 @@ public extension Guild {
     ///   - userID: The Snowflake ID of the user to ban.
     ///   - deleteMessageDays: The number of days worth of messages to delete from the user in the guild. Defaults to `1` if no value is passed. The minimum value is `0` and the maximum value is `7`.
     func ban(_ userID: Snowflake, deleteMessageDays: Int = 1) async throws {
-        try await rest.createGuildBan(id, userID, ["delete_message_days":deleteMessageDays])
+        try await rest.createGuildBan(id, userID, ["delete_message_days": deleteMessageDays])
     }
 
     /// Unbans a user from the guild.
@@ -276,4 +268,3 @@ public extension Guild {
         try await rest.removeGuildBan(id, userID)
     }
 }
-

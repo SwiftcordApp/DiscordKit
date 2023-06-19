@@ -87,7 +87,7 @@ public extension Member {
     /// Applies a time out to a member until the specified time.
     /// - Parameter time: The time that the timeout ends.
     func timeout(time: Date) async throws {
-        try await rest.editGuildMember(guildID!, user!.id, ["communication_disabled_until" : time])
+        try await rest.editGuildMember(guildID!, user!.id, ["communication_disabled_until": time])
     }
 
     /// Kicks the member from the guild.
@@ -99,14 +99,14 @@ public extension Member {
     /// - Parameter messageDeleteSeconds: The number of seconds worth of messages to delete from the user in the guild. 
     /// Defaults to `86400` (1 day) if no value is passed. The minimum value is `0` and the maximum value is `604800` (7 days).
     func ban(deleteMessageSeconds: Int = 86400) async throws {
-        try await rest.createGuildBan(guildID!, user!.id, ["delete_message_seconds":deleteMessageSeconds])
+        try await rest.createGuildBan(guildID!, user!.id, ["delete_message_seconds": deleteMessageSeconds])
     }
 
     /// Bans the member from the guild.
     /// - Parameter messageDeleteSeconds: The number of seconds worth of messages to delete from the user in the guild. 
     /// Defaults to `1` if no value is passed. The minimum value is `0` and the maximum value is `7`.
     func ban(deleteMessageDays: Int = 1) async throws {
-        try await rest.createGuildBan(guildID!, user!.id, ["delete_message_days":deleteMessageDays])
+        try await rest.createGuildBan(guildID!, user!.id, ["delete_message_days": deleteMessageDays])
     }
 
     /// Deletes the ban for this member.
@@ -122,6 +122,6 @@ public extension Member {
     /// 
     /// - Returns: The newly created DM Channel
     func createDM() async throws -> Channel {
-        return try await rest.createDM(["recipient_id":user!.id])
+        return try await rest.createDM(["recipient_id": user!.id])
     }
 }
