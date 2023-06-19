@@ -179,30 +179,23 @@ public class Guild: Identifiable {
         }
     }
 
-    private var coreMembers: PaginatedList<DiscordKitCore.Member> {
+    private var coreMembers: PaginatedSequence<DiscordKitCore.Member> {
         get {
-            return PaginatedList(pageFetch: { try await self.rest.listGuildMembers(self.id, $0) }, afterGetter: { $0.user!.id })
+            return PaginatedSequence({ try await self.rest.listGuildMembers(self.id, $0) }, { $0.user!.id })
         }
     }
 
     /// A list of the guild's first 50 members.
-    public var members: AsyncMapSequence<PaginatedList<DiscordKitCore.Member>, Member> {
+    public var members: AsyncMapSequence<PaginatedSequence<DiscordKitCore.Member>, Member> {
         get {
             return coreMembers.map({ Member(from: $0, rest: self.rest)})
         }
     }
-    /// If the guild is "chunked"
-    /// 
-    /// A chunked guild means that ``memberCount`` is equal to the number of members in ``members``.
-    /// If this value is false, you should request for offline members.
-    // public var chunked: Bool {
-    //     get async throws {
-    //         try await memberCount == members.count
-    //     }
-    // }
-    public var bans: PaginatedList<GuildBanEntry> {
+    
+    /// A list of users that have been banned from this guild.
+    public var bans: PaginatedSequence<GuildBanEntry> {
         get {
-            return PaginatedList(pageFetch: { try await self.rest.getGuildBans(self.id, $0)}, afterGetter: { $0.user.id })
+            return PaginatedSequence({ try await self.rest.getGuildBans(self.id, $0)}, { $0.user.id })
         }
     }
 
