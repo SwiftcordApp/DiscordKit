@@ -181,7 +181,7 @@ public class Guild: Identifiable {
 
     private var coreMembers: PaginatedList<DiscordKitCore.Member> {
         get {
-            return PaginatedList(pageFetch: { try await self.rest.listGuildMembers(self.id, $0!) }, afterGetter: { $0.user!.id })
+            return PaginatedList(pageFetch: { try await self.rest.listGuildMembers(self.id, $0) }, afterGetter: { $0.user!.id })
         }
     }
 
@@ -202,7 +202,7 @@ public class Guild: Identifiable {
     // }
     public var bans: PaginatedList<GuildBanEntry> {
         get {
-            return PaginatedList(pageFetch: { try await self.rest.getGuildBans(self.id, $0!)}, afterGetter: { $0.user.id })
+            return PaginatedList(pageFetch: { try await self.rest.getGuildBans(self.id, $0)}, afterGetter: { $0.user.id })
         }
     }
 
