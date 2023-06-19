@@ -1,6 +1,6 @@
 import DiscordKitCore
 
-struct GuildBanEntry: Codable {
+public struct GuildBanEntry: Codable {
     let reason: String
     let user: User
 }

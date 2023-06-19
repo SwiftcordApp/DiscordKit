@@ -179,16 +179,16 @@ public class Guild: Identifiable {
         }
     }
 
-    private var coreMembers: CoreMemberList {
-        get async throws {
-            return CoreMemberList(limit: 50, guildID: id)
+    private var coreMembers: PaginatedList<DiscordKitCore.Member> {
+        get {
+            return PaginatedList(pageFetch: { try await self.rest.listGuildMembers(self.id, $0!) }, afterGetter: { $0.user!.id })
         }
     }
 
     /// A list of the guild's first 50 members.
-    public var members: AsyncMapSequence<CoreMemberList, Member> {
-        get async throws {
-            return try await coreMembers.map({ Member(from: $0, rest: self.rest)})
+    public var members: AsyncMapSequence<PaginatedList<DiscordKitCore.Member>, Member> {
+        get {
+            return coreMembers.map({ Member(from: $0, rest: self.rest)})
         }
     }
     /// If the guild is "chunked"
@@ -200,7 +200,11 @@ public class Guild: Identifiable {
     //         try await memberCount == members.count
     //     }
     // }
-
+    public var bans: PaginatedList<GuildBanEntry> {
+        get {
+            return PaginatedList(pageFetch: { try await self.rest.getGuildBans(self.id, $0!)}, afterGetter: { $0.user.id })
+        }
+    }
 
     /// The bot's member object.
     public var me: Member {
@@ -280,74 +284,3 @@ public extension Guild {
     }
 }
 
-struct BansList: AsyncSequence {
-    typealias Element = GuildBanEntry
-    let limit: Int
-    let guildID: Snowflake
-
-    struct AsyncIterator: AsyncIteratorProtocol {
-        let limit: Int
-        var after: Snowflake? = nil
-        var buffer: [GuildBanEntry] = []
-        var currentIndex: Int = 0
-        let rest = Client.current!.rest
-        let guildID: Snowflake
-
-        mutating func next() async -> GuildBanEntry? {
-            if currentIndex > buffer.count {
-                let tmpBuffer: [GuildBanEntry]? = try? await rest.getGuildBans(guildID, [URLQueryItem(name: "limit", value: String(limit)), URLQueryItem(name: "after", value: after)])
-                if let tmpBuffer = tmpBuffer {
-                    buffer = tmpBuffer
-                    currentIndex = 0
-                    after = tmpBuffer.last?.user.id
-                } else {
-                    return nil
-                }
-            }
-
-            let result = buffer[currentIndex]
-            currentIndex += 1
-            return result
-        }
-    }
-
-    func makeAsyncIterator() -> AsyncIterator {
-        return AsyncIterator(limit: limit, guildID: guildID)
-    }
-}
-
-public struct CoreMemberList: AsyncSequence {
-    public typealias Element = DiscordKitCore.Member
-    let limit: Int
-    let guildID: Snowflake
-
-    public struct AsyncIterator: AsyncIteratorProtocol {
-        let limit: Int
-        var after: Snowflake? = nil
-        var buffer: [DiscordKitCore.Member] = []
-        var currentIndex: Int = 0
-        let rest = Client.current!.rest
-        let guildID: Snowflake
-
-        public mutating func next() async throws -> DiscordKitCore.Member? {
-            if currentIndex > buffer.count {
-                let tmpBuffer: [DiscordKitCore.Member]? = try await rest.listGuildMembers(guildID, limit, after)
-                if let tmpBuffer = tmpBuffer {
-                    buffer = tmpBuffer
-                    currentIndex = 0
-                    after = tmpBuffer.last?.user?.id
-                } else {
-                    return nil
-                }
-            }
-
-            let result = buffer[currentIndex]
-            currentIndex += 1
-            return result
-        }
-    }
-
-    public func makeAsyncIterator() -> AsyncIterator {
-        return AsyncIterator(limit: limit, guildID: guildID)
-    }
-}
