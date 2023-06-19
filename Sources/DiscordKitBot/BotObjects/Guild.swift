@@ -8,6 +8,7 @@
 import Foundation
 import DiscordKitCore
 
+/// Represents a Discord Server, aka Guild.
 public class Guild: Identifiable {
     /// The guild's Snowflake ID.
     public let id: Snowflake
