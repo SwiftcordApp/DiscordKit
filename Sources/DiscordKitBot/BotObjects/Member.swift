@@ -96,9 +96,17 @@ public extension Member {
     }
 
     /// Bans the member from the guild.
-    /// - Parameter messageDeleteSeconds: The number of seconds worth of messages to delete from the user in the guild. Defaults to `0` if not value is passed. The minimum value is `0` and the maximum value is `604800` (7 days).
-    func ban(messageDeleteSeconds: Int = 0) async throws {
-        try await rest.createGuildBan(guildID!, user!.id, ["delete_message_seconds":messageDeleteSeconds])
+    /// - Parameter messageDeleteSeconds: The number of seconds worth of messages to delete from the user in the guild. 
+    /// Defaults to `86400` (1 day) if no value is passed. The minimum value is `0` and the maximum value is `604800` (7 days).
+    func ban(deleteMessageSeconds: Int = 86400) async throws {
+        try await rest.createGuildBan(guildID!, user!.id, ["delete_message_seconds":deleteMessageSeconds])
+    }
+
+    /// Bans the member from the guild.
+    /// - Parameter messageDeleteSeconds: The number of seconds worth of messages to delete from the user in the guild. 
+    /// Defaults to `1` if no value is passed. The minimum value is `0` and the maximum value is `7`.
+    func ban(deleteMessageDays: Int = 1) async throws {
+        try await rest.createGuildBan(guildID!, user!.id, ["delete_message_days":deleteMessageDays])
     }
 
     /// Deletes the ban for this member.

@@ -221,10 +221,12 @@ public extension DiscordREST {
     ///
     /// > GET: `/guilds/{guild.id}/bans`
     func getGuildBans<T: Decodable>(
-        _ guildId: Snowflake
+        _ guildId: Snowflake,
+        _ query: [URLQueryItem]
     ) async throws -> T {
         return try await getReq(
-            path: "guilds/\(guildId)/bans"
+            path: "guilds/\(guildId)/bans",
+            query: query
         )
     }
     /// Get Guild Ban

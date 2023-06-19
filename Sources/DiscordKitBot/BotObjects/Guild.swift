@@ -179,27 +179,29 @@ public class Guild: Identifiable {
         }
     }
 
-    private var coreMembers: [DiscordKitCore.Member] {
+    private var coreMembers: CoreMemberList {
         get async throws {
-            try await rest.listGuildMembers(id)
+            return CoreMemberList(limit: 50, guildID: id)
         }
     }
 
     /// A list of the guild's first 50 members.
-    public var members: [Member] {
+    public var members: AsyncMapSequence<CoreMemberList, Member> {
         get async throws {
-            return try await coreMembers.map({ Member(from: $0, rest: rest)})
+            return try await coreMembers.map({ Member(from: $0, rest: self.rest)})
         }
     }
     /// If the guild is "chunked"
     /// 
     /// A chunked guild means that ``memberCount`` is equal to the number of members in ``members``.
     /// If this value is false, you should request for offline members.
-    public var chunked: Bool {
-        get async throws {
-            try await memberCount == members.count
-        }
-    }
+    // public var chunked: Bool {
+    //     get async throws {
+    //         try await memberCount == members.count
+    //     }
+    // }
+
+
     /// The bot's member object.
     public var me: Member {
         get async throws {
@@ -255,5 +257,97 @@ public class Guild: Identifiable {
 }
 
 public extension Guild {
+    /// Bans the member from the guild.
+    /// - Parameters:
+    ///   - userID: The Snowflake ID of the user to ban.
+    ///   - messageDeleteSeconds: The number of seconds worth of messages to delete from the user in the guild. Defaults to `86400` (1 day) if no value is passed. The minimum value is `0` and the maximum value is `604800` (7 days).
+    func ban(_ userID: Snowflake, deleteMessageSeconds: Int = 86400) async throws {
+        try await rest.createGuildBan(id, userID, ["delete_message_seconds":deleteMessageSeconds])
+    }
 
+    /// Bans the member from the guild.
+    /// - Parameters:
+    ///   - userID: The Snowflake ID of the user to ban.
+    ///   - deleteMessageDays: The number of days worth of messages to delete from the user in the guild. Defaults to `1` if no value is passed. The minimum value is `0` and the maximum value is `7`.
+    func ban(_ userID: Snowflake, deleteMessageDays: Int = 1) async throws {
+        try await rest.createGuildBan(id, userID, ["delete_message_days":deleteMessageDays])
+    }
+
+    /// Unbans a user from the guild.
+    /// - Parameter userID: The Snowflake ID of the user.
+    func unban(_ userID: Snowflake) async throws {
+        try await rest.removeGuildBan(id, userID)
+    }
+}
+
+struct BansList: AsyncSequence {
+    typealias Element = GuildBanEntry
+    let limit: Int
+    let guildID: Snowflake
+
+    struct AsyncIterator: AsyncIteratorProtocol {
+        let limit: Int
+        var after: Snowflake? = nil
+        var buffer: [GuildBanEntry] = []
+        var currentIndex: Int = 0
+        let rest = Client.current!.rest
+        let guildID: Snowflake
+
+        mutating func next() async -> GuildBanEntry? {
+            if currentIndex > buffer.count {
+                let tmpBuffer: [GuildBanEntry]? = try? await rest.getGuildBans(guildID, [URLQueryItem(name: "limit", value: String(limit)), URLQueryItem(name: "after", value: after)])
+                if let tmpBuffer = tmpBuffer {
+                    buffer = tmpBuffer
+                    currentIndex = 0
+                    after = tmpBuffer.last?.user.id
+                } else {
+                    return nil
+                }
+            }
+
+            let result = buffer[currentIndex]
+            currentIndex += 1
+            return result
+        }
+    }
+
+    func makeAsyncIterator() -> AsyncIterator {
+        return AsyncIterator(limit: limit, guildID: guildID)
+    }
+}
+
+public struct CoreMemberList: AsyncSequence {
+    public typealias Element = DiscordKitCore.Member
+    let limit: Int
+    let guildID: Snowflake
+
+    public struct AsyncIterator: AsyncIteratorProtocol {
+        let limit: Int
+        var after: Snowflake? = nil
+        var buffer: [DiscordKitCore.Member] = []
+        var currentIndex: Int = 0
+        let rest = Client.current!.rest
+        let guildID: Snowflake
+
+        public mutating func next() async throws -> DiscordKitCore.Member? {
+            if currentIndex > buffer.count {
+                let tmpBuffer: [DiscordKitCore.Member]? = try await rest.listGuildMembers(guildID, limit, after)
+                if let tmpBuffer = tmpBuffer {
+                    buffer = tmpBuffer
+                    currentIndex = 0
+                    after = tmpBuffer.last?.user?.id
+                } else {
+                    return nil
+                }
+            }
+
+            let result = buffer[currentIndex]
+            currentIndex += 1
+            return result
+        }
+    }
+
+    public func makeAsyncIterator() -> AsyncIterator {
+        return AsyncIterator(limit: limit, guildID: guildID)
+    }
 }
