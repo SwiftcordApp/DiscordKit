@@ -117,9 +117,13 @@ public extension DiscordREST {
         _ after: Snowflake?,
         _ limit: Int = 50
     ) async throws -> T {
+        var query = [URLQueryItem(name: "limit", value: String(limit))]
+        if let after = after {
+            query.append(URLQueryItem(name: "after", value: after))
+        }
         return try await getReq(
             path: "/guilds/\(guildId)/members",
-            query: [URLQueryItem(name: "limit", value: String(limit)), URLQueryItem(name: "after", value: after)]
+            query: query
         )
     }
     /// Search Guild Members
@@ -225,9 +229,13 @@ public extension DiscordREST {
         _ after: Snowflake?,
         _ limit: Int = 50
     ) async throws -> T {
+        var query = [URLQueryItem(name: "limit", value: String(limit))]
+        if let after = after {
+            query.append(URLQueryItem(name: "after", value: after))
+        }
         return try await getReq(
             path: "guilds/\(guildId)/bans",
-            query: [URLQueryItem(name: "limit", value: String(limit)), URLQueryItem(name: "after", value: after)]
+            query: query
         )
     }
     /// Get Guild Ban
