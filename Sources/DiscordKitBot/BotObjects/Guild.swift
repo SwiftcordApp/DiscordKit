@@ -29,7 +29,7 @@ public class Guild: Identifiable {
         }
     }
     /// The time that the guild was created.
-    public var createdAt: Date { id.creationTime() }
+    public var createdAt: Date? { id.creationTime() }
     /// The number of seconds until someone is moved to the afk channel.
     public let afkTimeout: Int
     /// If the guild has widgets enabled.
