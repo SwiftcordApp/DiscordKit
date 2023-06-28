@@ -150,7 +150,7 @@ public final class Client {
     /// - ``login(token:)``
     public func login(filePath: String) throws {
         let token = try String(contentsOfFile: filePath).trimmingCharacters(in: .whitespacesAndNewlines)
-        if token.isEmpty {
+        guard !token.isEmpty else {
             throw AuthError.emptyToken
         }
         login(token: token)
@@ -176,14 +176,10 @@ public final class Client {
     /// - ``login(token:)``
     public func login() throws {
         let token = ProcessInfo.processInfo.environment["DISCORD_TOKEN"]?.trimmingCharacters(in: .whitespacesAndNewlines)
-        if let token = token {
-            if token.isEmpty {
-                throw AuthError.emptyToken
-            }
-            login(token: token)
-        } else {
-            throw AuthError.missingEnvVar
-        }
+        guard let token = token else { throw AuthError.missingEnvVar }
+        guard !token.isEmpty else { throw AuthError.emptyToken }
+        login(token: token)
+
     }
 
     /// Disconnect from the gateway, undoes ``login(token:)``

@@ -174,7 +174,7 @@ public extension DiscordREST {
         )
     }
 
-    /// Make a `POST` request to the Discord REST APIfor endpoints
+    /// Make a `POST` request to the Discord REST API for endpoints
     /// that require no payload
     func postReq<T: Decodable>(
         path: String
