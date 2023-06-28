@@ -10,9 +10,9 @@ import Foundation
 public typealias Snowflake = String
 
 public extension Snowflake {
-    func creationTime() -> Date {
+    func creationTime() -> Date? {
         // Convert to a unsigned integer
-        let snowflake = UInt64(self)!
+        guard let snowflake = UInt64(self) else { return nil }
         // shifts the bits so that only the first 42 are used
         let snowflakeTimestamp = snowflake >> 22
         // Discord snowflake timestamps start from the first second of 2015
