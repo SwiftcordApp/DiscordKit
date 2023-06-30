@@ -26,6 +26,13 @@ public enum ChannelType: Int, Codable {
     case stageVoice = 13
     case directory = 14 // Hubs
     case forum = 15 // (still in development) a channel that can only contain threads
+
+    case unknown = -1 // An unknown value
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        self = Self(rawValue: try container.decode(Int.self)) ?? Self.unknown
+    }
 }
 
 public struct Channel: Identifiable, Codable, GatewayData, Equatable {
