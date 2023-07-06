@@ -48,7 +48,7 @@ public struct Message: Identifiable {
     public var member: Member? {
         get async throws {
             if let messageMember = coreMessage.member {
-                return Member(from: messageMember, rest: rest)
+                return Member(from: messageMember, rest: rest!)
             }
             return nil
         }
@@ -102,7 +102,7 @@ public struct Message: Identifiable {
     /// Type of message
     ///
     /// Refer to ``MessageType`` for possible values.
-    public let type: MessageType
+    public let type: MessageType?
 
     /// Sent with Rich Presence-related chat embeds
     public var activity: MessageActivity?
@@ -148,10 +148,15 @@ public struct Message: Identifiable {
     public var call: CallMessageComponent?
 
     /// The url to jump to this message
-    public var jumpURL: URL
+    public var jumpURL: URL? {
+        get {
+            guard let guild_id = coreMessage.guild_id else { return nil }
+            return URL(string: "https://discord.com/channels/\(guild_id)/\(coreMessage.channel_id)/\(id)")
+        }
+    }
 
     // The REST handler associated with this message, used for message actions
-    private var rest: DiscordREST
+    private weak var rest: DiscordREST?
 
     private var coreMessage: DiscordKitCore.Message
 
@@ -172,7 +177,7 @@ public struct Message: Identifiable {
         reactions = message.reactions
         pinned = message.pinned
         webhookID = message.webhook_id
-        type = MessageType(message.type)!
+        type = MessageType(message.type)
         activity = message.activity
         application = message.application
         application_id = message.application_id
@@ -187,8 +192,6 @@ public struct Message: Identifiable {
 
         self.rest = rest
         self.coreMessage = message
-
-        jumpURL = URL(string: "https://discord.com/channels/\(message.guild_id!)/\(message.channel_id)/\(id)")!
     }
 }
 
@@ -197,19 +200,19 @@ public extension Message {
     /// 
     /// - Parameter content: The content of the reply message
     func reply(_ content: String) async throws -> DiscordKitBot.Message {
-        let coreMessage = try await rest.createChannelMsg(
+        let coreMessage = try await rest!.createChannelMsg(
             message: .init(content: content, message_reference: .init(message_id: id), components: []),
             id: channelID
         )
 
-        return await Message(from: coreMessage, rest: rest)
+        return await Message(from: coreMessage, rest: rest!)
     }
 
     /// Deletes the message.
     /// 
     /// You can always delete your own messages, but deleting other people's messages requires the `manage_messages` guild permission.
     func delete() async throws {
-        try await rest.deleteMsg(id: channelID, msgID: id)
+        try await rest!.deleteMsg(id: channelID, msgID: id)
     }
 
     /// Edits the message
@@ -218,28 +221,28 @@ public extension Message {
     /// 
     /// - Parameter content: The content of the edited message
     func edit(content: String?) async throws {
-        try await rest.editMessage(channelID, id, DiscordKitCore.NewMessage(content: content))
+        try await rest!.editMessage(channelID, id, DiscordKitCore.NewMessage(content: content))
     }
 
     /// Add a reaction emoji to the message.
     ///
     /// - Parameter emoji: The emote in the form `:emote_name:emote_id`
     func addReaction(emoji: String) async throws {
-        try await rest.createReaction(channelID, id, emoji)
+        try await rest!.createReaction(channelID, id, emoji)
     }
 
     /// Removes your own reaction from a message
     /// 
     /// - Parameter emoji: The emote in the form `:emote_name:emote_id`
     func removeReaction(emoji: Snowflake) async throws {
-        try await rest.deleteOwnReaction(channelID, id, emoji)
+        try await rest!.deleteOwnReaction(channelID, id, emoji)
     }
 
     /// Clear all reactions from a message
     /// 
     /// Requires the the `manage_messages` guild permission.
     func clearAllReactions() async throws {
-        try await rest.deleteAllReactions(channelID, id)
+        try await rest!.deleteAllReactions(channelID, id)
     }
     /// Clear all reactions from a message of a specific emoji
     /// 
@@ -247,7 +250,7 @@ public extension Message {
     /// 
     /// - Parameter emoji: The emote in the form `:emote_name:emote_id`
     func clearAllReactions(for emoji: Snowflake) async throws {
-        try await rest.deleteAllReactionsforEmoji(channelID, id, emoji)
+        try await rest!.deleteAllReactionsforEmoji(channelID, id, emoji)
     }
 
     /// Starts a thread from the message
@@ -255,29 +258,29 @@ public extension Message {
     /// Requires the `create_public_threads`` guild permission.
     func createThread(name: String, autoArchiveDuration: Int?, rateLimitPerUser: Int?) async throws -> Channel {
         let body = CreateThreadRequest(name: name, auto_archive_duration: autoArchiveDuration, rate_limit_per_user: rateLimitPerUser)
-        return try await rest.startThreadfromMessage(channelID, id, body)
+        return try await rest!.startThreadfromMessage(channelID, id, body)
     }
 
     /// Pins the message.
     /// 
     /// Requires the `manage_messages` guild permission to do this in a non-private channel context.
     func pin() async throws {
-        try await rest.pinMessage(channelID, id)
+        try await rest!.pinMessage(channelID, id)
     }
 
     /// Unpins the message.
     /// 
     /// Requires the `manage_messages` guild permission to do this in a non-private channel context.
     func unpin() async throws {
-        try await rest.unpinMessage(channelID, id)
+        try await rest!.unpinMessage(channelID, id)
     }
 
     /// Publishes a message in an announcement channel to it's followers.
     /// 
     /// Requires the `SEND_MESSAGES` permission, if the bot sent the message, or the `MANAGE_MESSAGES` permission for all other messages
     func publish() async throws -> Message {
-        let coreMessage: DiscordKitCore.Message = try await rest.crosspostMessage(channelID, id)
-        return await Message(from: coreMessage, rest: rest)
+        let coreMessage: DiscordKitCore.Message = try await rest!.crosspostMessage(channelID, id)
+        return await Message(from: coreMessage, rest: rest!)
     }
 
     static func == (lhs: Message, rhs: Message) -> Bool {

@@ -93,43 +93,43 @@ public class Guild: Identifiable {
 
     private var coreChannels: [Channel] {
         get async throws {
-            try await rest.getGuildChannels(id: id).compactMap({ try? $0.result.get() })
+            try await rest!.getGuildChannels(id: id).compactMap({ try? $0.result.get() })
         }
     }
     /// The channels in this guild.
     public var channels: [GuildChannel] {
         get async throws {
-            try await coreChannels.asyncCompactMap({ try? GuildChannel(from: $0, rest: rest) })
+            try await coreChannels.asyncCompactMap({ try? GuildChannel(from: $0, rest: rest!) })
         }
     }
     /// The text channels in this guild.
     public var textChannels: [TextChannel] {
         get async throws {
-            try await coreChannels.filter({ $0.type == .text }).asyncCompactMap({ try? TextChannel(from: $0, rest: rest) })
+            try await coreChannels.filter({ $0.type == .text }).asyncCompactMap({ try? TextChannel(from: $0, rest: rest!) })
         }
     }
     /// The voice channels in the guild.
     public var voiceChannels: [GuildChannel] {
         get async throws {
-            try await coreChannels.filter({ $0.type == .voice }).asyncCompactMap({ try? GuildChannel(from: $0, rest: rest) })
+            try await coreChannels.filter({ $0.type == .voice }).asyncCompactMap({ try? GuildChannel(from: $0, rest: rest!) })
         }
     }
     /// The categories in this guild.
     public var categories: [CategoryChannel] {
         get async throws {
-            try await coreChannels.filter({ $0.type == .category }).asyncCompactMap({ try? CategoryChannel(from: $0, rest: rest) })
+            try await coreChannels.filter({ $0.type == .category }).asyncCompactMap({ try? CategoryChannel(from: $0, rest: rest!) })
         }
     }
     /// The forum channels in this guild.
     public var forums: [GuildChannel] {
         get async throws {
-            try await coreChannels.filter({ $0.type == .forum }).asyncCompactMap({ try? GuildChannel(from: $0, rest: rest) })
+            try await coreChannels.filter({ $0.type == .forum }).asyncCompactMap({ try? GuildChannel(from: $0, rest: rest!) })
         }
     }
     /// The stage channels in this guild.
     public var stages: [GuildChannel] {
         get async throws {
-            try await coreChannels.filter({ $0.type == .stageVoice }).asyncCompactMap({ try? GuildChannel(from: $0, rest: rest) })
+            try await coreChannels.filter({ $0.type == .stageVoice }).asyncCompactMap({ try? GuildChannel(from: $0, rest: rest!) })
         }
     }
     /// The AFK Voice Channel.
@@ -179,28 +179,28 @@ public class Guild: Identifiable {
     }
 
     private var coreMembers: PaginatedSequence<DiscordKitCore.Member> {
-        return PaginatedSequence({ try await self.rest.listGuildMembers(self.id, $0) }, { $0.user!.id })
+        return PaginatedSequence({ try await self.rest!.listGuildMembers(self.id, $0) }, { $0.user!.id })
     }
 
     /// A list of the guild's first 50 members.
     public var members: AsyncMapSequence<PaginatedSequence<DiscordKitCore.Member>, Member> {
-        return coreMembers.map({ Member(from: $0, rest: self.rest)})
+        return coreMembers.map({ Member(from: $0, rest: self.rest!)})
     }
 
     /// A list of users that have been banned from this guild.
     public var bans: PaginatedSequence<GuildBanEntry> {
-        return PaginatedSequence({ try await self.rest.getGuildBans(self.id, $0)}, { $0.user.id })
+        return PaginatedSequence({ try await self.rest!.getGuildBans(self.id, $0)}, { $0.user.id })
     }
 
     /// The bot's member object.
     public var me: Member { // swiftlint:disable:this identifier_name
         get async throws {
-            return Member(from: try await rest.getGuildMember(guild: id), rest: rest)
+            return Member(from: try await rest!.getGuildMember(guild: id), rest: rest!)
         }
     }
 
     private let coreGuild: DiscordKitCore.Guild
-    private var rest: DiscordREST
+    private weak var rest: DiscordREST?
 
     internal init(guild: DiscordKitCore.Guild, rest: DiscordREST) {
         self.coreGuild = guild
@@ -252,7 +252,7 @@ public extension Guild {
     ///   - userID: The Snowflake ID of the user to ban.
     ///   - messageDeleteSeconds: The number of seconds worth of messages to delete from the user in the guild. Defaults to `86400` (1 day) if no value is passed. The minimum value is `0` and the maximum value is `604800` (7 days).
     func ban(_ userID: Snowflake, deleteMessageSeconds: Int = 86400) async throws {
-        try await rest.createGuildBan(id, userID, ["delete_message_seconds": deleteMessageSeconds])
+        try await rest!.createGuildBan(id, userID, ["delete_message_seconds": deleteMessageSeconds])
     }
 
     /// Bans the member from the guild.
@@ -260,12 +260,12 @@ public extension Guild {
     ///   - userID: The Snowflake ID of the user to ban.
     ///   - deleteMessageDays: The number of days worth of messages to delete from the user in the guild. Defaults to `1` if no value is passed. The minimum value is `0` and the maximum value is `7`.
     func ban(_ userID: Snowflake, deleteMessageDays: Int = 1) async throws {
-        try await rest.createGuildBan(id, userID, ["delete_message_days": deleteMessageDays])
+        try await rest!.createGuildBan(id, userID, ["delete_message_days": deleteMessageDays])
     }
 
     /// Unbans a user from the guild.
     /// - Parameter userID: The Snowflake ID of the user.
     func unban(_ userID: Snowflake) async throws {
-        try await rest.removeGuildBan(id, userID)
+        try await rest!.removeGuildBan(id, userID)
     }
 }

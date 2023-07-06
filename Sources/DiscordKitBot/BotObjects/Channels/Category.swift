@@ -5,31 +5,31 @@ import DiscordKitCore
 public class CategoryChannel: GuildChannel {
     private var coreChannels: [DiscordKitCore.Channel] {
         get async throws {
-            try await rest.getGuildChannels(id: coreChannel.guild_id!).compactMap({ try $0.result.get() }).filter({ $0.parent_id == id })
+            try await rest!.getGuildChannels(id: coreChannel.guild_id!).compactMap({ try $0.result.get() }).filter({ $0.parent_id == id })
         }
     }
     /// All the channels in the category.
     public var channels: [GuildChannel] {
         get async throws {
-            return try await coreChannels.asyncMap({ try GuildChannel(from: $0, rest: rest) })
+            return try await coreChannels.asyncMap({ try GuildChannel(from: $0, rest: rest!) })
         }
     }
     /// The text channels in the category.
     public var textChannels: [TextChannel] {
         get async throws {
-            return try await coreChannels.filter({ $0.type == .text }).asyncMap({ try TextChannel(from: $0, rest: rest) })
+            return try await coreChannels.filter({ $0.type == .text }).asyncMap({ try TextChannel(from: $0, rest: rest!) })
         }
     }
     /// The voice channels in the category.
     public var voiceChannels: [GuildChannel] {
         get async throws {
-            return try await coreChannels.filter({ $0.type == .voice }).asyncMap({ try TextChannel(from: $0, rest: rest) })
+            return try await coreChannels.filter({ $0.type == .voice }).asyncMap({ try TextChannel(from: $0, rest: rest!) })
         }
     }
     /// The stage channels in the category.
     public var stageChannels: [GuildChannel] {
         get async throws {
-            return try await coreChannels.filter({ $0.type == .stageVoice }).asyncMap({ try TextChannel(from: $0, rest: rest) })
+            return try await coreChannels.filter({ $0.type == .stageVoice }).asyncMap({ try TextChannel(from: $0, rest: rest!) })
         }
     }
     /// If the category is marked as nsfw.

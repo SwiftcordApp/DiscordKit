@@ -7,9 +7,9 @@ public class TextChannel: GuildChannel {
     public var lastMessage: Message? {
         get async throws {
             if let lastMessageID = lastMessageID {
-                let coreMessage = try? await rest.getChannelMsg(id: coreChannel.id, msgID: lastMessageID)
+                let coreMessage = try? await rest!.getChannelMsg(id: coreChannel.id, msgID: lastMessageID)
                 if let coreMessage = coreMessage {
-                    return await Message(from: coreMessage, rest: rest)
+                    return await Message(from: coreMessage, rest: rest!)
                 } else {
                     return nil
                 }
@@ -25,10 +25,10 @@ public class TextChannel: GuildChannel {
     /// All the threads that your bot can see.
     public var threads: [TextChannel]? {
         get async throws {
-            let coreThreads = try await rest.getGuildChannels(id: coreChannel.guild_id!)
+            let coreThreads = try await rest!.getGuildChannels(id: coreChannel.guild_id!)
                 .compactMap({ try? $0.result.get() }).filter({ $0.type == .publicThread || $0.type == .privateThread })
 
-            return try await coreThreads.asyncMap({ try TextChannel(from: $0, rest: rest) })
+            return try await coreThreads.asyncMap({ try TextChannel(from: $0, rest: rest!) })
         }
     }
     /// The topic of the channel
@@ -65,16 +65,16 @@ public extension TextChannel {
     /// - Parameter id: The `Snowflake` ID of the message
     /// - Returns: The ``Message`` asked for.
     func getMessage(_ id: Snowflake) async throws -> Message {
-        let coreMessage = try await rest.getChannelMsg(id: self.id, msgID: id)
-        return await Message(from: coreMessage, rest: rest)
+        let coreMessage = try await rest!.getChannelMsg(id: self.id, msgID: id)
+        return await Message(from: coreMessage, rest: rest!)
     }
 
     /// Retrieve message history starting from the most recent message in the channel.
     /// - Parameter limit: The number of messages to retrieve. If not provided, it defaults to 50.
     /// - Returns: The last `limit` messages sent in the channel.
     func getMessageHistory(limit: Int = 50) async throws -> [Message] {
-        let coreMessages = try await rest.getChannelMsgs(id: id, limit: limit)
-        return await coreMessages.asyncMap({ await Message(from: $0, rest: rest) })
+        let coreMessages = try await rest!.getChannelMsgs(id: id, limit: limit)
+        return await coreMessages.asyncMap({ await Message(from: $0, rest: rest!) })
     }
 
     /// Retrieve message history surrounding a certain message.
@@ -83,8 +83,8 @@ public extension TextChannel {
     ///   - limit: The number of messages to retrieve. If not provided, it defaults to 50.
     /// - Returns: An array of ``Message``s around the message provided.
     func getMessageHistory(around: Message, limit: Int = 50) async throws -> [Message] {
-        let coreMessages = try await rest.getChannelMsgs(id: id, limit: limit, around: around.id)
-        return await coreMessages.asyncMap({ await Message(from: $0, rest: rest) })
+        let coreMessages = try await rest!.getChannelMsgs(id: id, limit: limit, around: around.id)
+        return await coreMessages.asyncMap({ await Message(from: $0, rest: rest!) })
     }
 
     /// Retrieve message before after a certain message.
@@ -93,8 +93,8 @@ public extension TextChannel {
     ///   - limit: The number of messages to retrieve. If not provided, it defaults to 50.
     /// - Returns: An array of ``Message``s before the message provided.
     func getMessageHistory(before: Message, limit: Int = 50) async throws -> [Message] {
-        let coreMessages = try await rest.getChannelMsgs(id: id, limit: limit, before: before.id)
-        return await coreMessages.asyncMap({ await Message(from: $0, rest: rest) })
+        let coreMessages = try await rest!.getChannelMsgs(id: id, limit: limit, before: before.id)
+        return await coreMessages.asyncMap({ await Message(from: $0, rest: rest!) })
     }
 
     /// Retrieve message after after a certain message.
@@ -103,23 +103,23 @@ public extension TextChannel {
     ///   - limit: The number of messages to retrieve. If not provided, it defaults to 50.
     /// - Returns: An array of ``Message``s after the message provided
     func getMessageHistory(after: Message, limit: Int = 50) async throws -> [Message] {
-        let coreMessages = try await rest.getChannelMsgs(id: id, limit: limit, after: after.id)
-        return await coreMessages.asyncMap({ await Message(from: $0, rest: rest) })
+        let coreMessages = try await rest!.getChannelMsgs(id: id, limit: limit, after: after.id)
+        return await coreMessages.asyncMap({ await Message(from: $0, rest: rest!) })
     }
 
     /// Sends a message in the channel.
     /// - Parameter message: The message to send
     /// - Returns: The sent message.
     func send(message: NewMessage) async throws -> Message {
-        let coreMessage = try await rest.createChannelMsg(message: message, id: id)
-        return await Message(from: coreMessage, rest: rest)
+        let coreMessage = try await rest!.createChannelMsg(message: message, id: id)
+        return await Message(from: coreMessage, rest: rest!)
     }
 
     /// Bulk delete messages in this channel.
     /// - Parameter messages: An array of ``Message``s to delete.
     func deleteMessages(messages: [Message]) async throws {
         let snowflakes = messages.map({ $0.id })
-        try await rest.bulkDeleteMessages(id, ["messages": snowflakes])
+        try await rest!.bulkDeleteMessages(id, ["messages": snowflakes])
     }
 
 }

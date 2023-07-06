@@ -28,7 +28,7 @@ public class Member {
     /// The Snowflake ID of the guild this member is a part of.
     public let guildID: Snowflake?
 
-    fileprivate var rest: DiscordREST
+    private weak var rest: DiscordREST?
 
     internal init(from member: DiscordKitCore.Member, rest: DiscordREST) {
         user = member.user
@@ -61,7 +61,7 @@ public extension Member {
     /// Changes the nickname of this member in the guild.
     /// - Parameter nickname: The new nickname for this member.
     func changeNickname(_ nickname: String) async throws {
-        try await rest.editGuildMember(guildID!, user!.id, ["nick": nickname])
+        try await rest!.editGuildMember(guildID!, user!.id, ["nick": nickname])
     }
 
     /// Adds a guild role to this member.
@@ -69,49 +69,49 @@ public extension Member {
     func addRole(_ role: Snowflake) async throws {
         var roles = roles
         roles.append(role)
-        try await rest.editGuildMember(guildID!, user!.id, ["roles": roles])
+        try await rest!.editGuildMember(guildID!, user!.id, ["roles": roles])
     }
 
     /// Removes a guild role from a member.
     /// - Parameter role: The Snowflake ID of the role to remove.
     func removeRole(_ role: Snowflake) async throws {
-        try await rest.removeGuildMemberRole(guildID!, user!.id, role)
+        try await rest!.removeGuildMemberRole(guildID!, user!.id, role)
     }
 
     /// Removes all roles from a member.
     func removeAllRoles() async throws {
         let empty: [Snowflake] = []
-        try await rest.editGuildMember(guildID!, user!.id, ["roles": empty])
+        try await rest!.editGuildMember(guildID!, user!.id, ["roles": empty])
     }
 
     /// Applies a time out to a member until the specified time.
     /// - Parameter time: The time that the timeout ends.
     func timeout(time: Date) async throws {
-        try await rest.editGuildMember(guildID!, user!.id, ["communication_disabled_until": time])
+        try await rest!.editGuildMember(guildID!, user!.id, ["communication_disabled_until": time])
     }
 
     /// Kicks the member from the guild.
     func kick() async throws {
-        try await rest.removeGuildMember(guildID!, user!.id)
+        try await rest!.removeGuildMember(guildID!, user!.id)
     }
 
     /// Bans the member from the guild.
     /// - Parameter messageDeleteSeconds: The number of seconds worth of messages to delete from the user in the guild. 
     /// Defaults to `86400` (1 day) if no value is passed. The minimum value is `0` and the maximum value is `604800` (7 days).
     func ban(deleteMessageSeconds: Int = 86400) async throws {
-        try await rest.createGuildBan(guildID!, user!.id, ["delete_message_seconds": deleteMessageSeconds])
+        try await rest!.createGuildBan(guildID!, user!.id, ["delete_message_seconds": deleteMessageSeconds])
     }
 
     /// Bans the member from the guild.
     /// - Parameter messageDeleteSeconds: The number of seconds worth of messages to delete from the user in the guild. 
     /// Defaults to `1` if no value is passed. The minimum value is `0` and the maximum value is `7`.
     func ban(deleteMessageDays: Int = 1) async throws {
-        try await rest.createGuildBan(guildID!, user!.id, ["delete_message_days": deleteMessageDays])
+        try await rest!.createGuildBan(guildID!, user!.id, ["delete_message_days": deleteMessageDays])
     }
 
     /// Deletes the ban for this member.
     func unban() async throws {
-        try await rest.removeGuildBan(guildID!, user!.id)
+        try await rest!.removeGuildBan(guildID!, user!.id)
     }
 
     /// Creates a DM with this user.
@@ -122,6 +122,6 @@ public extension Member {
     /// 
     /// - Returns: The newly created DM Channel
     func createDM() async throws -> Channel {
-        return try await rest.createDM(["recipient_id": user!.id])
+        return try await rest!.createDM(["recipient_id": user!.id])
     }
 }

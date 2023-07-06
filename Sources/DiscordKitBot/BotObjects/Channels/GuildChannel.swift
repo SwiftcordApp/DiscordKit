@@ -48,7 +48,7 @@ public class GuildChannel: Identifiable {
     /// The `Snowflake` ID of the channel.
     public let id: Snowflake
 
-    internal let rest: DiscordREST
+    internal weak var rest: DiscordREST?
     internal let coreChannel: DiscordKitCore.Channel
 
     internal init(from channel: DiscordKitCore.Channel, rest: DiscordREST) throws {
@@ -84,7 +84,7 @@ public extension GuildChannel {
     /// - Returns: The newly created `Invite`.
     func createInvite(maxAge: Int = 0, maxUsers: Int = 0, temporary: Bool = false, unique: Bool = false) async throws -> Invite {
         let body = CreateChannelInviteReq(max_age: maxAge, max_users: maxUsers, temporary: temporary, unique: unique)
-        return try await rest.createChannelInvite(id, body)
+        return try await rest!.createChannelInvite(id, body)
     }
 
     /// Deletes the channel. See discussion for warnings.
@@ -93,13 +93,13 @@ public extension GuildChannel {
     /// > 
     /// > In contrast, when used with a private message, it is possible to undo the action by opening a private message with the recipient again.
     func delete() async throws {
-        try await rest.deleteChannel(id: id)
+        try await rest!.deleteChannel(id: id)
     }
 
     /// Gets all the invites for the current channel.
     /// - Returns: An Array of `Invite`s for the current channel.
     func invites() async throws -> [Invite] {
-        return try await rest.getChannelInvites(id)
+        return try await rest!.getChannelInvites(id)
     }
 
     /// Clones a channel, with the only difference being the name.
@@ -107,8 +107,8 @@ public extension GuildChannel {
     /// - Returns: The newly cloned channel.
     func clone(name: String) async throws -> GuildChannel {
         let body = CreateGuildChannelRed(name: name, type: coreChannel.type, topic: coreChannel.topic, bitrate: coreChannel.bitrate, user_limit: coreChannel.user_limit, rate_limit_per_user: coreChannel.rate_limit_per_user, position: coreChannel.position, permission_overwrites: coreChannel.permission_overwrites, parent_id: coreChannel.parent_id, nsfw: coreChannel.nsfw, rtc_region: coreChannel.rtc_region, video_quality_mode: coreChannel.video_quality_mode, default_auto_archive_duration: coreChannel.default_auto_archive_duration)
-        let newCh: DiscordKitCore.Channel = try await rest.createGuildChannel(guild.id, body)
-        return try GuildChannel(from: newCh, rest: rest)
+        let newCh: DiscordKitCore.Channel = try await rest!.createGuildChannel(guild.id, body)
+        return try GuildChannel(from: newCh, rest: rest!)
     }
 
     /// Gets the permission overrides for a specific member.
@@ -125,7 +125,7 @@ public extension GuildChannel {
     ///   - deny: The permissions you want to deny, use array notation to pass multiple
     func setPermissions(for member: Member, allow: Permissions, deny: Permissions) async throws {
         let body = EditChannelPermissionsReq(allow: allow, deny: deny, type: .member)
-        try await rest.editChannelPermissions(id, member.user!.id, body)
+        try await rest!.editChannelPermissions(id, member.user!.id, body)
     }
 }
 
