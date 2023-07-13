@@ -11,7 +11,7 @@ import DiscordKitCore
 /// Provides methods to get parameters of and respond to application command interactions
 public class CommandData {
     internal init(
-        commandData: Interaction.Data.AppCommandData,
+        commandData: Interaction.Data.AppCommandData, interaction: Interaction,
         rest: DiscordREST, applicationID: String, interactionID: Snowflake, token: String
     ) {
         self.rest = rest
@@ -20,7 +20,7 @@ public class CommandData {
         self.applicationID = applicationID
 
         self.optionValues = Self.unwrapOptionDatas(commandData.options ?? [])
-        self.commandData = commandData
+        self.interaction = interaction
     }
 
     /// A private reference to the active rest handler for handling actions
@@ -35,7 +35,7 @@ public class CommandData {
     /// Values of options in this command
     private let optionValues: [String: OptionData]
     /// The raw command data
-    private let commandData: Interaction.Data.AppCommandData
+    private let interaction: Interaction
 
     /// If this reply has already been deferred
     fileprivate var hasReplied = false
@@ -48,21 +48,21 @@ public class CommandData {
     /// The guild member that sent the interaction
     public var member: Member? {
         get {
-            guard let coreMember = commandData.member, let rest = rest else { return nil }
+            guard let coreMember = interaction.member, let rest = rest else { return nil }
             return Member(from: coreMember, rest: rest)
         }
     }
 
     public var guild: Guild? {
          get async {
-            guard let guild_id = commandData.guildID else { return nil }
+            guard let guild_id = interaction.guildID else { return nil }
             return try? await Guild(id: guild_id)
         }
     }
 
     public var channel: GuildChannel? {
         get async {
-            guard let channelID = commandData.channelID else { return nil }
+            guard let channelID = interaction.channelID else { return nil }
             return try? await GuildChannel(from: channelID)
         }
     }

@@ -213,12 +213,12 @@ extension Client {
     public var isReady: Bool { gateway?.sessionOpen == true }
 
     /// Invoke the handler associated with the respective commands
-    private func invokeCommandHandler(_ commandData: Interaction.Data.AppCommandData, id: Snowflake, token: String) {
+    private func invokeCommandHandler(_ commandData: Interaction.Data.AppCommandData, interaction: Interaction, id: Snowflake, token: String) {
         if let handler = appCommandHandlers[commandData.id] {
             Self.logger.trace("Invoking application handler", metadata: ["command.name": "\(commandData.name)"])
             Task {
                 await handler(.init(
-                    commandData: commandData,
+                    commandData: commandData, interaction: interaction,
                     rest: rest, applicationID: applicationID!, interactionID: id, token: token
                 ))
             }
@@ -251,7 +251,7 @@ extension Client {
             // Handle interactions based on type
             switch interaction.data {
             case .applicationCommand(let commandData):
-                invokeCommandHandler(commandData, id: interaction.id, token: interaction.token)
+                invokeCommandHandler(commandData, interaction: interaction, id: interaction.id, token: interaction.token)
             case .messageComponent(let componentData):
                 print("Component interaction: \(componentData.custom_id)")
             default: break

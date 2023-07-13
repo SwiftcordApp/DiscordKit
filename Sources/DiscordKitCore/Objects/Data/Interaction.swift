@@ -63,12 +63,6 @@ public struct Interaction: Decodable {
             public let type: Int
             /// Options of command (present if the command has options)
             public let options: [OptionData]?
-            /// The member that sent the interaction
-            public let member: Member?
-            /// The ID of the guild the interaction was sent from
-            public let guildID: Snowflake?
-            /// The channel the interaction was sent from
-            public let channelID: Snowflake?
 
             /// The data representing one option
             public struct OptionData: Codable {
