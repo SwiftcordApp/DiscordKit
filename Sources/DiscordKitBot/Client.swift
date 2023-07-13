@@ -218,7 +218,7 @@ extension Client {
             Self.logger.trace("Invoking application handler", metadata: ["command.name": "\(commandData.name)"])
             Task {
                 await handler(.init(
-                    optionValues: commandData.options ?? [],
+                    commandData: commandData,
                     rest: rest, applicationID: applicationID!, interactionID: id, token: token
                 ))
             }
