@@ -72,6 +72,7 @@ public struct Interaction: Decodable {
                     case integer(Int)
                     case double(Double)
                     case boolean(Bool) // Discord docs are disappointing
+                    case user(Snowflake)
 
                     public func encode(to encoder: Encoder) throws {
                         var container = encoder.singleValueContainer()
@@ -80,6 +81,7 @@ public struct Interaction: Decodable {
                         case .integer(let val): try container.encode(val)
                         case .double(let val): try container.encode(val)
                         case .boolean(let val): try container.encode(val)
+                        case .user(let val): try container.encode(val)
                         }
                     }
 
@@ -87,7 +89,10 @@ public struct Interaction: Decodable {
                     ///
                     /// - Returns: The string value of a certain option if it is present and is of type `String`, otherwise `nil`
                     public func value() -> String? {
-                        guard case let .string(val) = self else { return nil }
+                        guard case let .string(val) = self else {
+                            guard case let .user(val) = self else { return nil }
+                            return val
+                        }
                         return val
                     }
                     /// Get the wrapped `Int` value
@@ -145,6 +150,7 @@ public struct Interaction: Decodable {
                     case .number: value = .double(try container.decode(Double.self, forKey: .value))
                     case .boolean: value = .boolean(try container.decode(Bool.self, forKey: .value))
                     case .string: value = .string(try container.decode(String.self, forKey: .value))
+                    case .user: value = .user(try container.decode(Snowflake.self, forKey: .value))
                     default: value = nil
                     }
                 }
