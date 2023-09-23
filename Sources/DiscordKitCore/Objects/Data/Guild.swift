@@ -162,6 +162,22 @@ public struct PreloadedGuild: GatewayData, Identifiable, Equatable {
     public let roles: [DecodableThrowable<Role>]
     public let stickers: [Sticker]
     // public let threads:
+
+    /// Convenience init for creating DM channel
+    public init(channels: [Channel], properties: Guild) {
+        self.version = 0
+        self.channels = channels
+        self.emojis = []
+        self.id = "@me"
+        self.joined_at = .distantPast
+        self.large = false
+        self.lazy = false
+        self.member_count = 0
+        self.premium_subscription_count = 0
+        self.properties = properties
+        self.roles = []
+        self.stickers = []
+    }
 }
 
 // Partial Guild, returned when listing guilds
