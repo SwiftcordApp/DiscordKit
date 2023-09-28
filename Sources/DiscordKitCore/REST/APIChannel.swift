@@ -65,8 +65,8 @@ public extension DiscordREST {
     func ackMessageRead(
         id: Snowflake,
         msgID: Snowflake,
-        manual: Bool?,
-        mention_count: Int?
+        manual: Bool? = false,
+        mention_count: Int? = 0
     ) async throws -> MessageReadAck {
         if manual ?? false {
             return try await postReq(path: "channels/\(id)/messages/\(msgID)/ack", body: MessageReadAck(token: nil, last_viewed: nil, manual: manual, mention_count: mention_count))
