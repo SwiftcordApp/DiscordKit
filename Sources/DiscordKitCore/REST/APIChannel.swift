@@ -72,7 +72,7 @@ public extension DiscordREST {
             return try await postReq(path: "channels/\(id)/messages/\(msgID)/ack", body: MessageReadAck(token: nil, last_viewed: nil, manual: manual, mention_count: mention_count))
         }
         
-        let lastViewed = Int(ceil((Date().timeIntervalSince1970 - DISCORD_EPOCH) / 864e5))
+        let lastViewed = Int(ceil((Date().timeIntervalSince1970*1000 - DISCORD_EPOCH) / 864e5))
         
         return try await postReq(path: "channels/\(id)/messages/\(msgID)/ack", body: MessageReadAck(token: nil, last_viewed: lastViewed, manual: nil, mention_count: nil))
     }
