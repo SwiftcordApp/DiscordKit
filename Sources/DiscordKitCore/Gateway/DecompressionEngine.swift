@@ -79,7 +79,7 @@ public extension DecompressionEngine {
         decompressing = true
 
         // ZLib header, strip it if necessary
-        var data = data.prefix(2) == Data([0x78, 0x9C]) ? data.dropFirst(2) : data
+        var data = data.prefix(2) == Data([0x78, 0x9C]) || data.prefix(2) == Data([0x78, 0xDA]) ? data.dropFirst(2) : data
 
         // Configure stream source and destinations (will be changed in loop)
         stream.src_size = 0
