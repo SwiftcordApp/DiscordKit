@@ -5,10 +5,11 @@
 //  Created by Vincent Kwok on 13/5/22.
 //
 
-#if os(macOS)
 import Foundation
-import Compression
 import Logging
+
+#if os(macOS) || os(iOS)
+import Compression
 
 /// Decompresses `zlib-stream`-compressed payloads received
 /// from the Gateway
@@ -148,9 +149,8 @@ public extension DecompressionEngine {
         return decompressed
     }
 }
+
 #else
-import Foundation
-import Logging
 import SWCompression
 
 public class DecompressionEngine {
