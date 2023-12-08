@@ -56,11 +56,7 @@ public enum MessageType: Int, Codable {
 }
 
 /// Represents a message sent in a channel within Discord
-public class Message: Codable, GatewayData, Equatable, Identifiable {
-    public static func == (lhs: Message, rhs: Message) -> Bool {
-        lhs.content == rhs.content  && lhs.attachments == rhs.attachments
-    }
-
+public class Message: Codable, GatewayData, Identifiable {
     public struct Flags: OptionSet, Codable {
         public init(rawValue: UInt8) {
             self.rawValue = rawValue

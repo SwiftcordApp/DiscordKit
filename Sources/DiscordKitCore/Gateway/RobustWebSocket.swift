@@ -233,12 +233,12 @@ public class RobustWebSocket: NSObject {
                     @unknown default: Self.log.warning("Unknown sock message case!")
                     }
                 } catch {
-                    Self.log.warning("Error decoding message", metadata: ["error": "\(error.localizedDescription)"])
+                    Self.log.warning("Error decoding message", metadata: ["error": "\(error)"])
                 }
                 self.attachSockReceiveListener()
             } catch {
                 // If an error is encountered here, the connection is probably broken
-                Self.log.error("Receive error", metadata: ["error": "\(error.localizedDescription)"])
+                Self.log.error("Receive error", metadata: ["error": "\(error)"])
                 self.forceClose()
             }
         }
@@ -477,55 +477,6 @@ public extension RobustWebSocket {
 
 // MARK: - Heartbeating
 public extension RobustWebSocket {
-    // @objc errors on linux. Im not sure why it's used here, but i'll keep it.
-    #if os(macOS)
-    @objc private func sendHeartbeat(_ interval: TimeInterval) {
-        guard connected else { return }
-        if let hbTimeout = hbTimeout, hbTimeout.isValid {
-            Self.log.warning("Skipping sending heartbeat", metadata: ["reason": "already waiting for one"])
-            return
-        }
-
-        Self.log.debug("[HEARTBEAT] Sending heartbeat")
-        send(.heartbeat, data: GatewayHeartbeat(seq))
-
-        hbTimeout?.invalidate()
-        DispatchQueue.main.async { [weak self] in
-            self?.hbTimeout = Timer.scheduledTimer(withTimeInterval: interval * 0.25, repeats: false) { [weak self] _ in
-                Self.log.warning("[HEARTBEAT] Force-closing connection", metadata: ["reason": "socket timed out"])
-                self?.forceClose()
-            }
-        }
-    }
-
-    @objc private func startHeartbeating(interval: TimeInterval) {
-        Self.log.debug("Start heartbeating", metadata: ["interval": "\(interval)"])
-
-        if let hbCancellable = hbCancellable {
-            Self.log.debug("Cancelling existing heartbeat timer")
-            hbCancellable.cancel()
-        }
-        if let hbTimeout = hbTimeout {
-            Self.log.debug("Cancelling existing hbTimeout timer")
-            hbTimeout.invalidate()
-        }
-
-        // First heartbeat after interval * jitter where jitter is a value from 0-1
-        // ~ Discord API docs
-        DispatchQueue.main.asyncAfter(
-            deadline: .now() + interval * Double.random(in: 0...1),
-            qos: .utility,
-            flags: .enforceQoS
-        ) {
-            // Only ever start 1 publishing timer
-            self.sendHeartbeat(interval)
-
-            self.hbCancellable = Timer.publish(every: interval, tolerance: 2, on: .main, in: .common)
-                .autoconnect()
-                .sink { _ in self.sendHeartbeat(interval) }
-        }
-    }
-    #else
     private func sendHeartbeat(_ interval: TimeInterval) {
         guard connected else { return }
         if let hbTimeout = hbTimeout, hbTimeout.isValid {
@@ -572,7 +523,6 @@ public extension RobustWebSocket {
                 .sink { _ in self.sendHeartbeat(interval) }
         }
     }
-    #endif
 }
 
 // MARK: - Extension with public exposed methods

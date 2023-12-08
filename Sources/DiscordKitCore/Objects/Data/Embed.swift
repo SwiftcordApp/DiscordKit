@@ -17,7 +17,7 @@ public enum EmbedType: String, Codable {
     case autoMod = "auto_moderation_message"
 }
 
-public struct Embed: Codable, Identifiable {
+public struct Embed: Codable, Identifiable, Equatable, Hashable {
     public init(title: String? = nil, type: EmbedType? = nil, description: String? = nil, url: String? = nil, timestamp: Date? = nil, color: Int? = nil, footer: EmbedFooter? = nil, image: EmbedMedia? = nil, thumbnail: EmbedMedia? = nil, video: EmbedMedia? = nil, provider: EmbedProvider? = nil, author: EmbedAuthor? = nil, fields: [EmbedField]? = nil) {
         self.title = title
         self.type = type
@@ -53,7 +53,7 @@ public struct Embed: Codable, Identifiable {
     }
 }
 
-public struct EmbedFooter: Codable {
+public struct EmbedFooter: Codable, Equatable, Hashable {
     public init(text: String, icon_url: String? = nil, proxy_icon_url: String? = nil) {
         self.text = text
         self.icon_url = icon_url
@@ -65,26 +65,26 @@ public struct EmbedFooter: Codable {
     public let proxy_icon_url: String?
 }
 
-public struct EmbedMedia: Codable {
+public struct EmbedMedia: Codable, Equatable, Hashable {
     public let url: String
     public let proxy_url: String?
     public let height: Int?
     public let width: Int?
 }
 
-public struct EmbedProvider: Codable {
+public struct EmbedProvider: Codable, Equatable, Hashable {
     public let name: String?
     public let url: String?
 }
 
-public struct EmbedAuthor: Codable {
+public struct EmbedAuthor: Codable, Equatable, Hashable {
     public let name: String
     public let url: String?
     public let icon_url: String?
     public let proxy_icon_url: String?
 }
 
-public struct EmbedField: Codable, Identifiable {
+public struct EmbedField: Codable, Identifiable, Equatable, Hashable {
     public let name: String
     public let value: String
     public let inline: Bool?
