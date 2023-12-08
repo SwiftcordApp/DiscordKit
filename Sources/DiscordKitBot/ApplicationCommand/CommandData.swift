@@ -11,7 +11,7 @@ import DiscordKitCore
 /// Provides methods to get parameters of and respond to application command interactions
 public class CommandData {
     internal init(
-        optionValues: [OptionData],
+        commandData: Interaction.Data.AppCommandData, interaction: Interaction,
         rest: DiscordREST, applicationID: String, interactionID: Snowflake, token: String
     ) {
         self.rest = rest
@@ -19,7 +19,8 @@ public class CommandData {
         self.interactionID = interactionID
         self.applicationID = applicationID
 
-        self.optionValues = Self.unwrapOptionDatas(optionValues)
+        self.optionValues = Self.unwrapOptionDatas(commandData.options ?? [])
+        self.interaction = interaction
     }
 
     /// A private reference to the active rest handler for handling actions
@@ -33,6 +34,8 @@ public class CommandData {
 
     /// Values of options in this command
     private let optionValues: [String: OptionData]
+    /// The raw command data
+    private let interaction: Interaction
 
     /// If this reply has already been deferred
     fileprivate var hasReplied = false
@@ -42,6 +45,27 @@ public class CommandData {
     let token: String
     /// The ID of this interaction
     public let interactionID: Snowflake
+    /// The guild member that sent the interaction
+    public var member: Member? {
+        get {
+            guard let coreMember = interaction.member, let rest = rest else { return nil }
+            return Member(from: coreMember, rest: rest)
+        }
+    }
+
+    public var guild: Guild? {
+         get async {
+            guard let guild_id = interaction.guildID else { return nil }
+            return try? await Guild(id: guild_id)
+        }
+    }
+
+    public var channel: GuildChannel? {
+        get async {
+            guard let channelID = interaction.channelID else { return nil }
+            return try? await GuildChannel(from: channelID)
+        }
+    }
 
     fileprivate static func unwrapOptionDatas(_ options: [OptionData]) -> [String: OptionData] {
         var optValues: [String: OptionData] = [:]
@@ -133,7 +157,8 @@ public extension CommandData {
     /// reply in clients. However, if a call to ``deferReply()`` was made, this
     /// edits the loading message with the content provided.
     func followUp(content: String?, embeds: [BotEmbed]?, components: [Component]?) async throws -> Message {
-        try await rest!.sendInteractionFollowUp(.init(content: content, embeds: embeds, components: components), applicationID: applicationID, token: token)
+        let coreMessage = try await rest!.sendInteractionFollowUp(.init(content: content, embeds: embeds, components: components), applicationID: applicationID, token: token)
+        return await Message(from: coreMessage, rest: rest!)
     }
 
     /// Defer the reply to this interaction - the user sees a loading state

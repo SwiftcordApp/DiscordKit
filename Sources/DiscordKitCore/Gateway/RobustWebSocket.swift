@@ -245,6 +245,7 @@ public class RobustWebSocket: NSObject {
         #endif
     }
 
+    // swiftlint:disable:next function_body_length
     private func connect() {
         guard !explicitlyClosed else { return }
         #if canImport(WebSocket)
@@ -626,7 +627,7 @@ public extension RobustWebSocket {
 
         Self.log.trace("Outgoing Payload", metadata: [
             "opcode": "\(opcode)",
-            "data": "\((T.self == GatewayIdentify.self ? nil : data))", // Don't log tokens.
+            "data": "\(String(describing: (T.self == GatewayIdentify.self ? nil : data)))", // Don't log tokens.
             "seq": "\(seq ?? -1)"
         ])
 

@@ -99,7 +99,7 @@ public extension DiscordREST {
     /// Send a follow up response to an interaction
     ///
     /// > POST: `/webhooks/{application.id}/{interaction.token}`
-    func sendInteractionFollowUp(_ response: WebhookResponse, applicationID: Snowflake, token: String) async throws -> Message {
+    func sendInteractionFollowUp(_ response: WebhookResponse, applicationID: Snowflake, token: String) async throws -> DiscordKitCore.Message {
         try await postReq(path: "webhooks/\(applicationID)/\(token)", body: response)
     }
 }

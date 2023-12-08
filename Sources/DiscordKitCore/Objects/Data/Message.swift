@@ -53,6 +53,27 @@ public enum MessageType: Int, Codable {
 
     /// A message detailing an action taken by automod
     case autoModAct = 24
+
+    /// The system message sent when a user purchases or renews a role subscription.
+    case roleSubscriptionPurchase = 25
+
+    /// The system message sent when a user is given an advertisement to purchase a premium tier for an application during an interaction.
+    case interactionPremiumUpsell = 26
+
+    /// The system message sent when the stage starts.
+    case stageStart = 27
+
+    /// The system message sent when the stage ends.
+    case stageEnd = 28
+
+    /// The system message sent when the stage speaker changes.
+    case stageSpeaker = 29
+
+    /// The system message sent when the stage topic changes.
+    case stageTopic = 31
+
+    /// The system message sent when an application’s premium subscription is purchased for the guild.
+    case guildApplicationPremiumSubscription = 32
 }
 
 /// Represents a message sent in a channel within Discord

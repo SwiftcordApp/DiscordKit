@@ -113,10 +113,17 @@ public extension DiscordREST {
     ///
     /// > GET: `/guilds/{guild.id}/members`
     func listGuildMembers<T: Decodable>(
-        _ guildId: Snowflake
+        _ guildId: Snowflake,
+        _ after: Snowflake?,
+        _ limit: Int = 50
     ) async throws -> T {
+        var query = [URLQueryItem(name: "limit", value: String(limit))]
+        if let after = after {
+            query.append(URLQueryItem(name: "after", value: after))
+        }
         return try await getReq(
-            path: "guilds/\(guildId)/members"
+            path: "/guilds/\(guildId)/members",
+            query: query
         )
     }
     /// Search Guild Members
@@ -218,10 +225,17 @@ public extension DiscordREST {
     ///
     /// > GET: `/guilds/{guild.id}/bans`
     func getGuildBans<T: Decodable>(
-        _ guildId: Snowflake
+        _ guildId: Snowflake,
+        _ after: Snowflake?,
+        _ limit: Int = 50
     ) async throws -> T {
+        var query = [URLQueryItem(name: "limit", value: String(limit))]
+        if let after = after {
+            query.append(URLQueryItem(name: "after", value: after))
+        }
         return try await getReq(
-            path: "guilds/\(guildId)/bans"
+            path: "guilds/\(guildId)/bans",
+            query: query
         )
     }
     /// Get Guild Ban

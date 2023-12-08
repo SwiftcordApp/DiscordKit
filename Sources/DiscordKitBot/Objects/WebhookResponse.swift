@@ -15,7 +15,7 @@ public struct WebhookResponse: Encodable {
         components: [Component]? = nil,
         username: String? = nil, avatarURL: URL? = nil,
         allowedMentions: AllowedMentions? = nil,
-        flags: Message.Flags? = nil,
+        flags: DiscordKitCore.Message.Flags? = nil,
         threadName: String? = nil
     ) {
         assert(content != nil || embeds != nil, "Must have at least one of content or embeds (files unsupported)")
@@ -40,7 +40,7 @@ public struct WebhookResponse: Encodable {
     public let allowed_mentions: AllowedMentions?
     public let components: [Component]?
     public let attachments: [NewAttachment]?
-    public let flags: Message.Flags?
+    public let flags: DiscordKitCore.Message.Flags?
     public let thread_name: String?
 
     enum CodingKeys: CodingKey {
