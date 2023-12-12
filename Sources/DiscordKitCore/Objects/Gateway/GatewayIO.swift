@@ -84,6 +84,9 @@ public struct GatewayIncoming: Decodable {
         /// > server outage.
         case guildDelete(GuildUnavailable)
 
+        /// Guild members chunk
+        case guildMembersChunk(GuildMembersChunk)
+
         // MARK: - Channels
 
         /// Channel create event
@@ -166,6 +169,19 @@ public struct GatewayIncoming: Decodable {
         /// > presence updates for users in a certain guild.
         case presenceUpdate(PresenceUpdate)
 
+        // MARK: - Guild Members
+
+        /// Guild member add
+        ///
+        /// Sent when a new user joins a guild
+        case guildMemberAdd(Member)
+
+        /// Guild member remove
+        case guildMemberRemove(GuildMemberRemove)
+
+        /// Guild member update
+        case guildMemberUpdate(GuildMemberUpdate)
+
         // MARK: - Interactions
 
         /// Interaction create event
@@ -238,6 +254,7 @@ public struct GatewayIncoming: Decodable {
             case .guildCreate: data = .guildCreate(try values.decode(Guild.self, forKey: .data))
             case .guildUpdate: data = .guildUpdate(try values.decode(Guild.self, forKey: .data))
             case .guildDelete: data = .guildDelete(try values.decode(GuildUnavailable.self, forKey: .data))
+            case .guildMembersChunk: data = .guildMembersChunk(try values.decode(GuildMembersChunk.self, forKey: .data))
 /*
             case .guildBanAdd, .guildBanRemove: data = try values.decode(GuildBan.self, forKey: .data)
             case .guildEmojisUpdate: data = try values.decode(GuildEmojisUpdate.self, forKey: .data)
@@ -263,6 +280,11 @@ public struct GatewayIncoming: Decodable {
             // MARK: Users
             case .userUpdate: data = .userUpdate(try values.decode(CurrentUser.self, forKey: .data))
             case .presenceUpdate: data = .presenceUpdate(try values.decode(PresenceUpdate.self, forKey: .data))
+
+            // MARK: Members
+            case .guildMemberAdd: data = .guildMemberAdd(try values.decode(Member.self, forKey: .data))
+            case .guildMemberRemove: data = .guildMemberRemove(try values.decode(GuildMemberRemove.self, forKey: .data))
+            case .guildMemberUpdate: data = .guildMemberUpdate(try values.decode(GuildMemberUpdate.self, forKey: .data))
 
             // MARK: Interactions
             case .interactionCreate: data = .interaction(try values.decode(Interaction.self, forKey: .data))

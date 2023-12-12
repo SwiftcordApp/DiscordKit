@@ -65,10 +65,19 @@ public struct GatewayVoiceStateUpdate: OutgoingGatewayData, GatewayData {
 /// Guild Request Members
 ///
 /// > Outgoing Gateway data struct for opcode 8
-public struct GatewayGuildRequestMembers: GatewayData {
-    public let guild_id: Snowflake
+public struct GatewayGuildRequestMembers: OutgoingGatewayData, GatewayData {
+    public init(guild_id: [Snowflake], query: String? = nil, limit: Int? = nil, presences: Bool? = nil, user_ids: [Snowflake]? = nil, nonce: String? = nil) {
+        self.guild_id = guild_id
+        self.query = query
+        self.limit = limit
+        self.presences = presences
+        self.user_ids = user_ids
+        self.nonce = nonce
+    }
+
+    public let guild_id: [Snowflake]
     public let query: String?
-    public let limit: Int
+    public let limit: Int?
     public let presences: Bool? // Used to specify if we want the presences of the matched members
     public let user_ids: [Snowflake]? // Used to specify which users you wish to fetch
     public let nonce: String? // Nonce to identify the Guild Members Chunk response
