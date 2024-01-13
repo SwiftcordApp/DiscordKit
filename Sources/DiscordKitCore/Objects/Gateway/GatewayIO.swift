@@ -87,6 +87,13 @@ public struct GatewayIncoming: Decodable {
         /// Guild members chunk
         case guildMembersChunk(GuildMembersChunk)
 
+        /// Guild role created
+        case guildRoleCreate(GuildRoleEvt)
+        /// Guild role update
+        case guildRoleUpdate(GuildRoleEvt)
+        /// Guild role delete
+        case guildRoleDelete(GuildRoleDelete)
+
         // MARK: - Channels
 
         /// Channel create event
@@ -255,6 +262,9 @@ public struct GatewayIncoming: Decodable {
             case .guildUpdate: data = .guildUpdate(try values.decode(Guild.self, forKey: .data))
             case .guildDelete: data = .guildDelete(try values.decode(GuildUnavailable.self, forKey: .data))
             case .guildMembersChunk: data = .guildMembersChunk(try values.decode(GuildMembersChunk.self, forKey: .data))
+            case .guildRoleCreate: data = .guildRoleCreate(try values.decode(GuildRoleEvt.self, forKey: .data))
+            case .guildRoleUpdate: data = .guildRoleUpdate(try values.decode(GuildRoleEvt.self, forKey: .data))
+            case .guildRoleDelete: data = .guildRoleDelete(try values.decode(GuildRoleDelete.self, forKey: .data))
 /*
             case .guildBanAdd, .guildBanRemove: data = try values.decode(GuildBan.self, forKey: .data)
             case .guildEmojisUpdate: data = try values.decode(GuildEmojisUpdate.self, forKey: .data)
