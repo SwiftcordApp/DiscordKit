@@ -101,6 +101,7 @@ public class RobustWebSocket: NSObject {
     // MARK: - Configuration
     internal let token: String
     private let reconnectInterval: ReconnectDelayClosure
+    private var reconnectURL: URL?
 
     /// The gateway close codes that signal a fatal error, and reconnection shouldn't be attempted
     private static let fatalCloseCodes = [4004] + Array(4010...4014)
@@ -259,21 +260,23 @@ public class RobustWebSocket: NSObject {
         }
         #endif
 
+        let connectionURL = reconnectURL ?? URL(string: DiscordKitConfig.default.gateway)!
         Self.log.info("[CONNECT]", metadata: [
             "ws": "\(DiscordKitConfig.default.gateway)",
-            "version": "\(DiscordKitConfig.default.version)"
+            "version": "\(DiscordKitConfig.default.version)",
+            "url": "\(connectionURL)"
         ])
         pendingReconnect = nil
 
         #if canImport(WebSocket)
         socket = WebSocket()
         do {
-            try socket.connect(to: DiscordKitConfig.default.gateway, headers: HTTPHeaders(dictionaryLiteral: ("User-Agent", DiscordKitConfig.default.userAgent)))
+            try socket.connect(url: connectionURL, headers: HTTPHeaders(dictionaryLiteral: ("User-Agent", DiscordKitConfig.default.userAgent)))
         } catch {
             Self.log.critical("Failed to connect to Gateway", metadata: ["Reason": "\(error.localizedDescription)"])
         }
         #else
-        var gatewayReq = URLRequest(url: URL(string: DiscordKitConfig.default.gateway)!)
+        var gatewayReq = URLRequest(url: connectionURL)
         // The difference in capitalisation is intentional
         gatewayReq.setValue(DiscordKitConfig.default.userAgent, forHTTPHeaderField: "User-Agent")
         socket = session.webSocketTask(with: gatewayReq)
@@ -355,6 +358,7 @@ public class RobustWebSocket: NSObject {
                 Self.log.warning("[RECONNECT] Session is invalid, reconnecting without resuming")
                 onSessionInvalid.notify()
                 canResume = false
+                reconnectURL = nil
             }
             // Close the connection immediately and reconnect after 1-5s, as per Discord docs
             // Unfortunately Discord seems to reject the new identify no matter how long I
@@ -368,15 +372,25 @@ public class RobustWebSocket: NSObject {
             // attemptReconnect(resume: shouldResume)
         case .userReady(let ready):
             sessionID = ready.session_id
+            reconnectURL = ready.resume_gateway_url
             canResume = true
             sessionOpen = true
+            Self.log.info("[READY]", metadata: [
+                "session": "\(ready.session_id)",
+                "reconnectURL": "\(ready.resume_gateway_url)"
+            ])
         case .botReady(let ready):
             sessionID = ready.session_id
             canResume = true
-            Self.log.info("[READY]", metadata: ["session": "\(ready.session_id)"])
-            fallthrough
+            sessionOpen = true
+            reconnectURL = ready.resume_gateway_url
+            Self.log.info("[READY]", metadata: [
+                "session": "\(ready.session_id)",
+                "reconnectURL": "\(ready.resume_gateway_url)"
+            ])
         case .resumed:
             sessionOpen = true
+            Self.log.info("[RESUMED]")
             // onEvent.notify(event: (type, decoded.data))
         case .reconnect:
             Self.log.warning("Gateway-requested reconnect: disconnecting and reconnecting immediately")

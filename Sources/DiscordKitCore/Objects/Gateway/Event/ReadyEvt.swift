@@ -27,6 +27,10 @@ public struct ReadyEvt: Decodable, GatewayData {
     ///
     /// > An implementation for unreads is still WIP in Swiftcord
     public let read_state: ReadState
+
+    public let auth_token: String?
+
+    public let resume_gateway_url: URL
 }
 
 /// The ready event payload for bot accounts
@@ -38,5 +42,5 @@ public struct BotReadyEvt: Decodable, GatewayData {
     public let session_id: String
     public let shard: [Int]? // Included for inclusivity, will not be used
     public let application: PartialApplication
-    public let resume_gateway_url: String
+    public let resume_gateway_url: URL
 }
