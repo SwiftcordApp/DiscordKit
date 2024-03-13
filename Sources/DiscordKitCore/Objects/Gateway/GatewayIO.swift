@@ -75,7 +75,7 @@ public struct GatewayIncoming: Decodable {
         // MARK: - Guilds
 
         /// Guild create event
-        case guildCreate(Guild)
+        case guildCreate(PreloadedGuild)
         /// Guild update event
         case guildUpdate(Guild)
         /// Guild delete event
@@ -234,12 +234,12 @@ public struct GatewayIncoming: Decodable {
             // Cue the long switch case to parse every single event
             switch type {
             case .ready:
-                if let userReady = try? values.decode(ReadyEvt.self, forKey: .data) {
-                    data = .userReady(userReady)
-                } else {
+                do {
+                    data = .userReady(try values.decode(ReadyEvt.self, forKey: .data))
+                } catch {
+                    print("Decoding ready dispatch as user ready failed: \(error), trying bot")
                     data = .botReady(try values.decode(BotReadyEvt.self, forKey: .data))
                 }
-                // data = .userReady(try values.decode(ReadyEvt.self, forKey: .data))
             case .readySupplemental: data = .readySupplemental(try values.decode(ReadySuppEvt.self, forKey: .data))
             case .resumed: data = .resumed
 
@@ -258,7 +258,7 @@ public struct GatewayIncoming: Decodable {
             case .threadMembersUpdate: data = try values.decode(ThreadMembersUpdate.self, forKey: .data)
 */
             // MARK: Guilds
-            case .guildCreate: data = .guildCreate(try values.decode(Guild.self, forKey: .data))
+            case .guildCreate: data = .guildCreate(try values.decode(PreloadedGuild.self, forKey: .data))
             case .guildUpdate: data = .guildUpdate(try values.decode(Guild.self, forKey: .data))
             case .guildDelete: data = .guildDelete(try values.decode(GuildUnavailable.self, forKey: .data))
             case .guildMembersChunk: data = .guildMembersChunk(try values.decode(GuildMembersChunk.self, forKey: .data))

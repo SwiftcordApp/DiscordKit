@@ -87,8 +87,9 @@ public struct Guild: GatewayData, Equatable, Identifiable {
 		self.premium_progress_bar_enabled = premium_progress_bar_enabled
 	}
 
+    // TODO: Make this check more complete
     public static func == (lhs: Guild, rhs: Guild) -> Bool {
-        lhs.id == rhs.id && lhs.name == rhs.name
+        lhs.id == rhs.id && lhs.name == rhs.name && lhs.icon == rhs.icon
     }
 
     public let id: Snowflake
@@ -155,6 +156,10 @@ public struct PreloadedGuild: GatewayData, Identifiable, Equatable {
     public let large: Bool
     public let lazy: Bool
     public let member_count: Int
+    /// Members in the guild
+    ///
+    /// > User accounts will only receive the client's member and users in voice channels, and 
+    public let members: [Member]?
 
     /// Number of "boosts" the server has
     public let premium_subscription_count: Int
@@ -177,6 +182,7 @@ public struct PreloadedGuild: GatewayData, Identifiable, Equatable {
         self.properties = properties
         self.roles = []
         self.stickers = []
+        self.members = nil
     }
 }
 
