@@ -35,6 +35,7 @@ public enum GatewayOutgoingOpcodes: Int, Codable {
     case resume = 6 // Attempt to resume disconnected session
     case requestGuildMembers = 8
     case subscribeGuildEvents = 14
+    case updateGuildSubscriptions = 37
 }
 
 public enum GatewayIncomingOpcodes: Int, Codable {

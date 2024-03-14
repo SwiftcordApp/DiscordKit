@@ -117,6 +117,33 @@ public struct SubscribeGuildEvts: OutgoingGatewayData {
     }
 }
 
+/// Guild update subscriptions
+public struct UpdateGuildSubscriptions: OutgoingGatewayData {
+    public struct Subscription: OutgoingGatewayData {
+        public let activities: Bool?
+        public let threads: Bool?
+        public let typing: Bool?
+        /// Range of members to request from each channel
+        ///
+        /// - Important: Returned members will only be correctly sorted up to
+        /// 100 members (e.g. a range of 0-99).
+        public let channels: [Snowflake : [DiscordRange]]
+
+        public init(activities: Bool? = nil, threads: Bool? = nil, typing: Bool? = nil, channels: [Snowflake : [DiscordRange]]) {
+            self.activities = activities
+            self.threads = threads
+            self.typing = typing
+            self.channels = channels
+        }
+    }
+
+    public let subscriptions: [Snowflake : Subscription]
+
+    public init(subscriptions: [Snowflake : Subscription]) {
+        self.subscriptions = subscriptions
+    }
+}
+
 /// Current client state, sent with the ``GatewayIdentify`` payload
 ///
 /// > Warning: This should only be sent in identify payloads for user accounts. Bot accounts don't need this!

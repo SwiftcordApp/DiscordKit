@@ -86,6 +86,9 @@ public struct GatewayIncoming: Decodable {
 
         /// Guild members chunk
         case guildMembersChunk(GuildMembersChunk)
+        
+        /// Guild member list update
+        case guildMemberListUpdate(GuildMemberListUpdate)
 
         /// Guild role created
         case guildRoleCreate(GuildRoleEvt)
@@ -262,6 +265,7 @@ public struct GatewayIncoming: Decodable {
             case .guildUpdate: data = .guildUpdate(try values.decode(Guild.self, forKey: .data))
             case .guildDelete: data = .guildDelete(try values.decode(GuildUnavailable.self, forKey: .data))
             case .guildMembersChunk: data = .guildMembersChunk(try values.decode(GuildMembersChunk.self, forKey: .data))
+            case .guildMemberListUpdate: data = .guildMemberListUpdate(try values.decode(GuildMemberListUpdate.self, forKey: .data))
             case .guildRoleCreate: data = .guildRoleCreate(try values.decode(GuildRoleEvt.self, forKey: .data))
             case .guildRoleUpdate: data = .guildRoleUpdate(try values.decode(GuildRoleEvt.self, forKey: .data))
             case .guildRoleDelete: data = .guildRoleDelete(try values.decode(GuildRoleDelete.self, forKey: .data))

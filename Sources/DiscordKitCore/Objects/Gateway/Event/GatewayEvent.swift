@@ -43,6 +43,7 @@ public enum GatewayEvent: String, Codable {
     case guildMemberRemove = "GUILD_MEMBER_REMOVE"
     case guildMemberUpdate = "GUILD_MEMBER_UPDATE"
     case guildMembersChunk = "GUILD_MEMBERS_CHUNK"
+    case guildMemberListUpdate = "GUILD_MEMBER_LIST_UPDATE"
     // MARK: Guild Roles
     case guildRoleCreate = "GUILD_ROLE_CREATE"
     case guildRoleUpdate = "GUILD_ROLE_UPDATE"
