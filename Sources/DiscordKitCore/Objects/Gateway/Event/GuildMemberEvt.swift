@@ -71,8 +71,10 @@ public struct GuildMemberListUpdate: Decodable, GatewayData {
             switch op {
             case .sync:
                 self = .sync(try container.decode([Data].self, forKey: .items), range: try container.decode(DiscordRange.self, forKey: .range))
-            case .update, .insert:
+            case .update:
                 self = .update(try container.decode(Data.self, forKey: .item), index: try container.decode(Int.self, forKey: .index))
+            case .insert:
+                self = .insert(try container.decode(Data.self, forKey: .item), index: try container.decode(Int.self, forKey: .index))
             case .delete:
                 self = .delete(try container.decode(Int.self, forKey: .index))
             }
