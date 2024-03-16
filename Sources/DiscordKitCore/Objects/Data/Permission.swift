@@ -114,7 +114,7 @@ public enum PermOverwriteType: Int, Codable {
     case member = 1
 }
 
-public struct PermOverwrite: Codable {
+public struct PermOverwrite: Codable, Equatable {
     public let id: Snowflake
     public let type: PermOverwriteType
     public let allow: Permissions

@@ -37,7 +37,7 @@ public enum ChannelType: Int, Codable {
 
 public struct Channel: Identifiable, Codable, GatewayData, Equatable {
     public static func == (lhs: Channel, rhs: Channel) -> Bool {
-        lhs.id == rhs.id && lhs.name == rhs.name && lhs.position == rhs.position
+        lhs.id == rhs.id && lhs.name == rhs.name && lhs.position == rhs.position && lhs.parent_id == rhs.parent_id && lhs.permission_overwrites == rhs.permission_overwrites
     }
 
     public let id: Snowflake
