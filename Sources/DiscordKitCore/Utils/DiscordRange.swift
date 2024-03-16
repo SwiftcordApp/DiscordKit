@@ -7,7 +7,14 @@
 
 import Foundation
 
-public struct DiscordRange: Codable {
+public struct DiscordRange: Codable, CustomStringConvertible, CustomDebugStringConvertible {
+    public var description: String {
+        closedRange.description
+    }
+    public var debugDescription: String {
+        closedRange.debugDescription
+    }
+
     public let start: Int
     public let end: Int
 

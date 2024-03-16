@@ -50,12 +50,14 @@ public struct GuildMemberListUpdate: Decodable, GatewayData {
             case sync = "SYNC"
             case delete = "DELETE"
             case insert = "INSERT"
+            case invalidate = "INVALIDATE"
         }
 
         case update(Data, index: Int)
         case insert(Data, index: Int)
         case delete(Int)
         case sync([Data], range: DiscordRange)
+        case invalidate(DiscordRange)
 
         enum CodingKeys: CodingKey {
             case index
@@ -77,6 +79,8 @@ public struct GuildMemberListUpdate: Decodable, GatewayData {
                 self = .insert(try container.decode(Data.self, forKey: .item), index: try container.decode(Int.self, forKey: .index))
             case .delete:
                 self = .delete(try container.decode(Int.self, forKey: .index))
+            case .invalidate:
+                self = .invalidate(try container.decode(DiscordRange.self, forKey: .range))
             }
         }
     }
