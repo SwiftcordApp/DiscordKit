@@ -81,7 +81,8 @@ public extension DiscordREST {
     ///   - provider: Unknown, always observed to be nil
     ///   - voipProvider: Unknown, always observed to be nil
     func logOut(provider: String? = nil, voipProvider: String? = nil) async throws {
-        return try await postReq(path: "auth/logout", body: LogOut(provider: provider, voip_provider: voipProvider))
+        try await postReq(path: "auth/logout", body: LogOut(provider: provider, voip_provider: voipProvider))
+        setToken(token: nil)
     }
     /// Edit Current User
     ///
