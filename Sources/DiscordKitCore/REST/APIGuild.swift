@@ -13,7 +13,7 @@ public extension DiscordREST {
     /// Get Guild Channels
     ///
     /// > GET: `/guilds/{guild.id}/channels`
-    func getGuildChannels(id: Snowflake) async throws -> [DecodableThrowable<Channel>] {
+    func getGuildChannels(id: Snowflake) async throws -> [DecodeThrowable<Channel>] {
         return try await getReq(path: "guilds/\(id)/channels")
     }
 

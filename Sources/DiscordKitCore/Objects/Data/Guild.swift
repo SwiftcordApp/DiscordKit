@@ -38,7 +38,7 @@ public enum GuildFeature: String, Codable {
 }
 
 public struct Guild: GatewayData, Equatable, Identifiable {
-	public init(id: Snowflake, name: String, icon: String? = nil, icon_hash: String? = nil, splash: String? = nil, discovery_splash: String? = nil, owner: Bool? = nil, owner_id: Snowflake, permissions: String? = nil, region: String? = nil, afk_channel_id: Snowflake? = nil, afk_timeout: Int, widget_enabled: Bool? = nil, widget_channel_id: Snowflake? = nil, verification_level: VerificationLevel, default_message_notifications: MessageNotifLevel, explicit_content_filter: ExplicitContentFilterLevel, roles: [DecodableThrowable<Role>], emojis: [DecodableThrowable<Emoji>], features: [DecodableThrowable<GuildFeature>], mfa_level: MFALevel, application_id: Snowflake? = nil, system_channel_id: Snowflake? = nil, system_channel_flags: Int, rules_channel_id: Snowflake? = nil, joined_at: Date? = nil, large: Bool? = nil, unavailable: Bool? = nil, member_count: Int? = nil, voice_states: [VoiceState]? = nil, members: [Member]? = nil, channels: [Channel]? = nil, threads: [Channel]? = nil, presences: [PresenceUpdate]? = nil, max_presences: Int? = nil, max_members: Int? = nil, vanity_url_code: String? = nil, description: String? = nil, banner: String? = nil, premium_tier: PremiumLevel, premium_subscription_count: Int? = nil, preferred_locale: Locale, public_updates_channel_id: Snowflake? = nil, max_video_channel_users: Int? = nil, approximate_member_count: Int? = nil, approximate_presence_count: Int? = nil, welcome_screen: GuildWelcomeScreen? = nil, nsfw_level: NSFWLevel, stage_instances: [StageInstance]? = nil, stickers: [Sticker]? = nil, guild_scheduled_events: [GuildScheduledEvent]? = nil, premium_progress_bar_enabled: Bool) {
+	public init(id: Snowflake, name: String, icon: String? = nil, icon_hash: String? = nil, splash: String? = nil, discovery_splash: String? = nil, owner: Bool? = nil, owner_id: Snowflake, permissions: String? = nil, region: String? = nil, afk_channel_id: Snowflake? = nil, afk_timeout: Int, widget_enabled: Bool? = nil, widget_channel_id: Snowflake? = nil, verification_level: VerificationLevel, default_message_notifications: MessageNotifLevel, explicit_content_filter: ExplicitContentFilterLevel, roles: [DecodeThrowable<Role>], emojis: [DecodeThrowable<Emoji>], features: [DecodeThrowable<GuildFeature>], mfa_level: MFALevel, application_id: Snowflake? = nil, system_channel_id: Snowflake? = nil, system_channel_flags: Int, rules_channel_id: Snowflake? = nil, joined_at: Date? = nil, large: Bool? = nil, unavailable: Bool? = nil, member_count: Int? = nil, voice_states: [VoiceState]? = nil, members: [Member]? = nil, channels: [Channel]? = nil, threads: [Channel]? = nil, presences: [PresenceUpdate]? = nil, max_presences: Int? = nil, max_members: Int? = nil, vanity_url_code: String? = nil, description: String? = nil, banner: String? = nil, premium_tier: PremiumLevel, premium_subscription_count: Int? = nil, preferred_locale: Locale, public_updates_channel_id: Snowflake? = nil, max_video_channel_users: Int? = nil, approximate_member_count: Int? = nil, approximate_presence_count: Int? = nil, welcome_screen: GuildWelcomeScreen? = nil, nsfw_level: NSFWLevel, stage_instances: [StageInstance]? = nil, stickers: [Sticker]? = nil, guild_scheduled_events: [GuildScheduledEvent]? = nil, premium_progress_bar_enabled: Bool) {
 		self.id = id
 		self.name = name
 		self.icon = icon
@@ -109,7 +109,7 @@ public struct Guild: GatewayData, Equatable, Identifiable {
     public let verification_level: VerificationLevel
     public let default_message_notifications: MessageNotifLevel
     public let explicit_content_filter: ExplicitContentFilterLevel
-    public let features: [DecodableThrowable<GuildFeature>]
+    public let features: [DecodeThrowable<GuildFeature>]
     public let mfa_level: MFALevel
     public let application_id: Snowflake? // For bot-created guilds
     public let system_channel_id: Snowflake? // ID of channel for system-created messages
@@ -149,8 +149,8 @@ public struct PreloadedGuild: GatewayData, Identifiable, Equatable {
     }
 
     public let version: Int
-    public let channels: [Channel]
-    public let emojis: [DecodableThrowable<Emoji>]
+    public let channels: [DecodeThrowable<Channel>]
+    public let emojis: [DecodeThrowable<Emoji>]
     public let id: Snowflake
     public let joined_at: Date
     public let large: Bool
@@ -159,19 +159,19 @@ public struct PreloadedGuild: GatewayData, Identifiable, Equatable {
     /// Members in the guild
     ///
     /// > User accounts will only receive the client's member and users in voice channels, and 
-    public let members: [Member]?
+    public let members: [DecodeThrowable<Member>]?
 
     /// Number of "boosts" the server has
     public let premium_subscription_count: Int
     public let properties: Guild
-    public let roles: [DecodableThrowable<Role>]
-    public let stickers: [Sticker]
+    public let roles: [DecodeThrowable<Role>]
+    public let stickers: [DecodeThrowable<Sticker>]
     // public let threads:
 
     /// Convenience init for creating DM channel
     public init(channels: [Channel], properties: Guild) {
         self.version = 0
-        self.channels = channels
+        self.channels = channels.map { DecodeThrowable($0) }
         self.emojis = []
         self.id = "@me"
         self.joined_at = .distantPast

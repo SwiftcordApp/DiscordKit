@@ -13,12 +13,26 @@ import Foundation
 /// decoding errors to be removed, instead of the whole struct failing
 /// to decode. Use a compactMap with `try? result.get()` to remove
 /// items that failed to decode.
-public struct DecodableThrowable<T: Decodable>: Decodable {
+public struct DecodeThrowable<T: Decodable>: Decodable {
     /// Decoded result, use `try? .get()` to retrive the value
     /// or nil if decoding failed
     public let result: Result<T, Error>
 
+    public func unwrap() throws -> T {
+        try result.get()
+    }
+
+    public init(_ wrapped: T) {
+        result = .success(wrapped)
+    }
+
     public init(from decoder: Decoder) throws {
         result = Result(catching: { try T(from: decoder) })
+    }
+}
+
+public extension Array {
+    func compactUnwrap<T>() -> [T] where Element == DecodeThrowable<T> {
+        self.compactMap { try? $0.unwrap() }
     }
 }

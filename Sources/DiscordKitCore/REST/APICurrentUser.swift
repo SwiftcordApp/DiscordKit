@@ -13,7 +13,7 @@ import Foundation
 public extension DiscordREST {
     // MARK: Get Current User DMs
     // GET /users/@me/channels
-    func getDMs() async throws -> [DecodableThrowable<Channel>] {
+    func getDMs() async throws -> [DecodeThrowable<Channel>] {
         return try await getReq(path: "users/@me/channels")
     }
 

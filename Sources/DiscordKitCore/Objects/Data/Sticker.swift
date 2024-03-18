@@ -9,16 +9,17 @@ import Foundation
 
 public enum StickerType: Int, Codable {
     case standard = 1
-    case guild = 2
+    case guild
 }
 
 public enum StickerFormat: Int, Codable {
     case png = 1
-    case aPNG = 2 // Animated PNG
-    case lottie = 3
+    case aPNG // Animated PNG
+    case lottie
+    case gif
 }
 
-public struct Sticker: Codable, GatewayData {
+public struct Sticker: Codable, GatewayData, Identifiable {
     public let id: Snowflake
     public let pack_id: Snowflake? // For standard stickers, id of the pack the sticker is from
     public let name: String
@@ -40,7 +41,7 @@ public struct StickerItem: Codable, Identifiable {
     public let format_type: StickerFormat
 }
 
-public struct StickerPack: Codable, GatewayData {
+public struct StickerPack: Codable, GatewayData, Identifiable {
     public let id: Snowflake
     public let stickers: [StickerItem]
     public let name: String
