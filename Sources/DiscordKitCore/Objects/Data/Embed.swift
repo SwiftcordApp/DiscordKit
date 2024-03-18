@@ -14,7 +14,8 @@ public enum EmbedType: String, Codable {
     case gifVid = "gifv" // GIF rendered as video
     case article = "article"
     case link = "link"
-    case autoMod = "auto_moderation_message"
+    case autoModAlert = "auto_moderation_message"
+    case autoModNotif = "auto_moderation_notification"
 }
 
 public struct Embed: Codable, Identifiable, Equatable, Hashable {
