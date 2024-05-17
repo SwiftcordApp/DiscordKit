@@ -8,3 +8,10 @@
 import Foundation
 
 public typealias Snowflake = String
+
+extension Snowflake {
+    init(timestamp: Date = .init()) {
+        let epoch = Int(timestamp.timeIntervalSince1970*1000) - DISCORD_EPOCH
+        self.init(epoch << 22)
+    }
+}

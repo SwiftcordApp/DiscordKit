@@ -26,12 +26,13 @@ public struct NewMessage: Encodable {
     public let components: [Component]?
     public let sticker_ids: [Snowflake]?
     public let attachments: [NewAttachment]?
+    public let nonce: Nonce?
     // file[n] // Handle file uploading later
     // attachments
     // let payload_json: Codable? // Handle this later
     public let flags: Int?
 
-	public init(content: String?, tts: Bool? = false, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: MessageReference? = nil, components: [Component]? = nil, sticker_ids: [Snowflake]? = nil, attachments: [NewAttachment]? = nil, flags: Int? = nil) {
+    public init(content: String?, nonce: Nonce = .init(), tts: Bool? = false, embeds: [Embed]? = nil, allowed_mentions: AllowedMentions? = nil, message_reference: MessageReference? = nil, components: [Component]? = nil, sticker_ids: [Snowflake]? = nil, attachments: [NewAttachment]? = nil, flags: Int? = nil) {
 		self.content = content
 		self.tts = tts
 		self.embeds = embeds
@@ -41,6 +42,7 @@ public struct NewMessage: Encodable {
 		self.sticker_ids = sticker_ids
 		self.attachments = attachments
 		self.flags = flags
+        self.nonce = nonce
     }
 
     enum CodingKeys: CodingKey {
@@ -53,6 +55,7 @@ public struct NewMessage: Encodable {
         case sticker_ids
         case attachments
         case flags
+        case nonce
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -66,6 +69,7 @@ public struct NewMessage: Encodable {
         try container.encodeIfPresent(sticker_ids, forKey: .sticker_ids)
         try container.encodeIfPresent(attachments, forKey: .attachments)
         try container.encodeIfPresent(flags, forKey: .flags)
+        try container.encodeIfPresent(nonce, forKey: .nonce)
 
         // Same workaround to encode array of protocols
         if let components = components {
