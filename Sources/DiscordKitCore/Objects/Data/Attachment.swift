@@ -1,6 +1,6 @@
 //
 //  Attachment.swift
-//  DiscordAPI
+//  DiscordKit
 //
 //  Created by Vincent Kwok on 19/2/22.
 //
@@ -18,4 +18,8 @@ public struct Attachment: Codable, Identifiable, Equatable, Hashable {
     public let height: Int? // Height of file (if image)
     public let width: Int? // Width of file (if image)
     public let ephemeral: Bool?
+    /// Thumbhash placeholder of image
+    public let placeholder: String?
+    /// Version of the contents of ``placeholder``
+    public let placeholder_version: Int?
 }
