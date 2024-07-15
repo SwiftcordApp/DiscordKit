@@ -14,7 +14,7 @@ public extension DiscordREST {
         after: Snowflake? = nil
     ) async throws -> [Message] {
         var query = [URLQueryItem(name: "limit", value: String(limit))]
-		if around != nil { query.append(URLQueryItem(name: "around", value: around?.description)) } else if before != nil {query.append(URLQueryItem(name: "before", value: before?.description))} else if after != nil { query.append(URLQueryItem(name: "after", value: after?.description)) }
+        if around != nil { query.append(URLQueryItem(name: "around", value: around?.description)) } else if before != nil {query.append(URLQueryItem(name: "before", value: before?.description))} else if after != nil { query.append(URLQueryItem(name: "after", value: after?.description)) }
 
         return try await getReq(path: "channels/\(id)/messages", query: query)
     }
@@ -64,9 +64,17 @@ public extension DiscordREST {
     /// > POST: `/channels/{channel.id}/messages/{message.id}/ack`
     func ackMessageRead(
         id: Snowflake,
-        msgID: Snowflake
+        msgID: Snowflake,
+        manual: Bool? = false,
+        mention_count: Int? = 0
     ) async throws -> MessageReadAck {
-        return try await postReq(path: "channels/\(id)/messages/\(msgID)/ack", body: MessageReadAck(token: nil), attachments: [])
+        if manual ?? false {
+            return try await postReq(path: "channels/\(id)/messages/\(msgID)/ack", body: MessageReadAck(token: nil, last_viewed: nil, manual: manual, mention_count: mention_count))
+        }
+        
+        let lastViewed = Int(ceil((Date().timeIntervalSince1970*1000 - DISCORD_EPOCH) / 864e5))
+        
+        return try await postReq(path: "channels/\(id)/messages/\(msgID)/ack", body: MessageReadAck(token: nil, last_viewed: lastViewed, manual: nil, mention_count: nil))
     }
 
     /// Typing Start (Undocumented endpoint!)

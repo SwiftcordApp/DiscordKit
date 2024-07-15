@@ -7,6 +7,8 @@
 
 import Foundation
 
+let DISCORD_EPOCH: TimeInterval = 1420070400000
+
 let iso8601 = { () -> ISO8601DateFormatter in
     let fmt = ISO8601DateFormatter()
     fmt.formatOptions = [.withInternetDateTime]
