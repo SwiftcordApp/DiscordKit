@@ -68,6 +68,7 @@ in the DiscordKit guide.
 Create a simple bot with a **/ping** command:
 
 ```swift
+import Foundation
 import DiscordKitBot
 
 let bot = Client(intents: .unprivileged)
