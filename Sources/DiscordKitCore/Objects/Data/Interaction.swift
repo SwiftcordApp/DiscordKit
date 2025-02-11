@@ -73,6 +73,7 @@ public struct Interaction: Decodable {
                     case double(Double)
                     case boolean(Bool) // Discord docs are disappointing
                     case user(Snowflake)
+                    case channel(String)
 
                     public func encode(to encoder: Encoder) throws {
                         var container = encoder.singleValueContainer()
@@ -82,6 +83,7 @@ public struct Interaction: Decodable {
                         case .double(let val): try container.encode(val)
                         case .boolean(let val): try container.encode(val)
                         case .user(let val): try container.encode(val)
+                        case .channel(let val): try container.encode(val)
                         }
                     }
 
@@ -89,11 +91,11 @@ public struct Interaction: Decodable {
                     ///
                     /// - Returns: The string value of a certain option if it is present and is of type `String`, otherwise `nil`
                     public func value() -> String? {
-                        guard case let .string(val) = self else {
-                            guard case let .user(val) = self else { return nil }
-                            return val
-                        }
-                        return val
+                        if case let .string(val) = self { return val }
+                        if case let .user(val) = self { return val }
+                        if case let .channel(val) = self { return val }
+
+                        return nil
                     }
                     /// Get the wrapped `Int` value
                     ///
@@ -151,6 +153,7 @@ public struct Interaction: Decodable {
                     case .boolean: value = .boolean(try container.decode(Bool.self, forKey: .value))
                     case .string: value = .string(try container.decode(String.self, forKey: .value))
                     case .user: value = .user(try container.decode(Snowflake.self, forKey: .value))
+                    case .channel: value = .channel(try container.decode(String.self, forKey: .value))
                     default: value = nil
                     }
                 }
