@@ -87,6 +87,21 @@ public extension CommandData {
     typealias OptionData = Interaction.Data.AppCommandData.OptionData
 }
 
+public extension CommandData {
+    func subGroup(name: String) -> CommandData? {
+        guard let option = optionValues[name], option.type == .subCommandGroup else { return nil }
+        guard let options = option.options else { return nil }
+        guard let rest = self.rest else { return nil }
+        return CommandData(
+            optionValues: options,
+            rest: rest,
+            applicationID: self.applicationID,
+            interactionID: self.interactionID,
+            token: self.token
+        )
+    }
+}
+
 // MARK: - Callback APIs
 public extension CommandData {
     /// Wrapper function to send an interaction response with the current interaction's ID and token
