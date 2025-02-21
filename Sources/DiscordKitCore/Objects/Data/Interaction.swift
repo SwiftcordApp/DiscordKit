@@ -61,6 +61,8 @@ public struct Interaction: Decodable {
             public let name: String
             /// Type of command
             public let type: Int
+            /// Resolved references for things like user and channels
+            public let resolved: ResolvedData?
             /// Options of command (present if the command has options)
             public let options: [OptionData]?
 
@@ -157,6 +159,10 @@ public struct Interaction: Decodable {
                     default: value = nil
                     }
                 }
+            }
+
+            public struct ResolvedData: Codable {
+                public let channels: [Snowflake: Channel]?
             }
         }
 
