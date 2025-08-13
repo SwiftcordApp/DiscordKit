@@ -27,7 +27,7 @@ let package = Package(
         .target(
             name: "DiscordKitCore",
             dependencies: [
-                .product(name: "Reachability", package: "Reachability.swift", condition: .when(platforms: [.macOS])),
+                .product(name: "Reachability", package: "Reachability.swift", condition: .when(platforms: [.macOS, .iOS])),
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
                 .product(name: "Logging", package: "swift-log"),
                 .product(name: "OpenCombine", package: "OpenCombine", condition: .when(platforms: [.linux])),

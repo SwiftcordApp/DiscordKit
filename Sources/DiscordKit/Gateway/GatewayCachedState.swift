@@ -32,12 +32,17 @@ public class CachedState: ObservableObject {
     /// Populates the cache using the provided event.
     /// - Parameter event: An incoming Gateway "ready" event.
     func configure(using event: ReadyEvt) {
-        event.guilds.forEach(appendOrReplace(_:))
-        dms = event.private_channels
-        user = event.user
-        event.users.forEach(appendOrReplace(_:))
-        event.merged_members.enumerated().forEach { (idx, guildMembers) in
-            members[event.guilds[idx].id] = guildMembers.first(where: { $0.user_id == event.user.id })
+        do {
+            let guilds = try event.guilds.map({ try $0.unwrap() })
+            guilds.forEach(appendOrReplace(_:))
+            dms = try event.private_channels.map({ try $0.unwrap() })
+            user = event.user
+            event.users.forEach(appendOrReplace(_:))
+            event.merged_members.enumerated().forEach { (idx, guildMembers) in
+                members[guilds[idx].id] = guildMembers.first(where: { $0.user_id == event.user.id })
+            }
+        } catch {
+            print("Error configuring cache: \(error.localizedDescription)")
         }
         print(members)
     }

@@ -43,7 +43,7 @@ public extension DiscordREST {
     /// > POST: `/channels/{channel.id}/messages`
     func createChannelMsg(
         message: NewMessage,
-        attachments: [URL] = [],
+        attachments: [some Attachable] = [URL](),
         id: Snowflake
     ) async throws -> Message {
         return try await postReq(path: "channels/\(id)/messages", body: message, attachments: attachments)
@@ -66,7 +66,7 @@ public extension DiscordREST {
         id: Snowflake,
         msgID: Snowflake
     ) async throws -> MessageReadAck {
-        return try await postReq(path: "channels/\(id)/messages/\(msgID)/ack", body: MessageReadAck(token: nil), attachments: [])
+        return try await postReq(path: "channels/\(id)/messages/\(msgID)/ack", body: MessageReadAck(token: nil), attachments: [URL]())
     }
 
     /// Typing Start (Undocumented endpoint!)

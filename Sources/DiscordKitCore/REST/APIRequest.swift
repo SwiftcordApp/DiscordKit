@@ -49,7 +49,7 @@ public extension DiscordREST {
     func makeRequest(
         path: String,
         query: [URLQueryItem] = [],
-        attachments: [URL] = [],
+        attachments: [some Attachable] = [URL](),
         body: Data? = nil,
         method: RequestMethod = .get
     ) async throws -> Data {
@@ -143,7 +143,7 @@ public extension DiscordREST {
     func postReq<D: Decodable, B: Encodable>(
         path: String,
         body: B? = nil,
-        attachments: [URL] = []
+        attachments: [some Attachable] = [URL]()
     ) async throws -> D {
         let payload = body != nil ? try DiscordREST.encoder.encode(body) : nil
         let respData = try await makeRequest(
