@@ -12,7 +12,7 @@ public extension DiscordREST {
         around: Snowflake? = nil,
         before: Snowflake? = nil,
         after: Snowflake? = nil
-    ) async throws -> [Message] {
+    ) async throws -> [DecodeThrowable<Message>] {
         var query = [URLQueryItem(name: "limit", value: String(limit))]
 		if around != nil { query.append(URLQueryItem(name: "around", value: around?.description)) } else if before != nil {query.append(URLQueryItem(name: "before", value: before?.description))} else if after != nil { query.append(URLQueryItem(name: "after", value: after?.description)) }
 
@@ -34,7 +34,7 @@ public extension DiscordREST {
             guard !messages.isEmpty else {
                 throw RequestError.genericError(reason: "Messages endpoint did not return any messages")
             }
-            return messages[0]
+            return try messages[0].unwrap()
         }
     }
 
