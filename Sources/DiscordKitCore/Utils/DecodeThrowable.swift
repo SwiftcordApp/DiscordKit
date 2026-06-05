@@ -33,6 +33,13 @@ public struct DecodeThrowable<T: Decodable>: Decodable {
 
 public extension Array {
     func compactUnwrap<T>() -> [T] where Element == DecodeThrowable<T> {
-        self.compactMap { try? $0.unwrap() }
+        self.compactMap {
+            do {
+                return try $0.unwrap()
+            } catch {
+                print("error decoding: \(error)")
+                return nil
+            }
+        }
     }
 }
