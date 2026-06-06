@@ -30,7 +30,7 @@ public enum PropertiesOS: String, Codable {
     case linux
 
     public static var current: Self {
-        #if os(macOS)
+        #if os(macOS) || targetEnvironment(macCatalyst)
             .macOS
         #else
             .linux
