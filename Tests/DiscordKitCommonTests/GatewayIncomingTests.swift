@@ -156,6 +156,17 @@ final class GatewayIncomingTests: XCTestCase {
         XCTAssertFalse(properties.keys.contains("client_heartbeat_session_id"))
     }
 
+    func testDiscordKitConfigUsesLaunchIdentityOverrides() throws {
+        let launchID = "00000000-0000-4000-8000-000000000000"
+        let signature = "0f0e0d0c-030a-4108-8706-050402020100"
+        let properties = try encodeObject(
+            DiscordKitConfig(clientLaunchID: launchID, launchSignature: signature).properties
+        )
+
+        XCTAssertEqual(properties["client_launch_id"] as? String, launchID)
+        XCTAssertEqual(properties["launch_signature"] as? String, signature)
+    }
+
     func testLaunchIDsAreReusedAcrossPropertyInstances() throws {
         let first = try encodeObject(GatewayConnProperties())
         let second = try encodeObject(GatewayConnProperties())

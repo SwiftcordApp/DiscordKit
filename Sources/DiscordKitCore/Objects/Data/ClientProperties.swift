@@ -59,8 +59,8 @@ public struct GatewayConnProperties: OutgoingGatewayData {
         search_engine_current: String? = nil,
         mp_keyword_current: String? = nil,
         client_event_source: String? = nil,
-        client_launch_id: String? = nil,
-        launch_signature: String? = Self.launchSignature,
+        client_launch_id: String? = DiscordKitConfig.clientLaunchID,
+        launch_signature: String? = DiscordKitConfig.launchSignature,
         client_app_state: String? = "unfocused",
         client_heartbeat_session_id: String? = nil,
         is_fast_connect: Bool? = nil,
@@ -97,7 +97,7 @@ public struct GatewayConnProperties: OutgoingGatewayData {
         self.release_channel = release_channel ?? "stable"
         self.client_build_number = client_build_number ?? 556_969
         _client_event_source = NullEncodable(wrappedValue: client_event_source)
-        self.client_launch_id = client_launch_id ?? Self.clientLaunchID
+        self.client_launch_id = client_launch_id ?? DiscordKitConfig.clientLaunchID
         _launch_signature = NullEncodable(wrappedValue: launch_signature)
         self.client_app_state = client_app_state
         self.client_heartbeat_session_id = client_heartbeat_session_id
@@ -153,14 +153,6 @@ public struct GatewayConnProperties: OutgoingGatewayData {
     var is_fast_connect: Bool?
     var gateway_connect_reasons: String?
     var installation_id: String?
-
-    public static let clientLaunchID: String = {
-        UUID().uuidString.lowercased()
-    }()
-
-    public static let launchSignature: String = {
-        UUID().uuidString.lowercased()
-    }()
 
     func addingGatewayIdentifyFields(
         clientAppState: String?,

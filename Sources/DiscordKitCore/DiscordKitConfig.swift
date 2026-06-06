@@ -76,6 +76,8 @@ public struct DiscordKitConfig {
     // MARK: Configuration constants
     public static let libraryName = "DiscordKit"
     public static let discordKitBuild = 1
+    public static let clientLaunchID = generateClientLaunchID()
+    public static let launchSignature = generateLaunchUUID()
 
     /// Populate struct values with provided parameters
     public init(
@@ -83,7 +85,9 @@ public struct DiscordKitConfig {
         version: Int? = nil,
         properties: GatewayConnProperties? = nil,
         intents: Intents? = nil,
-        streamCompression: Bool = true
+        streamCompression: Bool = true,
+        clientLaunchID: String? = nil,
+        launchSignature: String? = nil
     ) {
         self.cdnURL = "https://cdn.discordapp.com/"
         self.baseURL = URL(string: "https://\(baseURL)/")!
@@ -108,10 +112,20 @@ public struct DiscordKitConfig {
                 buildNumber: Self.clientParity.buildNumber,
                 browserVersion: Self.clientParity.browserVersion,
                 browserUserAgent: Self.clientParity.browserUserAgent,
-                osVersion: Self.clientParity.osVersion
+                osVersion: Self.clientParity.osVersion,
+                clientLaunchID: clientLaunchID,
+                launchSignature: launchSignature
             )
         }
         restBase = self.baseURL.appendingPathComponent("api").appendingPathComponent("v\(self.version)")
+    }
+
+    public static func generateClientLaunchID() -> String {
+        generateLaunchUUID()
+    }
+
+    private static func generateLaunchUUID() -> String {
+        UUID().uuidString.lowercased()
     }
 
     /// Populate a ``GatewayConnProperties`` struct with some constant
@@ -123,7 +137,9 @@ public struct DiscordKitConfig {
         buildNumber: Int,
         browserVersion: String,
         browserUserAgent: String,
-        osVersion: String
+        osVersion: String,
+        clientLaunchID: String? = nil,
+        launchSignature: String? = nil
     ) -> GatewayConnProperties {
         GatewayConnProperties(
             browser: "Chrome",
@@ -132,7 +148,9 @@ public struct DiscordKitConfig {
             system_locale: Locale.englishUS.rawValue,
             client_build_number: buildNumber,
             browser_user_agent: browserUserAgent,
-            browser_version: browserVersion
+            browser_version: browserVersion,
+            client_launch_id: clientLaunchID ?? Self.clientLaunchID,
+            launch_signature: launchSignature ?? Self.launchSignature
         )
     }
 
