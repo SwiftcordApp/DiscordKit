@@ -11,6 +11,12 @@ import Logging
 #if os(macOS) || os(iOS)
 import Compression
 
+enum GatewayDecompressionResult {
+    case waitingForMoreData
+    case payload(String)
+    case failure
+}
+
 /// Decompresses `zlib-stream`-compressed payloads received
 /// from the Gateway
 ///
@@ -25,26 +31,47 @@ import Compression
 public class DecompressionEngine {
     private static let ZLIB_SUFFIX = Data([0x00, 0x00, 0xff, 0xff]), BUFFER_SIZE = 32_768
 
-	private static let log = Logger(label: "DecompressionEngine", level: nil)
+    private static let log = Logger(label: "DecompressionEngine", level: nil)
     private var buf = Data(), stream: compression_stream, status: compression_status,
                 decompressing = false
+    private let streamSourceStub: UnsafeMutablePointer<UInt8>
+    private let streamDestinationStub: UnsafeMutablePointer<UInt8>
+    private var streamInitialized = false
 
     /// Inits an instance of ``DecompressionEngine``
     ///
     /// A compression stream is created and initialised, which is destroyed
     /// in `deinit`. All data is run though this compression stream for decompression.
     public init() {
-        stream = UnsafeMutablePointer<compression_stream>.allocate(capacity: 1).pointee
+        streamSourceStub = UnsafeMutablePointer<UInt8>.allocate(capacity: 1)
+        streamDestinationStub = UnsafeMutablePointer<UInt8>.allocate(capacity: 1)
+        streamSourceStub.initialize(to: 0)
+        streamDestinationStub.initialize(to: 0)
+        stream = compression_stream(
+            dst_ptr: streamDestinationStub,
+            dst_size: 0,
+            src_ptr: UnsafePointer(streamSourceStub),
+            src_size: 0,
+            state: nil
+        )
+        status = COMPRESSION_STATUS_OK
         status = compression_stream_init(&stream, COMPRESSION_STREAM_DECODE, COMPRESSION_ZLIB)
 
         guard status != COMPRESSION_STATUS_ERROR else {
             Self.log.critical("Couldn't init compression stream!")
             return
         }
+        streamInitialized = true
     }
 
     deinit {
-        compression_stream_destroy(&stream)
+        if streamInitialized {
+            compression_stream_destroy(&stream)
+        }
+        streamSourceStub.deinitialize(count: 1)
+        streamSourceStub.deallocate()
+        streamDestinationStub.deinitialize(count: 1)
+        streamDestinationStub.deallocate()
     }
 
     /// Push compressed data into the decompression `Data` buffer
@@ -56,26 +83,42 @@ public class DecompressionEngine {
     ///
     /// - Returns: `String` of decompressed data, or nil if the compressed
     /// data is not yet complete
-    public func push_data(_ data: Data) -> String? {
+    func pushGatewayData(_ data: Data) -> GatewayDecompressionResult {
         buf.append(data)
 
         guard buf.count >= 4, buf.suffix(4) == DecompressionEngine.ZLIB_SUFFIX else {
             Self.log.debug("Appending to buf", metadata: ["buf.count": "\(buf.count)"])
-            return nil
+            return .waitingForMoreData
         }
 
-        let output = decompress(buf)
-        buf.removeAll()
+        guard let output = decompress(buf) else {
+            buf.removeAll()
+            return .failure
+        }
 
-        return String(decoding: output, as: UTF8.self)
+        buf.removeAll()
+        return .payload(String(decoding: output, as: UTF8.self))
+    }
+
+    public func push_data(_ data: Data) -> String? {
+        switch pushGatewayData(data) {
+        case .waitingForMoreData, .failure:
+            return nil
+        case .payload(let payload):
+            return payload
+        }
     }
 }
 
 public extension DecompressionEngine {
-    fileprivate func decompress(_ data: Data) -> Data {
+    fileprivate func decompress(_ data: Data) -> Data? {
+        guard streamInitialized else {
+            Self.log.warning("Compression stream is unavailable")
+            return nil
+        }
         guard !decompressing else {
             Self.log.warning("Another decompression is currently taking place, skipping")
-            return Data()
+            return nil
         }
         decompressing = true
 
@@ -116,10 +159,9 @@ public extension DecompressionEngine {
 
             // Perform compression or decompression.
             if let srcChunk = srcChunk {
-                srcChunk.withUnsafeBytes {
-                    let baseAddress = $0.bindMemory(to: UInt8.self).baseAddress!
-
-                    stream.src_ptr = baseAddress.advanced(by: $0.count - stream.src_size)
+                srcChunk.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) in
+                    guard let baseAddress = buffer.bindMemory(to: UInt8.self).baseAddress else { return }
+                    stream.src_ptr = baseAddress.advanced(by: buffer.count - stream.src_size)
                     status = compression_stream_process(&stream, flags)
                 }
             }
@@ -136,7 +178,13 @@ public extension DecompressionEngine {
                 // Reset the stream to receive the next batch of output.
                 stream.dst_ptr = destinationBufferPointer
                 stream.dst_size = bufferSize
-            case COMPRESSION_STATUS_ERROR: break // This "error" occurs when decompression is done, what a hack
+            case COMPRESSION_STATUS_ERROR:
+                // Discord zlib-stream frames can finish at a flush boundary that
+                // Apple's Compression reports as ERROR after producing output.
+                // Treat an empty result as an actual decompression failure.
+                if decompressed.isEmpty {
+                    return nil
+                }
             default: break
             }
         } while status == COMPRESSION_STATUS_OK
@@ -153,24 +201,42 @@ public extension DecompressionEngine {
 #else
 import SWCompression
 
+enum GatewayDecompressionResult {
+    case waitingForMoreData
+    case payload(String)
+    case failure
+}
+
 public class DecompressionEngine {
     private var buf = Data()
 
     private static let ZLIB_SUFFIX = Data([0x00, 0x00, 0xff, 0xff]), BUFFER_SIZE = 32_768
     private static let log = Logger(label: "DecompressionEngine", level: nil)
 
-    public func push_data(_ data: Data) -> String? {
+    func pushGatewayData(_ data: Data) -> GatewayDecompressionResult {
         buf.append(data)
 
         guard buf.count >= 4, buf.suffix(4) == DecompressionEngine.ZLIB_SUFFIX else {
             Self.log.debug("Appending to buf", metadata: ["buf.count": "\(buf.count)"])
-            return nil
+            return .waitingForMoreData
         }
 
-        guard let output = try? ZlibArchive.unarchive(archive: buf) else { return nil }
+        guard let output = try? ZlibArchive.unarchive(archive: buf) else {
+            buf.removeAll()
+            return .failure
+        }
         buf.removeAll()
 
-        return String(decoding: output, as: UTF8.self)
+        return .payload(String(decoding: output, as: UTF8.self))
+    }
+
+    public func push_data(_ data: Data) -> String? {
+        switch pushGatewayData(data) {
+        case .waitingForMoreData, .failure:
+            return nil
+        case .payload(let payload):
+            return payload
+        }
     }
 }
 #endif

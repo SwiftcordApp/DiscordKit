@@ -150,37 +150,23 @@ public struct UpdateGuildSubscriptions: OutgoingGatewayData {
 struct ClientState: OutgoingGatewayData {
     struct GuildVersion: OutgoingGatewayData { }
 
-    let api_code_version: Int
     let guild_versions: GuildVersion
-    let highest_last_message_id: Snowflake
-    let initial_guild_id: Snowflake?
-    let private_channels_version: String
-    let read_state_version: Int
-    let user_guild_settings_version: Int
-    let user_settings_version: Int
+
+    init(guild_versions: GuildVersion = GuildVersion()) {
+        self.guild_versions = guild_versions
+    }
 }
-/// Placeholder struct for `guild_hashes` in `client_state`
+/// Gateway QOS heartbeat.
 ///
-/// This is currently empty, and simply serves as a placeholder.
-struct GuildHashes: OutgoingGatewayData {
+/// The official client currently sends opcode 40 heartbeats with the current
+/// gateway sequence and an optional consumed QOS payload.
+struct GatewayQOSHeartbeat: OutgoingGatewayData {
+    @NullEncodable var seq: Int?
+    @NullEncodable var qos: String?
 
-}
-
-/// Gateway Heartbeat
-///
-/// Sent when establishing a new session with the Gateway, to identify the client.
-/// Refer to ``GatewayHello/heartbeat_interval`` for more details regarding
-/// the heartbeat timings.
-///
-/// > Outgoing Gateway data struct for opcode 2
-struct GatewayHeartbeat: OutgoingGatewayData {
-    let seq: Int?
-
-    init(_ seq: Int?) { self.seq = seq }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        try container.encode(seq)
+    init(seq: Int?, qos: String? = nil) {
+        _seq = NullEncodable(wrappedValue: seq)
+        _qos = NullEncodable(wrappedValue: qos)
     }
 }
 

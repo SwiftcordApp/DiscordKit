@@ -11,31 +11,24 @@ public extension RobustWebSocket {
     /// Returns a `GatewayIdentify` struct for identification
     /// during Gateway connection
     ///
-    /// Retrives the Discord token from the keychain and populates
-    /// the `GatewayIdentify` struct. This method should not normally
+    /// Populates the `GatewayIdentify` struct from the socket's token
+    /// and current DiscordKit configuration. This method should not normally
     /// need to be called from outside `RobustWebSocket`.
-    ///
-    /// - Returns: A `GatewayIdentify` struct, or nil if the Discord token is
-    /// not present in the keychain
-    internal func getIdentify() -> GatewayIdentify? {
-        return GatewayIdentify(
+    internal func getIdentify() -> GatewayIdentify {
+        GatewayIdentify(
             token: token,
-            properties: DiscordKitConfig.default.properties,
+            properties: DiscordKitConfig.default.properties.addingGatewayIdentifyFields(
+                clientAppState: "focused",
+                isFastConnect: false,
+                gatewayConnectReasons: "",
+                installationID: nil
+            ),
             compress: false,
             large_threshold: nil,
             shard: nil,
             presence: GatewayPresenceUpdate(since: 0, activities: [], status: .online, afk: false),
-            client_state: DiscordKitConfig.default.isBot ? nil : ClientState( // Just a dummy client_state
-                api_code_version: 0,
-                guild_versions: .init(),
-                highest_last_message_id: "0",
-                initial_guild_id: nil,
-                private_channels_version: "0",
-                read_state_version: 0,
-                user_guild_settings_version: -1,
-                user_settings_version: -1
-            ),
-            capabilities: DiscordKitConfig.default.isBot ? nil : 8189, // TODO: Reverse engineer this
+            client_state: DiscordKitConfig.default.isBot ? nil : ClientState(),
+            capabilities: DiscordKitConfig.default.isBot ? nil : 1_734_653,
             intents: DiscordKitConfig.default.isBot ? DiscordKitConfig.default.intents : nil
         )
     }
@@ -46,11 +39,8 @@ public extension RobustWebSocket {
     /// returns a `GatewayResume` struct instead, which is used when
     /// attempting to resume. This method should not normally need
     /// to be called from outside `RobustWebSocket`.
-    ///
-    /// - Returns: A `GatewayResume` struct, or nil if the Discord token is
-    /// not present in the keychain
-    internal func getResume(seq: Int?, sessionID: String) -> GatewayResume? {
-        return GatewayResume(
+    internal func getResume(seq: Int?, sessionID: String) -> GatewayResume {
+        GatewayResume(
             token: token,
             session_id: sessionID,
             seq: seq
