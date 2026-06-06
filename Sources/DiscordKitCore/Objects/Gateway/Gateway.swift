@@ -7,10 +7,6 @@
 
 import Foundation
 
-/*
- but enough for what this app needs to do.
- */
-
 public enum GatewayCloseCode: Int {
     case unknown = 4000
     case unknownOpcode = 4001
@@ -36,6 +32,7 @@ public enum GatewayOutgoingOpcodes: Int, Codable {
     case requestGuildMembers = 8
     case subscribeGuildEvents = 14
     case updateGuildSubscriptions = 37
+    case qosHeartbeat = 40
 }
 
 public enum GatewayIncomingOpcodes: Int, Codable {
@@ -45,4 +42,16 @@ public enum GatewayIncomingOpcodes: Int, Codable {
     case invalidSession = 9
     case hello = 10
     case heartbeatAck = 11
+    case unknown = -1
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let rawValue = try container.decode(Int.self)
+        self = Self(rawValue: rawValue) ?? .unknown
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
+    }
 }
