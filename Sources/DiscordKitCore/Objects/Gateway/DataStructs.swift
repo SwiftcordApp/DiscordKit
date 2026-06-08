@@ -42,13 +42,25 @@ public struct GatewayVoiceStateUpdate: OutgoingGatewayData, GatewayData {
     public let self_mute: Bool
     public let self_deaf: Bool
     public let self_video: Bool?
+    public let flags: Int?
+    public let tracks: [GatewayVoiceTrack]?
 
-    public init(guild_id: Snowflake?, channel_id: Snowflake?, self_mute: Bool, self_deaf: Bool, self_video: Bool?) {
+    public init(
+        guild_id: Snowflake?,
+        channel_id: Snowflake?,
+        self_mute: Bool,
+        self_deaf: Bool,
+        self_video: Bool?,
+        flags: Int? = nil,
+        tracks: [GatewayVoiceTrack]? = nil
+    ) {
         self.guild_id = guild_id
         self.channel_id = channel_id
         self.self_mute = self_mute
         self.self_deaf = self_deaf
         self.self_video = self_video
+        self.flags = flags
+        self.tracks = tracks
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -59,6 +71,36 @@ public struct GatewayVoiceStateUpdate: OutgoingGatewayData, GatewayData {
         try container.encode(self_video, forKey: .self_video)
         try container.encode(channel_id, forKey: .channel_id)
         try container.encode(guild_id, forKey: .guild_id)
+        try container.encodeIfPresent(flags, forKey: .flags)
+        try container.encodeIfPresent(tracks, forKey: .tracks)
+    }
+}
+
+/// Voice media track descriptor.
+///
+/// Sent in ``GatewayVoiceStateUpdate`` when enabling local video.
+public struct GatewayVoiceTrack: Codable, OutgoingGatewayData, GatewayData {
+    public let type: String
+    public let rid: String
+    public let quality: Int
+
+    public init(type: String, rid: String, quality: Int) {
+        self.type = type
+        self.rid = rid
+        self.quality = quality
+    }
+}
+
+/// Call connect.
+///
+/// Sent before joining DM/group calls on user accounts.
+///
+/// > Outgoing Gateway data struct for opcode 13
+public struct GatewayCallConnect: OutgoingGatewayData, GatewayData {
+    public let channel_id: Snowflake
+
+    public init(channel_id: Snowflake) {
+        self.channel_id = channel_id
     }
 }
 

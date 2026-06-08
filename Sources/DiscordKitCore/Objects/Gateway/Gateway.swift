@@ -28,8 +28,10 @@ public enum GatewayOutgoingOpcodes: Int, Codable {
     case identify = 2
     case presenceUpdate = 3
     case voiceStateUpdate = 4
+    case voiceServerPing = 5
     case resume = 6 // Attempt to resume disconnected session
     case requestGuildMembers = 8
+    case callConnect = 13
     case subscribeGuildEvents = 14
     case updateGuildSubscriptions = 37
     case qosHeartbeat = 40

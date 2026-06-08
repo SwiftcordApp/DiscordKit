@@ -179,6 +179,28 @@ public struct GatewayIncoming: Decodable {
         /// > presence updates for users in a certain guild.
         case presenceUpdate(PresenceUpdate)
 
+        // MARK: - Voice
+
+        /// Voice state update event
+        ///
+        /// Sent when a user's voice state changes.
+        case voiceStateUpdate(VoiceState)
+
+        /// Batched voice state update event
+        ///
+        /// User accounts may receive this when multiple voice states are updated together.
+        case voiceStateUpdateBatch(VoiceStateUpdateBatch)
+
+        /// Voice server update event
+        ///
+        /// Contains the voice endpoint and token needed to connect to Discord voice.
+        case voiceServerUpdate(VoiceServerUpdate)
+
+        /// Call create event
+        ///
+        /// Sent for DM/group calls and may include the initial voice states.
+        case callCreate(CallCreate)
+
         // MARK: - Guild Members
 
         /// Guild member add
@@ -279,6 +301,12 @@ public struct GatewayIncoming: Decodable {
         // MARK: Users
         case .userUpdate: return .userUpdate(try values.decode(CurrentUser.self, forKey: .data))
         case .presenceUpdate: return .presenceUpdate(try values.decode(PresenceUpdate.self, forKey: .data))
+
+        // MARK: Voice
+        case .voiceStateUpdate: return .voiceStateUpdate(try values.decode(VoiceState.self, forKey: .data))
+        case .voiceStateUpdateBatch: return .voiceStateUpdateBatch(try values.decode(VoiceStateUpdateBatch.self, forKey: .data))
+        case .voiceServerUpdate: return .voiceServerUpdate(try values.decode(VoiceServerUpdate.self, forKey: .data))
+        case .callCreate: return .callCreate(try values.decode(CallCreate.self, forKey: .data))
 
         // MARK: Members
         case .guildMemberAdd: return .guildMemberAdd(try values.decode(Member.self, forKey: .data))

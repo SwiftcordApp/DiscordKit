@@ -51,6 +51,135 @@ final class GatewayIncomingTests: XCTestCase {
         XCTAssertTrue(data["qos"] is NSNull)
     }
 
+    func testVoiceStateUpdateDispatchDecodes() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {"op":0,"s":45,"t":"VOICE_STATE_UPDATE","d":\(voiceStateJSON)}
+        """)
+
+        XCTAssertEqual(incoming.opcode, .dispatchEvent)
+        XCTAssertEqual(incoming.type, .voiceStateUpdate)
+        guard case .voiceStateUpdate(let voiceState) = incoming.data else {
+            XCTFail("Expected voice state update, got \(incoming.data)")
+            return
+        }
+
+        XCTAssertEqual(voiceState.guild_id, "guild")
+        XCTAssertEqual(voiceState.channel_id, "channel")
+        XCTAssertEqual(voiceState.user_id, "user")
+        XCTAssertEqual(voiceState.session_id, "voice-session")
+    }
+
+    func testVoiceStateUpdateBatchDispatchDecodesArrayPayload() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {"op":0,"s":46,"t":"VOICE_STATE_UPDATE_BATCH","d":[\(voiceStateJSON)]}
+        """)
+
+        XCTAssertEqual(incoming.type, .voiceStateUpdateBatch)
+        guard case .voiceStateUpdateBatch(let batch) = incoming.data else {
+            XCTFail("Expected voice state update batch, got \(incoming.data)")
+            return
+        }
+
+        XCTAssertNil(batch.guild_id)
+        XCTAssertEqual(batch.voice_states.count, 1)
+        XCTAssertEqual(batch.voice_states.first?.user_id, "user")
+    }
+
+    func testVoiceServerUpdateDispatchDecodes() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {
+          "op":0,
+          "s":47,
+          "t":"VOICE_SERVER_UPDATE",
+          "d":{
+            "token":"voice-token",
+            "guild_id":"guild",
+            "channel_id":"channel",
+            "endpoint":"voice.example.com"
+          }
+        }
+        """)
+
+        XCTAssertEqual(incoming.type, .voiceServerUpdate)
+        guard case .voiceServerUpdate(let update) = incoming.data else {
+            XCTFail("Expected voice server update, got \(incoming.data)")
+            return
+        }
+
+        XCTAssertEqual(update.token, "voice-token")
+        XCTAssertEqual(update.guild_id, "guild")
+        XCTAssertEqual(update.channel_id, "channel")
+        XCTAssertEqual(update.endpoint, "voice.example.com")
+    }
+
+    func testCallCreateDispatchDecodesEmbeddedVoiceStates() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {
+          "op":0,
+          "s":48,
+          "t":"CALL_CREATE",
+          "d":{
+            "channel_id":"channel",
+            "message_id":"message",
+            "region":"us-central",
+            "ringing":["user"],
+            "unavailable":false,
+            "voice_states":[\(voiceStateJSON)]
+          }
+        }
+        """)
+
+        XCTAssertEqual(incoming.type, .callCreate)
+        guard case .callCreate(let call) = incoming.data else {
+            XCTFail("Expected call create, got \(incoming.data)")
+            return
+        }
+
+        XCTAssertEqual(call.channel_id, "channel")
+        XCTAssertEqual(call.message_id, "message")
+        XCTAssertEqual(call.voice_states?.first?.session_id, "voice-session")
+    }
+
+    func testVoiceStateUpdateEncodesVoiceJoinFields() throws {
+        let payload = GatewayOutgoing(
+            opcode: .voiceStateUpdate,
+            data: GatewayVoiceStateUpdate(
+                guild_id: nil,
+                channel_id: "channel",
+                self_mute: false,
+                self_deaf: false,
+                self_video: true,
+                flags: 0,
+                tracks: [GatewayVoiceTrack(type: "video", rid: "100", quality: 100)]
+            )
+        )
+        let object = try encodePayloadObject(payload)
+        let data = try XCTUnwrap(object["d"] as? [String: Any])
+        let tracks = try XCTUnwrap(data["tracks"] as? [[String: Any]])
+        let track = try XCTUnwrap(tracks.first)
+
+        XCTAssertEqual(object["op"] as? Int, 4)
+        XCTAssertTrue(data["guild_id"] is NSNull)
+        XCTAssertEqual(data["channel_id"] as? String, "channel")
+        XCTAssertEqual(data["self_video"] as? Bool, true)
+        XCTAssertEqual(data["flags"] as? Int, 0)
+        XCTAssertEqual(track["type"] as? String, "video")
+        XCTAssertEqual(track["rid"] as? String, "100")
+        XCTAssertEqual(track["quality"] as? Int, 100)
+    }
+
+    func testCallConnectEncodes() throws {
+        let payload = GatewayOutgoing(
+            opcode: .callConnect,
+            data: GatewayCallConnect(channel_id: "channel")
+        )
+        let object = try encodePayloadObject(payload)
+        let data = try XCTUnwrap(object["d"] as? [String: Any])
+
+        XCTAssertEqual(object["op"] as? Int, 13)
+        XCTAssertEqual(data["channel_id"] as? String, "channel")
+    }
+
     func testUserIdentifyPayloadMatchesOfficialShape() throws {
         let originalConfig = DiscordKitConfig.default
         DiscordKitConfig.default = DiscordKitConfig()
@@ -208,6 +337,25 @@ final class GatewayIncomingTests: XCTestCase {
     private func encodeObject<T: Encodable>(_ value: T) throws -> [String: Any] {
         let data = try DiscordREST.encoder.encode(value)
         return try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+    }
+
+    private var voiceStateJSON: String {
+        """
+        {
+          "guild_id":"guild",
+          "channel_id":"channel",
+          "user_id":"user",
+          "session_id":"voice-session",
+          "deaf":false,
+          "mute":false,
+          "self_deaf":false,
+          "self_mute":false,
+          "self_stream":false,
+          "self_video":false,
+          "suppress":false,
+          "request_to_speak_timestamp":null
+        }
+        """
     }
 
     private func assertUnknown(

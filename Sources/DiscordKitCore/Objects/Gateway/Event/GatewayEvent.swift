@@ -96,8 +96,12 @@ public enum GatewayEvent: String, Codable {
     // MARK: Misc Updates
     case userUpdate = "USER_UPDATE"
     case voiceStateUpdate = "VOICE_STATE_UPDATE"
+    case voiceStateUpdateBatch = "VOICE_STATE_UPDATE_BATCH"
     case voiceServerUpdate = "VOICE_SERVER_UPDATE"
     case webhooksUpdate = "WEBHOOKS_UPDATE"
+
+    // MARK: Calls
+    case callCreate = "CALL_CREATE"
 
     // MARK: Human account-specific Events
     case channelUnreadUpdate = "CHANNEL_UNREAD_UPDATE"
