@@ -351,6 +351,7 @@ public struct GatewayIncoming: Decodable {
                 do {
                     data = try Self.decodeBody(type: type, values: values)
                 } catch {
+                    print("Gateway dispatch decode error: \(error)")
                     data = .unknown
                 }
             } else {

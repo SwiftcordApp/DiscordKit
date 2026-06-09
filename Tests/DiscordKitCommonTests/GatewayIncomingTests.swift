@@ -140,6 +140,57 @@ final class GatewayIncomingTests: XCTestCase {
         XCTAssertEqual(call.voice_states?.first?.session_id, "voice-session")
     }
 
+    func testReadySupplementalDispatchDecodesInitialVoiceStates() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {
+          "op":0,
+          "s":49,
+          "t":"READY_SUPPLEMENTAL",
+          "d":{
+            "guilds":[{
+              "id":"guild",
+              "voice_states":[{
+                "channel_id":"channel",
+                "user_id":"user",
+                "session_id":"voice-session",
+                "deaf":false,
+                "mute":false,
+                "self_deaf":false,
+                "self_mute":false,
+                "connected_at":1791234567890
+              }],
+              "members":[],
+              "presences":[],
+              "activity_instances":[]
+            }],
+            "merged_members":[[]],
+            "merged_presences":{
+              "guilds":[],
+              "friends":[]
+            },
+            "lazy_private_channels":[]
+          }
+        }
+        """)
+
+        XCTAssertEqual(incoming.type, .readySupplemental)
+        guard case .readySupplemental(let supplemental) = incoming.data else {
+            XCTFail("Expected ready supplemental, got \(incoming.data)")
+            return
+        }
+
+        let guild = try XCTUnwrap(supplemental.guilds?.first)
+        let voiceState = try XCTUnwrap(guild.voice_states?.first)
+        XCTAssertEqual(guild.id, "guild")
+        XCTAssertNil(voiceState.guild_id)
+        XCTAssertEqual(voiceState.channel_id, "channel")
+        XCTAssertEqual(voiceState.user_id, "user")
+        XCTAssertEqual(voiceState.session_id, "voice-session")
+        XCTAssertFalse(voiceState.self_video)
+        XCTAssertFalse(voiceState.suppress)
+        XCTAssertNotNil(voiceState.connected_at)
+    }
+
     func testVoiceStateUpdateEncodesVoiceJoinFields() throws {
         let payload = GatewayOutgoing(
             opcode: .voiceStateUpdate,

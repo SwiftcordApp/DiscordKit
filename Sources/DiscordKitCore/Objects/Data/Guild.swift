@@ -156,6 +156,7 @@ public struct PreloadedGuild: GatewayData, Identifiable, Equatable {
     public let large: Bool
     public let lazy: Bool
     public let member_count: Int
+    public let voice_states: [VoiceState]?
     /// Members in the guild
     ///
     /// > User accounts will only receive the client's member and users in voice channels, and 
@@ -178,6 +179,7 @@ public struct PreloadedGuild: GatewayData, Identifiable, Equatable {
         self.large = false
         self.lazy = false
         self.member_count = 0
+        self.voice_states = nil
         self.premium_subscription_count = 0
         self.properties = properties
         self.roles = []
