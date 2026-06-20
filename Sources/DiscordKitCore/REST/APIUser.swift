@@ -2,6 +2,11 @@
 
 import Foundation
 
+public enum UserProfileViewType: String, Codable {
+    case popout
+    case sidebar
+}
+
 public extension DiscordREST {
     /// Get Current User
     ///
@@ -26,15 +31,31 @@ public extension DiscordREST {
     ///
     /// - Parameters:
     ///   - user: ID of user to retrieve profile
+    ///   - profileViewType: The client surface requesting the profile.
     ///   - mutualGuilds: If the user's mutual guilds with the current user should be returned as well
+    ///   - mutualFriends: If the user's mutual friends with the current user should be returned as well
+    ///   - mutualFriendsCount: If only the mutual friends count should be returned.
     ///   - guildID: The ID of the guild the action that triggered profile retrival was carried out in. Pass `nil`
     ///   if the action was carried out in a DM channel.
     func getProfile(
         user: Snowflake,
+        profileViewType: UserProfileViewType? = nil,
         mutualGuilds: Bool = false,
+        mutualFriends: Bool? = nil,
+        mutualFriendsCount: Bool? = nil,
         guildID: Snowflake? = nil
     ) async throws -> UserProfile {
-        var query = [URLQueryItem(name: "with_mutual_guilds", value: String(mutualGuilds))]
+        var query: [URLQueryItem] = []
+        if let profileViewType {
+            query.append(URLQueryItem(name: "type", value: profileViewType.rawValue))
+        }
+        query.append(URLQueryItem(name: "with_mutual_guilds", value: String(mutualGuilds)))
+        if let mutualFriends {
+            query.append(URLQueryItem(name: "with_mutual_friends", value: String(mutualFriends)))
+        }
+        if let mutualFriendsCount {
+            query.append(URLQueryItem(name: "with_mutual_friends_count", value: String(mutualFriendsCount)))
+        }
         if let guildID = guildID {
             query.append(URLQueryItem(name: "guild_id", value: guildID))
         }
