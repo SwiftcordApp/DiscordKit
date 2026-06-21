@@ -254,6 +254,7 @@ public struct UserProfileDetails: Codable, GatewayData {
     public let pronouns: String?
     public let profile_effect: UserProfileEffect?
     public let collectibles: [UserProfileCollectible]?
+    public let theme_colors: [Int?]?
 }
 
 public struct GuildMemberProfile: Codable, GatewayData {
@@ -261,6 +262,7 @@ public struct GuildMemberProfile: Codable, GatewayData {
     public let pronouns: String?
     public let profile_effect: UserProfileEffect?
     public let collectibles: [UserProfileCollectible]?
+    public let theme_colors: [Int?]?
 }
 
 public struct UserProfileEffect: Codable, GatewayData {}
