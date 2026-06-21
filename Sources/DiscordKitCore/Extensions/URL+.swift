@@ -41,6 +41,21 @@ public extension URL {
         return self
     }
 
+    func setAnimated(animated: Bool) -> URL {
+        guard var components = URLComponents(url: self, resolvingAgainstBaseURL: false)
+        else { return self }
+
+        var queryItems = components.queryItems ?? []
+        queryItems.removeAll { $0.name == "animated" }
+
+        if animated {
+            queryItems.append(URLQueryItem(name: "animated", value: "true"))
+        }
+
+        components.queryItems = queryItems.isEmpty ? nil : queryItems
+        return components.url ?? self
+    }
+
     func setSize(width: Int?, height: Int?) -> URL {
         if let width = width, let height = height {
             return self.appendingQueryItems(

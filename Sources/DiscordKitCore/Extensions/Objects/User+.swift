@@ -8,8 +8,8 @@
 import Foundation
 
 @inline(__always)
-private func _avatar(_ asset: HashedAsset?, size: Int?, discrim: String, id: Snowflake) -> URL {
-    if let url = asset?.avatarURL(of: id, size: size) {
+private func _avatar(_ asset: ScopedHashedAsset<UserAvatar>?, size: Int?, discrim: String, id: Snowflake) -> URL {
+    if let url = asset?.url(size: size) {
         return url
     }
     let index = discrim == "0"
@@ -22,12 +22,12 @@ private func _avatar(_ asset: HashedAsset?, size: Int?, discrim: String, id: Sno
 
 public extension User {
     func avatarURL(size: Int? = nil) -> URL {
-        _avatar(avatar, size: size, discrim: discriminator, id: id)
+        _avatar(avatarAsset, size: size, discrim: discriminator, id: id)
     }
 }
 
 public extension CurrentUser {
     func avatarURL(size: Int? = nil) -> URL {
-        _avatar(avatar, size: size, discrim: discriminator, id: id)
+        _avatar(avatarAsset, size: size, discrim: discriminator, id: id)
     }
 }

@@ -10,7 +10,8 @@ import Foundation
 public struct Member: Codable, GatewayData {
     public let user: User?
     public let nick: String?
-    public let avatar: String?
+    public let avatar: HashedAsset<GuildMemberAvatar>?
+    public let banner: HashedAsset<GuildMemberBanner>?
     public let roles: [Snowflake]
     public let joined_at: Date
     public let premium_since: Date? // When the user started boosting the guild
@@ -26,6 +27,7 @@ public struct Member: Codable, GatewayData {
         self.user = updateMember.user
         self.nick = updateMember.nick
         self.avatar = updateMember.avatar
+        self.banner = updateMember.banner
         self.roles = updateMember.roles
         self.joined_at = merging?.joined_at ?? updateMember.joined_at ?? .distantPast
         self.premium_since = updateMember.premium_since

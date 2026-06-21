@@ -12,7 +12,7 @@ public struct User: Codable, GatewayData, Identifiable, Equatable {
     }
 
     // To work around the default access level
-    public init(id: Snowflake, username: String, discriminator: String, global_name: String?, avatar: HashedAsset?, bot: Bool?, bio: String?, system: Bool?, mfa_enabled: Bool?, banner: HashedAsset?, accent_color: Int?, locale: Locale?, verified: Bool?, flags: User.Flags?, premium_type: PremiumType?, public_flags: User.Flags?) {
+    public init(id: Snowflake, username: String, discriminator: String, global_name: String?, avatar: HashedAsset<UserAvatar>?, bot: Bool?, bio: String?, system: Bool?, mfa_enabled: Bool?, banner: HashedAsset<UserBanner>?, accent_color: Int?, locale: Locale?, verified: Bool?, flags: User.Flags?, premium_type: PremiumType?, public_flags: User.Flags?) {
         self.id = id
         self.username = username
         self.discriminator = discriminator
@@ -46,7 +46,7 @@ public struct User: Codable, GatewayData, Identifiable, Equatable {
     public let global_name: String?
 
     /// User's avatar hash
-    public let avatar: HashedAsset?
+    public let avatar: HashedAsset<UserAvatar>?
 
     /// If this user is a bot
     public let bot: Bool?
@@ -61,7 +61,7 @@ public struct User: Codable, GatewayData, Identifiable, Equatable {
     public let mfa_enabled: Bool?
 
     /// Banner image hash (nitro-only)
-    public let banner: HashedAsset?
+    public let banner: HashedAsset<UserBanner>?
 
     /// Banner color
     public let accent_color: Int?
@@ -157,10 +157,10 @@ public struct CurrentUser: Codable, GatewayData, Equatable {
     public let accent_color: Int?
 
     /// Banner image hash (nitro-only)
-    public let banner: HashedAsset?
+    public let banner: HashedAsset<UserBanner>?
 
     /// User's avatar hash
-    public let avatar: HashedAsset?
+    public let avatar: HashedAsset<UserAvatar>?
 }
 
 /// A user's profile, containing more data about the user and a fuller ``User`` struct
@@ -272,7 +272,7 @@ public struct UserProfileCollectible: Codable, GatewayData {}
 public struct UserProfileBadge: Codable, GatewayData, Identifiable {
     public let id: String
     public let description: String
-    public let icon: HashedAsset
+    public let icon: HashedAsset<UserProfileBadgeIcon>
     public let link: String?
 }
 

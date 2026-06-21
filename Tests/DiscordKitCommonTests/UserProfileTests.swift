@@ -23,7 +23,11 @@ final class UserProfileTests: XCTestCase {
             "1417976730303463436",
             "964741354112577557"
         ])
+        XCTAssertEqual(profile.user_profile?.theme_colors?[0], 3539984)
+        XCTAssertEqual(profile.user_profile?.theme_colors?[1], 0)
         XCTAssertEqual(profile.guild_member_profile?.guild_id, "964741354112577557")
+        XCTAssertEqual(profile.guild_member_profile?.theme_colors?[0], 0)
+        XCTAssertNil(profile.guild_member_profile?.theme_colors?[1])
     }
 
     private static let payload = """
@@ -56,7 +60,8 @@ final class UserProfileTests: XCTestCase {
         "accent_color": null,
         "pronouns": "",
         "profile_effect": null,
-        "collectibles": []
+        "collectibles": [],
+        "theme_colors": [3539984, 0]
       },
       "badges": [
         {
@@ -136,7 +141,8 @@ final class UserProfileTests: XCTestCase {
         "guild_id": "964741354112577557",
         "pronouns": "",
         "profile_effect": null,
-        "collectibles": []
+        "collectibles": [],
+        "theme_colors": [0, null]
       },
       "legacy_username": null
     }

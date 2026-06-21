@@ -7,17 +7,153 @@
 
 import Foundation
 
-public typealias HashedAsset = String
+public protocol AssetFormat: RawRepresentable, Sendable where RawValue == String {
+    static var animatedWebP: Self? { get }
+}
 
-public extension HashedAsset {
-    enum AssetFormat: String {
-        case jpeg = "jpg"
-        case png = "png"
-        case webp = "webp"
-        case gif = "gif"
+public extension AssetFormat {
+    static var animatedWebP: Self? { nil }
+}
+
+/// A typical static asset, supporting jpeg, png and webp formats
+public enum StaticAssetFormat: String, AssetFormat {
+    case jpeg = "jpg"
+    case png = "png"
+    case webp = "webp"
+}
+
+/// An animated asset, supporting jpeg, png, webp and gif formats
+public enum AnimatedAssetFormat: String, AssetFormat {
+    case jpeg = "jpg"
+    case png = "png"
+    case webp = "webp"
+    case gif = "gif"
+
+    public static var animatedWebP: Self? { .webp }
+}
+
+/// A png-only asset, supporting only the png format
+public enum PNGAssetFormat: String, AssetFormat {
+    case png = "png"
+}
+
+public protocol HashedAssetKind: Sendable {
+    associatedtype Scope: Sendable = Void
+    associatedtype Format: AssetFormat = StaticAssetFormat
+
+    static var defaultFormat: Format { get }
+    static func pathComponents(for hash: String, scope: Scope) -> [String]
+}
+
+public extension HashedAssetKind where Format == StaticAssetFormat {
+    static var defaultFormat: Format { .png }
+}
+
+public extension HashedAssetKind where Format == AnimatedAssetFormat {
+    static var defaultFormat: Format { .png }
+}
+
+public extension HashedAssetKind where Format == PNGAssetFormat {
+    static var defaultFormat: Format { .png }
+}
+
+public struct HashedAsset<Kind: HashedAssetKind>: RawRepresentable, Codable, Hashable, Sendable, ExpressibleByStringLiteral, CustomStringConvertible {
+    public let rawValue: String
+
+    public init(rawValue: String) {
+        self.rawValue = rawValue
     }
 
-    private static func joinPaths(with format: AssetFormat, _ paths: String...) -> URL {
+    public init(_ rawValue: String) {
+        self.rawValue = rawValue
+    }
+
+    public init(stringLiteral value: String) {
+        self.rawValue = value
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        rawValue = try container.decode(String.self)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
+    }
+
+    public var description: String {
+        rawValue
+    }
+
+    public var isAnimated: Bool {
+        rawValue.hasPrefix("a_")
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(rawValue)
+    }
+
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.rawValue == rhs.rawValue
+    }
+
+    public func scoped(to scope: Kind.Scope) -> ScopedHashedAsset<Kind> {
+        ScopedHashedAsset(asset: self, scope: scope)
+    }
+}
+
+public extension HashedAsset where Kind.Scope == Void {
+    func scoped() -> ScopedHashedAsset<Kind> {
+        scoped(to: ())
+    }
+
+    func url(
+        with format: Kind.Format = Kind.defaultFormat,
+        size: Int? = nil,
+        animated: Bool = false
+    ) -> URL {
+        scoped().url(with: format, size: size, animated: animated)
+    }
+}
+
+public struct ScopedHashedAsset<Kind: HashedAssetKind>: Sendable, CustomStringConvertible {
+    public let asset: HashedAsset<Kind>
+    public let scope: Kind.Scope
+
+    public init(asset: HashedAsset<Kind>, scope: Kind.Scope) {
+        self.asset = asset
+        self.scope = scope
+    }
+
+    public var rawValue: String {
+        asset.rawValue
+    }
+
+    public var description: String {
+        rawValue
+    }
+
+    public var isAnimated: Bool {
+        asset.isAnimated
+    }
+
+    public func url(
+        with format: Kind.Format = Kind.defaultFormat,
+        size: Int? = nil,
+        animated: Bool = false
+    ) -> URL {
+        let shouldAnimate = animated && isAnimated && Kind.Format.animatedWebP != nil
+        let resolvedFormat = shouldAnimate ? Kind.Format.animatedWebP! : format
+        return Self.joinPaths(
+            with: resolvedFormat,
+            Kind.pathComponents(for: rawValue, scope: scope)
+        )
+        .setAnimated(animated: shouldAnimate)
+        .setSize(size: size)
+    }
+
+    private static func joinPaths<Format: AssetFormat>(with format: Format, _ paths: [String]) -> URL {
         var base = URL(string: DiscordKitConfig.default.cdnURL)!
 
         for path in paths { base.appendPathComponent(path) }
@@ -27,87 +163,29 @@ public extension HashedAsset {
     }
 }
 
-public extension HashedAsset {
-    // TODO: Validate requested format
+extension ScopedHashedAsset: Equatable where Kind.Scope: Equatable {}
+extension ScopedHashedAsset: Hashable where Kind.Scope: Hashable {}
 
-    /// Returns the avatar URL of a user
-    ///
-    /// > This resource might be animated. It is animated if the hash begins with `a_`, and will
-    /// > be available in GIF format as well.
-    ///
-    /// - Parameters:
-    ///  - userID: ID of user
-    ///  - format: Format of banner (PNG, JPEG, WebP, GIF)
-    ///  - size: Size of asset, a power of 2 from 16 to 4096
-    func avatarURL(
-        of userID: Snowflake,
-        with format: AssetFormat = .png,
-        size: Int? = nil
-    ) -> URL {
-        return HashedAsset.joinPaths(with: format, "avatars", userID, self)
-            .setSize(size: size)
-    }
-
-    /// Returns the banner URL of a guild or user
-    ///
-    /// > This resource might be animated. It is animated if the hash begins with `a_`, and will
-    /// > be available in GIF format as well.
-    ///
-    /// - Parameters:
-    ///  - id: ID of guild or user
-    ///  - format: Format of banner (PNG, JPEG, WebP, GIF)
-    ///  - size: Size of asset, a power of 2 from 16 to 4096
-    func bannerURL(
-        of id: Snowflake,
-        with format: AssetFormat = .png,
-        size: Int? = nil
-    ) -> URL {
-        return HashedAsset.joinPaths(with: format, "banners", id, self)
-            .setSize(size: size)
-    }
-
-    /// Returns the icon URL of a guild
-    ///
-    /// > This resource might be animated. It is animated if the hash begins with `a_`, and will
-    /// > be available in GIF format as well.
-    ///
-    /// - Parameters:
-    ///  - id: ID of guild
-    ///  - format: Format of icon (PNG, JPEG, WebP, GIF)
-    ///  - size: Size of asset, a power of 2 from 16 to 4096
-    func guildIconURL(
-        of guildID: Snowflake,
-        with format: AssetFormat = .png,
-        size: Int? = nil
-    ) -> URL {
-        return HashedAsset.joinPaths(with: format, "icons", guildID, self)
-            .setSize(size: size)
-    }
-
-    /// Returns the icon URL of a sticker pack banner
-    ///
-    /// > This resource will not be animated.
-    ///
-    /// - Parameters:
-    ///  - format: Format of banner (PNG, JPEG, WebP)
-    ///  - size: Size of asset, a power of 2 from 16 to 4096
-    func stickerPackBannerURL(
-        with format: AssetFormat = .png,
-        size: Int? = nil
-    ) -> URL {
-        return HashedAsset.joinPaths(with: format, "app-assets", "710982414301790216", "store", self)
-            .setSize(size: size)
+public extension HashedAsset where Kind == GuildMemberAvatar {
+    func scoped(to userID: Snowflake, in guildID: Snowflake) -> ScopedHashedAsset<Kind> {
+        scoped(to: GuildMemberAssetScope(userID: userID, guildID: guildID))
     }
 }
 
-public extension HashedAsset {
-    /// Get the default avatar image of a provided user discriminator
-    ///
-    /// - Parameter discriminator: User discriminator string
+public extension HashedAsset where Kind == GuildMemberBanner {
+    func scoped(to userID: Snowflake, in guildID: Snowflake) -> ScopedHashedAsset<Kind> {
+        scoped(to: GuildMemberAssetScope(userID: userID, guildID: guildID))
+    }
+}
+
+public extension HashedAsset where Kind == UserAvatar {
+    /// Get the default avatar image of a provided user discriminator.
     static func defaultAvatar(of discriminator: String) -> URL {
-        return HashedAsset.joinPaths(
-            with: .png,
-            "embed", "avatars", String((Int(discriminator) ?? 0) % 5)
-        )
+        var url = URL(string: DiscordKitConfig.default.cdnURL)!
+        url.appendPathComponent("embed")
+        url.appendPathComponent("avatars")
+        url.appendPathComponent(String((Int(discriminator) ?? 0) % 5))
+        url.appendPathExtension(PNGAssetFormat.png.rawValue)
+        return url
     }
 }

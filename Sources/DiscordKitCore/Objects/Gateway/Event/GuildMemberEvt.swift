@@ -20,7 +20,8 @@ public struct GuildMemberUpdate: Codable, GatewayData {
     public let roles: [Snowflake] // User role IDs
     public let user: User
     public let nick: String?
-    public let avatar: String? // User's guild avatar hash
+    public let avatar: HashedAsset<GuildMemberAvatar>? // User's guild avatar hash
+    public let banner: HashedAsset<GuildMemberBanner>? // User's guild banner hash
     public let joined_at: Date?
     public let premium_since: Date? // When user started boosting guild
     public let deaf: Bool?

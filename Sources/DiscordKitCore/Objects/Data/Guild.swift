@@ -38,7 +38,7 @@ public enum GuildFeature: String, Codable {
 }
 
 public struct Guild: GatewayData, Equatable, Identifiable {
-	public init(id: Snowflake, name: String, icon: String? = nil, icon_hash: String? = nil, splash: String? = nil, discovery_splash: String? = nil, owner: Bool? = nil, owner_id: Snowflake, permissions: String? = nil, region: String? = nil, afk_channel_id: Snowflake? = nil, afk_timeout: Int, widget_enabled: Bool? = nil, widget_channel_id: Snowflake? = nil, verification_level: VerificationLevel, default_message_notifications: MessageNotifLevel, explicit_content_filter: ExplicitContentFilterLevel, roles: [DecodeThrowable<Role>], emojis: [DecodeThrowable<Emoji>], features: [DecodeThrowable<GuildFeature>], mfa_level: MFALevel, application_id: Snowflake? = nil, system_channel_id: Snowflake? = nil, system_channel_flags: Int, rules_channel_id: Snowflake? = nil, joined_at: Date? = nil, large: Bool? = nil, unavailable: Bool? = nil, member_count: Int? = nil, voice_states: [VoiceState]? = nil, members: [Member]? = nil, channels: [Channel]? = nil, threads: [Channel]? = nil, presences: [PresenceUpdate]? = nil, max_presences: Int? = nil, max_members: Int? = nil, vanity_url_code: String? = nil, description: String? = nil, banner: String? = nil, premium_tier: PremiumLevel, premium_subscription_count: Int? = nil, preferred_locale: Locale, public_updates_channel_id: Snowflake? = nil, max_video_channel_users: Int? = nil, approximate_member_count: Int? = nil, approximate_presence_count: Int? = nil, welcome_screen: GuildWelcomeScreen? = nil, nsfw_level: NSFWLevel, stage_instances: [StageInstance]? = nil, stickers: [Sticker]? = nil, guild_scheduled_events: [GuildScheduledEvent]? = nil, premium_progress_bar_enabled: Bool) {
+	public init(id: Snowflake, name: String, icon: HashedAsset<GuildIcon>? = nil, icon_hash: HashedAsset<GuildIcon>? = nil, splash: String? = nil, discovery_splash: String? = nil, owner: Bool? = nil, owner_id: Snowflake, permissions: String? = nil, region: String? = nil, afk_channel_id: Snowflake? = nil, afk_timeout: Int, widget_enabled: Bool? = nil, widget_channel_id: Snowflake? = nil, verification_level: VerificationLevel, default_message_notifications: MessageNotifLevel, explicit_content_filter: ExplicitContentFilterLevel, roles: [DecodeThrowable<Role>], emojis: [DecodeThrowable<Emoji>], features: [DecodeThrowable<GuildFeature>], mfa_level: MFALevel, application_id: Snowflake? = nil, system_channel_id: Snowflake? = nil, system_channel_flags: Int, rules_channel_id: Snowflake? = nil, joined_at: Date? = nil, large: Bool? = nil, unavailable: Bool? = nil, member_count: Int? = nil, voice_states: [VoiceState]? = nil, members: [Member]? = nil, channels: [Channel]? = nil, threads: [Channel]? = nil, presences: [PresenceUpdate]? = nil, max_presences: Int? = nil, max_members: Int? = nil, vanity_url_code: String? = nil, description: String? = nil, banner: HashedAsset<GuildBanner>? = nil, premium_tier: PremiumLevel, premium_subscription_count: Int? = nil, preferred_locale: Locale, public_updates_channel_id: Snowflake? = nil, max_video_channel_users: Int? = nil, approximate_member_count: Int? = nil, approximate_presence_count: Int? = nil, welcome_screen: GuildWelcomeScreen? = nil, nsfw_level: NSFWLevel, stage_instances: [StageInstance]? = nil, stickers: [Sticker]? = nil, guild_scheduled_events: [GuildScheduledEvent]? = nil, premium_progress_bar_enabled: Bool) {
 		self.id = id
 		self.name = name
 		self.icon = icon
@@ -94,8 +94,8 @@ public struct Guild: GatewayData, Equatable, Identifiable {
 
     public let id: Snowflake
     public let name: String
-    public let icon: HashedAsset? // Icon hash
-    public let icon_hash: HashedAsset? // Also icon hash
+    public let icon: HashedAsset<GuildIcon>? // Icon hash
+    public let icon_hash: HashedAsset<GuildIcon>? // Also icon hash
     public let splash: String? // Splash hash
     public let discovery_splash: String?
     public let owner: Bool? // If current user is owner of guild
@@ -125,7 +125,7 @@ public struct Guild: GatewayData, Equatable, Identifiable {
     public let max_members: Int?
     public let vanity_url_code: String?
     public let description: String?
-    public let banner: HashedAsset? // Banner hash
+    public let banner: HashedAsset<GuildBanner>? // Banner hash
     public let premium_tier: PremiumLevel
     public let premium_subscription_count: Int? // Number of server boosts
     public let preferred_locale: Locale // Defaults to en-US

@@ -48,5 +48,5 @@ public struct StickerPack: Codable, GatewayData, Identifiable {
     public let sku_id: Snowflake
     public let cover_sticker_id: Snowflake?
     public let description: String
-    public let banner_asset_id: HashedAsset?
+    public let banner_asset_id: HashedAsset<StickerPackBanner>?
 }
