@@ -10,10 +10,22 @@ import Foundation
 public struct NewAttachment: Codable {
     public let id: String // Will not be a valid snowflake for new attachments
     public let filename: String
+    public let uploaded_filename: String?
+    public let description: String?
+    public let original_content_type: String?
 
-	public init(id: String, filename: String) {
+	public init(
+        id: String,
+        filename: String,
+        uploaded_filename: String? = nil,
+        description: String? = nil,
+        original_content_type: String? = nil
+    ) {
 		self.id = id
 		self.filename = filename
+        self.uploaded_filename = uploaded_filename
+        self.description = description
+        self.original_content_type = original_content_type
 	}
 }
 
