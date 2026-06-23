@@ -191,6 +191,21 @@ final class GatewayIncomingTests: XCTestCase {
         XCTAssertNotNil(voiceState.connected_at)
     }
 
+    func testReadySupplementalDispatchDefaultsMissingMergedPresences() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {"op":0,"s":50,"t":"READY_SUPPLEMENTAL","d":{}}
+        """)
+
+        XCTAssertEqual(incoming.type, .readySupplemental)
+        guard case .readySupplemental(let supplemental) = incoming.data else {
+            XCTFail("Expected ready supplemental, got \(incoming.data)")
+            return
+        }
+
+        XCTAssertTrue(supplemental.merged_presences.guilds.isEmpty)
+        XCTAssertTrue(supplemental.merged_presences.friends.isEmpty)
+    }
+
     func testVoiceStateUpdateEncodesVoiceJoinFields() throws {
         let payload = GatewayOutgoing(
             opcode: .voiceStateUpdate,

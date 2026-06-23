@@ -14,13 +14,13 @@ public struct VoiceState: Codable, GatewayData {
     public let member: Member?
     public let session_id: String
     /// Deafened by server
-    public let deaf: Bool
-    public let mute: Bool
-    public let self_deaf: Bool
-    public let self_mute: Bool
+    @DefaultFalseDecodable public var deaf: Bool
+    @DefaultFalseDecodable public var mute: Bool
+    @DefaultFalseDecodable public var self_deaf: Bool
+    @DefaultFalseDecodable public var self_mute: Bool
     public let self_stream: Bool?
-    public let self_video: Bool
-    public let suppress: Bool
+    @DefaultFalseDecodable public var self_video: Bool
+    @DefaultFalseDecodable public var suppress: Bool
     /// Time when user requested to speak, if any
     public let request_to_speak_timestamp: Date?
     public let discoverable: Bool?
@@ -51,13 +51,13 @@ public struct VoiceState: Codable, GatewayData {
         user_id = try container.decode(Snowflake.self, forKey: .user_id)
         member = try container.decodeIfPresent(Member.self, forKey: .member)
         session_id = try container.decode(String.self, forKey: .session_id)
-        deaf = try container.decodeIfPresent(Bool.self, forKey: .deaf) ?? false
-        mute = try container.decodeIfPresent(Bool.self, forKey: .mute) ?? false
-        self_deaf = try container.decodeIfPresent(Bool.self, forKey: .self_deaf) ?? false
-        self_mute = try container.decodeIfPresent(Bool.self, forKey: .self_mute) ?? false
+        _deaf = try container.decode(DefaultFalseDecodable.self, forKey: .deaf)
+        _mute = try container.decode(DefaultFalseDecodable.self, forKey: .mute)
+        _self_deaf = try container.decode(DefaultFalseDecodable.self, forKey: .self_deaf)
+        _self_mute = try container.decode(DefaultFalseDecodable.self, forKey: .self_mute)
         self_stream = try container.decodeIfPresent(Bool.self, forKey: .self_stream)
-        self_video = try container.decodeIfPresent(Bool.self, forKey: .self_video) ?? false
-        suppress = try container.decodeIfPresent(Bool.self, forKey: .suppress) ?? false
+        _self_video = try container.decode(DefaultFalseDecodable.self, forKey: .self_video)
+        _suppress = try container.decode(DefaultFalseDecodable.self, forKey: .suppress)
         request_to_speak_timestamp = try container.decodeDiscordDateIfPresent(forKey: .request_to_speak_timestamp)
         discoverable = try container.decodeIfPresent(Bool.self, forKey: .discoverable)
         connected_at = try container.decodeDiscordDateIfPresent(forKey: .connected_at)

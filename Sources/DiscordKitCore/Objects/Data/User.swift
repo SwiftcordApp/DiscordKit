@@ -168,22 +168,6 @@ public struct CurrentUser: Codable, GatewayData, Equatable {
 /// > Warning: The user profile endpoint is undocumented, and this struct
 /// > was created purely from reverse engineering and observations.
 public struct UserProfile: Codable, GatewayData {
-    private enum CodingKeys: String, CodingKey {
-        case connected_accounts
-        case guild_member
-        case premium_guild_since
-        case premium_since
-        case premium_type
-        case mutual_guilds
-        case mutual_friends
-        case mutual_friends_count
-        case user_profile
-        case guild_member_profile
-        case badges
-        case guild_badges
-        case user
-    }
-
     public init(
         connected_accounts: [Connection],
         guild_member: Member? = nil,
@@ -199,7 +183,7 @@ public struct UserProfile: Codable, GatewayData {
         guild_badges: [UserProfileBadge] = [],
         user: User
     ) {
-        self.connected_accounts = connected_accounts
+        _connected_accounts = DefaultEmptyArrayDecodable(wrappedValue: connected_accounts)
         self.guild_member = guild_member
         self.premium_guild_since = premium_guild_since
         self.premium_since = premium_since
@@ -208,30 +192,13 @@ public struct UserProfile: Codable, GatewayData {
         self.mutual_friends_count = mutual_friends_count
         self.user_profile = user_profile
         self.guild_member_profile = guild_member_profile
-        self.badges = badges
-        self.guild_badges = guild_badges
+        _badges = DefaultEmptyArrayDecodable(wrappedValue: badges)
+        _guild_badges = DefaultEmptyArrayDecodable(wrappedValue: guild_badges)
         self.premium_type = premium_type
         self.user = user
     }
 
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        connected_accounts = try container.decodeIfPresent([Connection].self, forKey: .connected_accounts) ?? []
-        guild_member = try container.decodeIfPresent(Member.self, forKey: .guild_member)
-        premium_guild_since = try container.decodeIfPresent(Date.self, forKey: .premium_guild_since)
-        premium_since = try container.decodeIfPresent(Date.self, forKey: .premium_since)
-        premium_type = try container.decodeIfPresent(User.PremiumType.self, forKey: .premium_type)
-        mutual_guilds = try container.decodeIfPresent([MutualGuild].self, forKey: .mutual_guilds)
-        mutual_friends = try container.decodeIfPresent([User].self, forKey: .mutual_friends)
-        mutual_friends_count = try container.decodeIfPresent(Int.self, forKey: .mutual_friends_count)
-        user_profile = try container.decodeIfPresent(UserProfileDetails.self, forKey: .user_profile)
-        guild_member_profile = try container.decodeIfPresent(GuildMemberProfile.self, forKey: .guild_member_profile)
-        badges = try container.decodeIfPresent([UserProfileBadge].self, forKey: .badges) ?? []
-        guild_badges = try container.decodeIfPresent([UserProfileBadge].self, forKey: .guild_badges) ?? []
-        user = try container.decode(User.self, forKey: .user)
-    }
-
-    public let connected_accounts: [Connection]
+    @DefaultEmptyArrayDecodable public var connected_accounts: [Connection]
     public let guild_member: Member?
     public let premium_guild_since: Date?
     public let premium_since: Date?
@@ -241,8 +208,8 @@ public struct UserProfile: Codable, GatewayData {
     public let mutual_friends_count: Int?
     public let user_profile: UserProfileDetails?
     public let guild_member_profile: GuildMemberProfile?
-    public let badges: [UserProfileBadge]
-    public let guild_badges: [UserProfileBadge]
+    @DefaultEmptyArrayDecodable public var badges: [UserProfileBadge]
+    @DefaultEmptyArrayDecodable public var guild_badges: [UserProfileBadge]
 
     /// A more complete ``User`` struct, containing the user's bio, among others.
     public let user: User

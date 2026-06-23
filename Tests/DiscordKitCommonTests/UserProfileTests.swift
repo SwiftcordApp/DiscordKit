@@ -61,6 +61,64 @@ final class UserProfileTests: XCTestCase {
         XCTAssertEqual(ambientEffect.position.y, 24)
     }
 
+    func testUserProfileDefaultsMissingArrays() throws {
+        let profile = try DiscordREST.decoder.decode(
+            UserProfile.self,
+            from: Data("""
+            {
+              "user": {
+                "id": "1",
+                "username": "user",
+                "discriminator": "0"
+              }
+            }
+            """.utf8)
+        )
+
+        XCTAssertTrue(profile.connected_accounts.isEmpty)
+        XCTAssertTrue(profile.badges.isEmpty)
+        XCTAssertTrue(profile.guild_badges.isEmpty)
+    }
+
+    func testUserProfileEffectProductDefaultsMissingAndNullValues() throws {
+        let product = try DiscordREST.decoder.decode(
+            UserProfileEffectProduct.self,
+            from: Data("""
+            {
+              "sku_id": "1447654091193978940",
+              "name": "Libra",
+              "items": [
+                {
+                  "effects": [
+                    {
+                      "src": "https://cdn.discordapp.com/assets/content/defaults",
+                      "loop": null,
+                      "height": null,
+                      "width": null,
+                      "start": null,
+                      "position": null,
+                      "zIndex": null,
+                      "randomizedSources": null
+                    }
+                  ]
+                }
+              ]
+            }
+            """.utf8)
+        )
+
+        let item = try XCTUnwrap(product.items.first)
+        let effect = try XCTUnwrap(item.effects.first)
+        XCTAssertFalse(effect.loop)
+        XCTAssertEqual(effect.height, 0)
+        XCTAssertEqual(effect.width, 0)
+        XCTAssertEqual(effect.start, 0)
+        XCTAssertEqual(effect.position.x, 0)
+        XCTAssertEqual(effect.position.y, 0)
+        XCTAssertEqual(effect.zIndex, 0)
+        XCTAssertTrue(effect.randomizedSources.isEmpty)
+    }
+
     private static let payload = """
     {
       "user": {
