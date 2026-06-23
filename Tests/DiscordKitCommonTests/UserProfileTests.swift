@@ -30,6 +30,37 @@ final class UserProfileTests: XCTestCase {
         XCTAssertNil(profile.guild_member_profile?.theme_colors?[1])
     }
 
+    func testUserProfileEffectProductDecodesCollectiblesProductPayload() throws {
+        let product = try DiscordREST.decoder.decode(
+            UserProfileEffectProduct.self,
+            from: Data(Self.effectProductPayload.utf8)
+        )
+
+        XCTAssertEqual(product.sku_id, "1447654091193978940")
+        XCTAssertEqual(product.name, "Libra")
+        XCTAssertEqual(product.styles?.background_colors, [197388, 725849])
+        XCTAssertEqual(product.google_sku_ids?["5"], "1447654091193978940_1447723406102630621")
+
+        let item = try XCTUnwrap(product.items.first)
+        XCTAssertEqual(item.animationType, 1)
+        XCTAssertEqual(item.accessibilityLabel, "Glowing blue-white figure.")
+        XCTAssertEqual(item.effects.count, 2)
+
+        let entryEffect = item.effects[0]
+        XCTAssertEqual(entryEffect.src, "https://cdn.discordapp.com/assets/content/entry")
+        XCTAssertFalse(entryEffect.loop)
+        XCTAssertEqual(entryEffect.width, 450)
+        XCTAssertEqual(entryEffect.height, 880)
+        XCTAssertEqual(entryEffect.start, 0)
+        XCTAssertEqual(entryEffect.zIndex, 100)
+
+        let ambientEffect = item.effects[1]
+        XCTAssertTrue(ambientEffect.loop)
+        XCTAssertEqual(ambientEffect.start, 4000)
+        XCTAssertEqual(ambientEffect.position.x, 12)
+        XCTAssertEqual(ambientEffect.position.y, 24)
+    }
+
     private static let payload = """
     {
       "user": {
@@ -145,6 +176,66 @@ final class UserProfileTests: XCTestCase {
         "theme_colors": [0, null]
       },
       "legacy_username": null
+    }
+    """
+
+    private static let effectProductPayload = """
+    {
+      "sku_id": "1447654091193978940",
+      "name": "Libra",
+      "summary": "Show this effect when others view your profile.",
+      "store_listing_id": "1447654091193978940",
+      "styles": {
+        "background_colors": [197388, 725849],
+        "button_colors": [5793266, 5793266],
+        "confetti_colors": [43772, 15774258]
+      },
+      "preview_assets": null,
+      "items": [
+        {
+          "type": 1,
+          "sku_id": "1447654091193978940",
+          "title": "Libra",
+          "description": "Show this effect when others view your profile.",
+          "accessibilityLabel": "Glowing blue-white figure.",
+          "animationType": 1,
+          "staticFrameSrc": "https://cdn.discordapp.com/assets/content/static",
+          "thumbnailPreviewSrc": "https://cdn.discordapp.com/assets/content/thumbnail",
+          "reducedMotionSrc": "https://cdn.discordapp.com/assets/content/reduced",
+          "effects": [
+            {
+              "src": "https://cdn.discordapp.com/assets/content/entry",
+              "loop": false,
+              "height": 880,
+              "width": 450,
+              "duration": 4000,
+              "start": 0,
+              "loopDelay": 0,
+              "position": { "x": 0, "y": 0 },
+              "zIndex": 100,
+              "randomizedSources": []
+            },
+            {
+              "src": "https://cdn.discordapp.com/assets/content/ambient",
+              "loop": true,
+              "height": 880,
+              "width": 450,
+              "duration": 5000,
+              "start": 4000,
+              "loopDelay": 0,
+              "position": { "x": 12, "y": 24 },
+              "zIndex": 101,
+              "randomizedSources": []
+            }
+          ]
+        }
+      ],
+      "type": 1,
+      "premium_type": 0,
+      "category_sku_id": "1447654091630182572",
+      "google_sku_ids": {
+        "5": "1447654091193978940_1447723406102630621"
+      }
     }
     """
 }

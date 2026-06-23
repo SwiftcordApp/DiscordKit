@@ -265,7 +265,11 @@ public struct GuildMemberProfile: Codable, GatewayData {
     public let theme_colors: [Int?]?
 }
 
-public struct UserProfileEffect: Codable, GatewayData {}
+public struct UserProfileEffect: Codable, GatewayData {
+    /// ``UserProfileEffectProduct`` collectible sku ID
+    public let sku_id: Snowflake
+//    public let expires_at:
+}
 
 public struct UserProfileCollectible: Codable, GatewayData {}
 
