@@ -88,18 +88,6 @@ public extension DiscordREST {
             body: body
         )
     }
-    /// Create Message
-    ///
-    /// > POST: `/channels/{channel.id}/messages`
-    func createMessage<T: Decodable, B: Encodable>(
-        _ channelId: Snowflake,
-        _ body: B
-    ) async throws -> T {
-        return try await postReq(
-            path: "channels/\(channelId)/messages",
-            body: body
-        )
-    }
     /// Crosspost Message
     ///
     /// > POST: `/channels/{channel.id}/messages/{message.id}/crosspost`
@@ -188,14 +176,14 @@ public extension DiscordREST {
     /// Edit Message
     ///
     /// > PATCH: `/channels/{channel.id}/messages/{message.id}`
-    func editMessage<B: Encodable>(
+    func editMessage(
         _ channelId: Snowflake,
         _ messageId: Snowflake,
-        _ body: B
+        _ message: EditMessage
     ) async throws {
         try await patchReq(
             path: "channels/\(channelId)/messages/\(messageId)",
-            body: body
+            body: message
         )
     }
     /// Bulk Delete Messages
