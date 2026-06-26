@@ -130,7 +130,7 @@ public struct PermOverwrite: Codable, Equatable {
  channel context. The @everyone role has the same ID as the guild it belongs to.
  */
 
-public struct Role: Codable {
+public struct Role: Codable, Equatable {
     public let id: Snowflake
     public let name: String
     public let color: Int
@@ -144,7 +144,7 @@ public struct Role: Codable {
     public let tags: RoleTags?
 }
 
-public struct RoleTags: Codable {
+public struct RoleTags: Codable, Equatable {
     public let bot_id: Snowflake?
     public let integration_id: Snowflake?
     public let premium_subscriber: Bool?
