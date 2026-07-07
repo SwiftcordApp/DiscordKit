@@ -164,6 +164,17 @@ public struct GatewayIncoming: Decodable {
         /// - Parameter messageACKEvt: Information about the acknowledged messages
         case messageACK(MessageACKEvt)
 
+        // MARK: - Message Reactions
+
+        /// Message reaction add event.
+        case messageReactionAdd(MessageReactionAdd)
+        /// Message reaction remove event.
+        case messageReactionRemove(MessageReactionRemove)
+        /// Message reaction remove all event.
+        case messageReactionRemoveAll(MessageReactionRemoveAll)
+        /// Message reaction remove emoji event.
+        case messageReactionRemoveEmoji(MessageReactionRemoveEmoji)
+
         // MARK: - Users
 
         /// User update event
@@ -300,6 +311,12 @@ public struct GatewayIncoming: Decodable {
         case .messageDelete: return .messageDelete(try values.decode(MessageDelete.self, forKey: .data))
         case .messageDeleteBulk: return .messageDeleteBulk(try values.decode(MessageDeleteBulk.self, forKey: .data))
         case .messageACK: return .messageACK(try values.decode(MessageACKEvt.self, forKey: .data))
+
+        // MARK: Message Reactions
+        case .messageReactAdd: return .messageReactionAdd(try values.decode(MessageReactionAdd.self, forKey: .data))
+        case .messageReactRemove: return .messageReactionRemove(try values.decode(MessageReactionRemove.self, forKey: .data))
+        case .messageReactRemoveAll: return .messageReactionRemoveAll(try values.decode(MessageReactionRemoveAll.self, forKey: .data))
+        case .messageReactRemoveEmoji: return .messageReactionRemoveEmoji(try values.decode(MessageReactionRemoveEmoji.self, forKey: .data))
 
         // MARK: Users
         case .userUpdate: return .userUpdate(try values.decode(CurrentUser.self, forKey: .data))

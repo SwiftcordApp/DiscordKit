@@ -38,6 +38,131 @@ final class GatewayIncomingTests: XCTestCase {
         assertUnknown(incoming.data)
     }
 
+    func testMessageReactionAddDispatchDecodes() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {
+          "op":0,
+          "s":51,
+          "t":"MESSAGE_REACTION_ADD",
+          "d":{
+            "user_id":"user",
+            "channel_id":"channel",
+            "message_id":"message",
+            "guild_id":"guild",
+            "emoji":{"id":"emoji","name":"party"},
+            "message_author_id":"author",
+            "burst":true,
+            "burst_colors":["#ffffff"],
+            "type":1
+          }
+        }
+        """)
+
+        XCTAssertEqual(incoming.type, .messageReactAdd)
+        guard case .messageReactionAdd(let reaction) = incoming.data else {
+            XCTFail("Expected message reaction add, got \(incoming.data)")
+            return
+        }
+
+        XCTAssertEqual(reaction.user_id, "user")
+        XCTAssertEqual(reaction.channel_id, "channel")
+        XCTAssertEqual(reaction.message_id, "message")
+        XCTAssertEqual(reaction.guild_id, "guild")
+        XCTAssertEqual(reaction.emoji.id, "emoji")
+        XCTAssertEqual(reaction.emoji.name, "party")
+        XCTAssertEqual(reaction.message_author_id, "author")
+        XCTAssertTrue(reaction.burst)
+        XCTAssertEqual(reaction.burst_colors, ["#ffffff"])
+        XCTAssertEqual(reaction.type, 1)
+    }
+
+    func testMessageReactionRemoveDispatchDecodes() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {
+          "op":0,
+          "s":52,
+          "t":"MESSAGE_REACTION_REMOVE",
+          "d":{
+            "user_id":"user",
+            "channel_id":"channel",
+            "message_id":"message",
+            "guild_id":"guild",
+            "emoji":{"id":null,"name":"\\\\uD83D\\\\uDE00"},
+            "burst":false,
+            "type":0
+          }
+        }
+        """)
+
+        XCTAssertEqual(incoming.type, .messageReactRemove)
+        guard case .messageReactionRemove(let reaction) = incoming.data else {
+            XCTFail("Expected message reaction remove, got \(incoming.data)")
+            return
+        }
+
+        XCTAssertEqual(reaction.user_id, "user")
+        XCTAssertEqual(reaction.channel_id, "channel")
+        XCTAssertEqual(reaction.message_id, "message")
+        XCTAssertEqual(reaction.guild_id, "guild")
+        XCTAssertNil(reaction.emoji.id)
+        XCTAssertEqual(reaction.emoji.name, "\\uD83D\\uDE00")
+        XCTAssertFalse(reaction.burst)
+        XCTAssertEqual(reaction.type, 0)
+    }
+
+    func testMessageReactionRemoveAllDispatchDecodes() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {
+          "op":0,
+          "s":53,
+          "t":"MESSAGE_REACTION_REMOVE_ALL",
+          "d":{
+            "channel_id":"channel",
+            "message_id":"message",
+            "guild_id":"guild"
+          }
+        }
+        """)
+
+        XCTAssertEqual(incoming.type, .messageReactRemoveAll)
+        guard case .messageReactionRemoveAll(let reaction) = incoming.data else {
+            XCTFail("Expected message reaction remove all, got \(incoming.data)")
+            return
+        }
+
+        XCTAssertEqual(reaction.channel_id, "channel")
+        XCTAssertEqual(reaction.message_id, "message")
+        XCTAssertEqual(reaction.guild_id, "guild")
+    }
+
+    func testMessageReactionRemoveEmojiDispatchDecodes() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {
+          "op":0,
+          "s":54,
+          "t":"MESSAGE_REACTION_REMOVE_EMOJI",
+          "d":{
+            "channel_id":"channel",
+            "message_id":"message",
+            "guild_id":"guild",
+            "emoji":{"id":"emoji","name":"party"}
+          }
+        }
+        """)
+
+        XCTAssertEqual(incoming.type, .messageReactRemoveEmoji)
+        guard case .messageReactionRemoveEmoji(let reaction) = incoming.data else {
+            XCTFail("Expected message reaction remove emoji, got \(incoming.data)")
+            return
+        }
+
+        XCTAssertEqual(reaction.channel_id, "channel")
+        XCTAssertEqual(reaction.message_id, "message")
+        XCTAssertEqual(reaction.guild_id, "guild")
+        XCTAssertEqual(reaction.emoji.id, "emoji")
+        XCTAssertEqual(reaction.emoji.name, "party")
+    }
+
     func testQOSHeartbeatEncodesExplicitNulls() throws {
         let payload = GatewayOutgoing(
             opcode: .qosHeartbeat,
