@@ -236,6 +236,9 @@ public struct GatewayIncoming: Decodable {
         /// Dispatched when the user settings proto changes.
         case settingsProtoUpdate(GatewaySettingsProtoUpdate)
 
+        /// Channel unread state update event.
+        case channelUnreadUpdate(ChannelUnreadUpdate)
+
         /// Handling this payload/event isn't implemented yet
         case unknown
     }
@@ -318,10 +321,8 @@ public struct GatewayIncoming: Decodable {
 
         // MARK: Typing
         case .typingStart: return .typingStart(try values.decode(TypingStart.self, forKey: .data))
-    /*
         // MARK: - User account-specific events
-        case .channelUnreadUpdate: return try values.decode(ChannelUnreadUpdate.self, forKey: .data)
-    */
+        case .channelUnreadUpdate: return .channelUnreadUpdate(try values.decode(ChannelUnreadUpdate.self, forKey: .data))
         case .userSettingsProtoUpdate: return .settingsProtoUpdate(
             try values.decode(GatewaySettingsProtoUpdate.self, forKey: .data)
         )
