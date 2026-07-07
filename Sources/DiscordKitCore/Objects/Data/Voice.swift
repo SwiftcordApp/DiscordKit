@@ -63,37 +63,3 @@ public struct VoiceState: Codable, GatewayData {
         connected_at = try container.decodeDiscordDateIfPresent(forKey: .connected_at)
     }
 }
-
-private extension KeyedDecodingContainer {
-    /// Loosely decodes a date from a variety of formats
-    ///
-    /// Supports ISO8601, unix epoch seconds and epoch ms
-    func decodeDiscordDateIfPresent(forKey key: Key) throws -> Date? {
-        guard contains(key), try !decodeNil(forKey: key) else { return nil }
-
-        if let dateString = try? decode(String.self, forKey: key) {
-            if let date = iso8601.date(from: dateString) {
-                return date
-            }
-            if let date = iso8601WithFractionalSeconds.date(from: dateString) {
-                return date
-            }
-            if let timestamp = TimeInterval(dateString) {
-                return Self.date(fromTimestamp: timestamp)
-            }
-            return nil
-        }
-
-        if let timestamp = try? decode(TimeInterval.self, forKey: key) {
-            return Self.date(fromTimestamp: timestamp)
-        }
-
-        return nil
-    }
-
-    static func date(fromTimestamp timestamp: TimeInterval) -> Date {
-        // Discord supplemental snapshots have been observed sending this as a
-        // number. Treat large Unix timestamps as milliseconds.
-        Date(timeIntervalSince1970: timestamp > 10_000_000_000 ? timestamp / 1_000 : timestamp)
-    }
-}
