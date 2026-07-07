@@ -16,4 +16,11 @@ public extension Snowflake {
         let millisTimestamp = (intSnowflake >> 22) + Self.DISCORD_EPOCH
         return Date(timeIntervalSince1970: Double(millisTimestamp) / 1000.0)
     }
+
+    /// Whether this snowflake is newer (numerically greater) than another; `nil` counts as older.
+    func isNewer(than other: Snowflake?) -> Bool {
+        guard let other else { return true }
+        guard let lhs = UInt64(self), let rhs = UInt64(other) else { return self > other }
+        return lhs > rhs
+    }
 }
