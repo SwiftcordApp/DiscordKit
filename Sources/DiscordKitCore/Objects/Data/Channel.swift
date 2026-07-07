@@ -33,6 +33,13 @@ public enum ChannelType: Int, Codable {
         let container = try decoder.singleValueContainer()
         self = Self(rawValue: try container.decode(Int.self)) ?? Self.unknown
     }
+
+    public var isThread: Bool {
+        switch self {
+        case .newsThread, .publicThread, .privateThread: return true
+        default: return false
+        }
+    }
 }
 
 public struct Channel: Identifiable, Codable, GatewayData, Equatable {
