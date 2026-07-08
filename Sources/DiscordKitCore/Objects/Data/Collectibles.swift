@@ -42,7 +42,10 @@ public struct UserProfileEffectProductItem: Codable, GatewayData {
 }
 
 public struct UserProfileEffectProductEffect: Codable, GatewayData {
-    public let src: String
+    /// Layer image URL; newer payloads reference an asset ``id`` instead
+    public let src: String?
+    /// Asset ID, resolved to a CDN URL via ``imageURL(skuID:)``
+    public let id: String?
     @DefaultFalseDecodable public var loop: Bool
     @DefaultZeroDecodable public var height: Double
     @DefaultZeroDecodable public var width: Double
@@ -52,6 +55,25 @@ public struct UserProfileEffectProductEffect: Codable, GatewayData {
     @DefaultInitialDecodable public var position: UserProfileEffectProductEffectPosition
     @DefaultZeroDecodable public var zIndex: Int
     @DefaultEmptyArrayDecodable public var randomizedSources: [String]
+}
+
+public extension UserProfileEffectProductEffect {
+    /// Resolves this layer's image URL the way the official client does:
+    /// an explicit `src` wins; otherwise the asset `id` maps to the
+    /// collectibles-shop CDN route.
+    func imageURL(skuID: Snowflake) -> URL? {
+        if let src {
+            return URL(string: src)
+        }
+
+        guard let id else { return nil }
+
+        var url = URL(string: DiscordKitConfig.default.cdnURL)!
+        for component in ["media", "v1", "collectibles-shop", skuID, id, "static"] {
+            url.appendPathComponent(component)
+        }
+        return url
+    }
 }
 
 public struct UserProfileEffectProductEffectPosition: Codable, GatewayData, DefaultInitializable {
