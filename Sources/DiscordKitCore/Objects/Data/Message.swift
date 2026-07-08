@@ -55,6 +55,18 @@ public enum MessageType: Int, Codable {
     case autoModAct = 24
 }
 
+public extension MessageType {
+    /// Whether this message type uses the standard user-authored message appearance.
+    var isRegular: Bool {
+        switch self {
+        case .defaultMsg, .reply, .chatInputCmd, .contextMenuCmd:
+            return true
+        default:
+            return false
+        }
+    }
+}
+
 /// Represents a message sent in a channel within Discord
 public class Message: Codable, GatewayData, Identifiable {
     public struct Flags: OptionSet, Codable {
