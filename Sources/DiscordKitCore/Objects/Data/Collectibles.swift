@@ -7,6 +7,106 @@
 
 import Foundation
 
+/// Compact user/member collectibles sent on user and guild-member payloads.
+public struct UserCollectibles: Codable, GatewayData, Equatable {
+    public let nameplate: ProfileNameplate?
+
+    public init(nameplate: ProfileNameplate? = nil) {
+        self.nameplate = nameplate
+    }
+
+    private enum DecodingKeys: String, CodingKey {
+        case nameplate
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: DecodingKeys.self)
+        nameplate = try? container.decodeIfPresent(ProfileNameplate.self, forKey: .nameplate)
+    }
+}
+
+/// Compact profile nameplate data attached to a user or guild member.
+public struct ProfileNameplate: Codable, GatewayData, Equatable {
+    public let sku_id: Snowflake
+    public let label: String
+    public let palette: String
+    public let asset: String?
+    public let expires_at: Double?
+
+    public init(
+        sku_id: Snowflake,
+        label: String,
+        palette: String,
+        asset: String? = nil,
+        expires_at: Double? = nil
+    ) {
+        self.sku_id = sku_id
+        self.label = label
+        self.palette = palette
+        self.asset = asset
+        self.expires_at = expires_at
+    }
+
+    private enum DecodingKeys: String, CodingKey {
+        case sku_id
+        case skuId
+        case label
+        case palette
+        case asset
+        case expires_at
+        case expiresAt
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: DecodingKeys.self)
+        sku_id = try container.decodeString(forKeys: .sku_id, .skuId)
+        label = try container.decode(String.self, forKey: .label)
+        palette = try container.decode(String.self, forKey: .palette)
+        asset = try? container.decodeIfPresent(String.self, forKey: .asset)
+        expires_at = try container.decodeNumberIfPresent(forKeys: .expires_at, .expiresAt)
+    }
+}
+
+public extension ProfileNameplate {
+    var staticImageURL: URL {
+        Self.staticImageURL(skuID: sku_id)
+    }
+
+    static func staticImageURL(skuID: Snowflake) -> URL {
+        var url = URL(string: DiscordKitConfig.default.cdnURL)!
+        for component in ["media", "v1", "collectibles-shop", skuID, "static"] {
+            url.appendPathComponent(component)
+        }
+        return url
+    }
+}
+
+private extension KeyedDecodingContainer {
+    func decodeString(forKeys keys: Key...) throws -> String {
+        for key in keys {
+            if let value = try? decodeIfPresent(String.self, forKey: key) {
+                return value
+            }
+        }
+        throw DecodingError.keyNotFound(
+            keys[0],
+            DecodingError.Context(
+                codingPath: codingPath,
+                debugDescription: "Expected one of \(keys.map(\.stringValue).joined(separator: ", "))"
+            )
+        )
+    }
+
+    func decodeNumberIfPresent(forKeys keys: Key...) throws -> Double? {
+        for key in keys {
+            if let value = try? decodeIfPresent(Double.self, forKey: key) {
+                return value
+            }
+        }
+        return nil
+    }
+}
+
 /// User profile effect collectible
 public struct UserProfileEffectProduct: Codable, GatewayData {
     /// Collectible sku id

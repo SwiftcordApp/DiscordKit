@@ -12,7 +12,7 @@ public struct User: Codable, GatewayData, Identifiable, Equatable {
     }
 
     // To work around the default access level
-    public init(id: Snowflake, username: String, discriminator: String, global_name: String?, avatar: HashedAsset<UserAvatar>?, bot: Bool?, bio: String?, system: Bool?, mfa_enabled: Bool?, banner: HashedAsset<UserBanner>?, accent_color: Int?, locale: Locale?, verified: Bool?, flags: User.Flags?, premium_type: PremiumType?, public_flags: User.Flags?) {
+    public init(id: Snowflake, username: String, discriminator: String, global_name: String?, avatar: HashedAsset<UserAvatar>?, bot: Bool?, bio: String?, system: Bool?, mfa_enabled: Bool?, banner: HashedAsset<UserBanner>?, accent_color: Int?, locale: Locale?, verified: Bool?, flags: User.Flags?, premium_type: PremiumType?, public_flags: User.Flags?, collectibles: UserCollectibles? = nil) {
         self.id = id
         self.username = username
         self.discriminator = discriminator
@@ -29,6 +29,7 @@ public struct User: Codable, GatewayData, Identifiable, Equatable {
         self.flags = flags
         self.premium_type = premium_type
         self.public_flags = public_flags
+        self.collectibles = collectibles
     }
 
     /// ID of this user
@@ -84,6 +85,9 @@ public struct User: Codable, GatewayData, Identifiable, Equatable {
 
     /// The type of nitro subscription this user has
     public let premium_type: User.PremiumType?
+
+    /// Compact collectibles attached to this user's global profile.
+    public let collectibles: UserCollectibles?
 }
 
 /// A subset of the ``User`` struct with less properties and less optionals
@@ -161,6 +165,9 @@ public struct CurrentUser: Codable, GatewayData, Equatable {
 
     /// User's avatar hash
     public let avatar: HashedAsset<UserAvatar>?
+
+    /// Compact collectibles attached to this user's global profile.
+    public let collectibles: UserCollectibles?
 }
 
 /// A user's profile, containing more data about the user and a fuller ``User`` struct
@@ -266,7 +273,8 @@ public extension User {
             verified: nil,
             flags: user.flags,
             premium_type: user.premium ? .nitro : User.PremiumType.none,
-            public_flags: user.public_flags
+            public_flags: user.public_flags,
+            collectibles: user.collectibles
         )
     }
 }
