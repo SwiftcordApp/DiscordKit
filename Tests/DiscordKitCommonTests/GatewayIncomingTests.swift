@@ -38,6 +38,54 @@ final class GatewayIncomingTests: XCTestCase {
         assertUnknown(incoming.data)
     }
 
+    func testGuildEmojisUpdateDispatchDecodes() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {
+          "op":0,
+          "s":50,
+          "t":"GUILD_EMOJIS_UPDATE",
+          "d":{
+            "guild_id":"guild",
+            "emojis":[
+              {
+                "id":"static-emoji",
+                "name":"party_blob",
+                "roles":["role-1"],
+                "require_colons":true,
+                "managed":false,
+                "animated":false,
+                "available":true
+              },
+              {
+                "id":"animated-emoji",
+                "name":"wave_anim",
+                "roles":[],
+                "require_colons":true,
+                "managed":false,
+                "animated":true,
+                "available":true
+              }
+            ]
+          }
+        }
+        """)
+
+        XCTAssertEqual(incoming.type, .guildEmojisUpdate)
+        guard case .guildEmojisUpdate(let update) = incoming.data else {
+            XCTFail("Expected guild emoji update, got \(incoming.data)")
+            return
+        }
+
+        XCTAssertEqual(update.guild_id, "guild")
+        XCTAssertEqual(update.emojis.count, 2)
+        XCTAssertEqual(update.emojis[0].id, "static-emoji")
+        XCTAssertEqual(update.emojis[0].name, "party_blob")
+        XCTAssertEqual(update.emojis[0].roles, ["role-1"])
+        XCTAssertFalse(update.emojis[0].animated ?? true)
+        XCTAssertEqual(update.emojis[1].id, "animated-emoji")
+        XCTAssertTrue(update.emojis[1].animated ?? false)
+    }
+
     func testMessageReactionAddDispatchDecodes() throws {
         let incoming = try decodeGatewayIncoming("""
         {
