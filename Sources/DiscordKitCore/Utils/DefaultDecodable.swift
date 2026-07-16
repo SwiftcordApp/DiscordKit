@@ -46,6 +46,44 @@ public extension KeyedDecodingContainer {
     }
 }
 
+/// Defaults a missing array to empty and discards only elements that fail to decode.
+///
+/// Use this for supplemental arrays whose schema drift must not discard their
+/// containing event. Keep authoritative collections on ``DefaultDecodable``.
+@propertyWrapper
+public struct LossyArrayDecodable<Element: Decodable>: Decodable {
+    public let wrappedValue: [Element]
+
+    public init() {
+        wrappedValue = []
+    }
+
+    public init(wrappedValue: [Element]) {
+        self.wrappedValue = wrappedValue
+    }
+
+    public init(from decoder: Decoder) throws {
+        let elements = try? decoder.singleValueContainer().decode([DecodeThrowable<Element>].self)
+        wrappedValue = elements?.compactMap { try? $0.unwrap() } ?? []
+    }
+}
+
+extension LossyArrayDecodable: Encodable where Element: Encodable {
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(wrappedValue)
+    }
+}
+
+public extension KeyedDecodingContainer {
+    func decode<Element>(
+        _ type: LossyArrayDecodable<Element>.Type,
+        forKey key: Key
+    ) throws -> LossyArrayDecodable<Element> {
+        try decodeIfPresent(type, forKey: key) ?? .init()
+    }
+}
+
 public enum DefaultFalse: DefaultDecodingType {
     public static let defaultValue = false
 }

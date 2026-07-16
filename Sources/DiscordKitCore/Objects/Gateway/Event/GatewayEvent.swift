@@ -81,6 +81,7 @@ public enum GatewayEvent: String, Codable {
 
     // MARK: Presence Update
     case presenceUpdate = "PRESENCE_UPDATE"
+    case presencesReplace = "PRESENCES_REPLACE"
 
     // MARK: Sessions
     case sessionsReplace = "SESSIONS_REPLACE"

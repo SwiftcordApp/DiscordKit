@@ -23,6 +23,8 @@ public struct Member: Codable, GatewayData {
     public let guild_id: Snowflake?
     public let user_id: Snowflake? // Only present in merged_members in READY payload!
     public let collectibles: UserCollectibles?
+    /// Presence nested in this member, only present in ``GuildMemberListUpdate`` items
+    public let presence: PresenceUpdate?
 
     init(
         user: User?,
@@ -39,7 +41,8 @@ public struct Member: Codable, GatewayData {
         communication_disabled_until: Date?,
         guild_id: Snowflake?,
         user_id: Snowflake?,
-        collectibles: UserCollectibles? = nil
+        collectibles: UserCollectibles? = nil,
+        presence: PresenceUpdate? = nil
     ) {
         self.user = user
         self.nick = nick
@@ -56,6 +59,7 @@ public struct Member: Codable, GatewayData {
         self.guild_id = guild_id
         self.user_id = user_id
         self.collectibles = collectibles
+        self.presence = presence
     }
 
     public init(from updateMember: GuildMemberUpdate, merging: Self? = nil) {
@@ -74,6 +78,7 @@ public struct Member: Codable, GatewayData {
         self.guild_id = updateMember.guild_id
         self.user_id = merging?.user_id
         self.collectibles = updateMember.collectibles ?? merging?.collectibles
+        self.presence = merging?.presence
     }
 
     public func preservingCollectibles(from existing: Self?) -> Self {
@@ -96,7 +101,8 @@ public struct Member: Codable, GatewayData {
             communication_disabled_until: communication_disabled_until,
             guild_id: guild_id,
             user_id: user_id,
-            collectibles: existingCollectibles
+            collectibles: existingCollectibles,
+            presence: presence
         )
     }
 }

@@ -16,6 +16,6 @@ public struct GuildMembersChunk: GatewayData {
     public let chunk_index: Int
     public let chunk_count: Int
     public let not_found: [Snowflake]?
-    public let presences: [Presence]?
+    public let presences: [PresenceUpdate]?
     public let nonce: String?
 }

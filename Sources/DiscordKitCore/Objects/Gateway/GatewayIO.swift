@@ -193,6 +193,12 @@ public struct GatewayIncoming: Decodable {
         /// > presence updates for users in a certain guild.
         case presenceUpdate(PresenceUpdate)
 
+        /// Presences replace event
+        ///
+        /// (For user accounts only) Replaces every presence in the non-guild ("@me") scope,
+        /// i.e. presences of friends and open-DM recipients. Items carry no `guild_id`.
+        case presencesReplace([PresenceUpdate])
+
         // MARK: - Voice
 
         /// Voice state update event
@@ -324,6 +330,7 @@ public struct GatewayIncoming: Decodable {
         // MARK: Users
         case .userUpdate: return .userUpdate(try values.decode(CurrentUser.self, forKey: .data))
         case .presenceUpdate: return .presenceUpdate(try values.decode(PresenceUpdate.self, forKey: .data))
+        case .presencesReplace: return .presencesReplace(try values.decode([PresenceUpdate].self, forKey: .data))
 
         // MARK: Voice
         case .voiceStateUpdate: return .voiceStateUpdate(try values.decode(VoiceState.self, forKey: .data))

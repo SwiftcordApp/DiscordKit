@@ -7,17 +7,55 @@
 
 import Foundation
 
-public enum ActivityType: Int, Codable {
-    case game = 0      // Playing {name}
-    case streaming = 1 // Streaming {details}
-    case listening = 2 // Listening to {name}
-    case watching = 3  // Watching {name}
-    case custom = 4    // {emoji} {name}
-    case competing = 5 // Competing in {name}
+public enum ActivityType: RawRepresentable, Codable, Hashable {
+    case game      // Playing {name}
+    case streaming // Streaming {details}
+    case listening // Listening to {name}
+    case watching  // Watching {name}
+    case custom    // {emoji} {name}
+    case competing // Competing in {name}
+    case hangStatus
+    case unknown(Int)
+
+    public init?(rawValue: Int) {
+        switch rawValue {
+        case 0: self = .game
+        case 1: self = .streaming
+        case 2: self = .listening
+        case 3: self = .watching
+        case 4: self = .custom
+        case 5: self = .competing
+        case 6: self = .hangStatus
+        default: self = .unknown(rawValue)
+        }
+    }
+
+    public var rawValue: Int {
+        switch self {
+        case .game: return 0
+        case .streaming: return 1
+        case .listening: return 2
+        case .watching: return 3
+        case .custom: return 4
+        case .competing: return 5
+        case .hangStatus: return 6
+        case .unknown(let value): return value
+        }
+    }
+
+    public init(from decoder: Decoder) throws {
+        let value = try decoder.singleValueContainer().decode(Int.self)
+        self = Self(rawValue: value)!
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
+    }
 }
 
-public struct Activity: GatewayData {
-    public init(name: String, type: ActivityType, url: String? = nil, created_at: Int, timestamps: ActivityTimestamp? = nil, application_id: Snowflake? = nil, details: String? = nil, state: String? = nil, emoji: ActivityEmoji? = nil, party: ActivityParty? = nil, assets: ActivityAssets? = nil, secrets: ActivitySecrets? = nil, instance: Bool? = nil, flags: Int? = nil, buttons: [String]? = nil) {
+public struct Activity: Codable, GatewayData {
+    public init(name: String, type: ActivityType, url: String? = nil, created_at: Int? = nil, timestamps: ActivityTimestamp? = nil, application_id: Snowflake? = nil, details: String? = nil, state: String? = nil, emoji: ActivityEmoji? = nil, party: ActivityParty? = nil, assets: ActivityAssets? = nil, secrets: ActivitySecrets? = nil, instance: Bool? = nil, flags: Int? = nil, buttons: [String]? = nil) {
         self.name = name
         self.type = type
         self.url = url
@@ -38,7 +76,7 @@ public struct Activity: GatewayData {
     public let name: String
     public let type: ActivityType
     public let url: String?
-    public let created_at: Int // Unix timestamp (in milliseconds) of when the activity was added to the user's session
+    public let created_at: Int? // Unix timestamp (in milliseconds) of when the activity was added to the user's session
     public let timestamps: ActivityTimestamp?
     public let application_id: Snowflake?
     public let details: String?

@@ -379,6 +379,155 @@ final class GatewayIncomingTests: XCTestCase {
         XCTAssertTrue(supplemental.merged_presences.friends.isEmpty)
     }
 
+    func testPresencesReplaceDefaultsMissingActivities() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {
+          "op":0,
+          "s":52,
+          "t":"PRESENCES_REPLACE",
+          "d":[{"user":{"id":"user"},"status":"dnd"}]
+        }
+        """)
+
+        XCTAssertEqual(incoming.type, .presencesReplace)
+        guard case .presencesReplace(let presences) = incoming.data else {
+            XCTFail("Expected presences replace, got \(incoming.data)")
+            return
+        }
+
+        let presence = try XCTUnwrap(presences.first)
+        XCTAssertEqual(presence.status, .dnd)
+        XCTAssertTrue(presence.activities.isEmpty)
+    }
+
+    func testPresenceUpdatePreservesClientActivityExtensions() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {
+          "op":0,
+          "s":53,
+          "t":"PRESENCE_UPDATE",
+          "d":{
+            "user":{"id":"user"},
+            "guild_id":"guild",
+            "status":"online",
+            "processed_at_timestamp":1791234567890,
+            "activities":[
+              {"name":"Hang Status","type":6},
+              {"name":false,"type":1},
+              {"name":"Future Activity","type":99}
+            ]
+          }
+        }
+        """)
+
+        guard case .presenceUpdate(let update) = incoming.data else {
+            XCTFail("Expected presence update, got \(incoming.data)")
+            return
+        }
+
+        XCTAssertEqual(update.status, .online)
+        XCTAssertEqual(update.processed_at_timestamp, 1_791_234_567_890)
+        XCTAssertEqual(update.activities.count, 2)
+        XCTAssertEqual(update.activities[0].type, .hangStatus)
+        XCTAssertNil(update.activities[0].created_at)
+        XCTAssertEqual(update.activities[1].type, .unknown(99))
+
+        let normalized = NormalizedPresence(update: update)
+        XCTAssertEqual(normalized.userID, "user")
+        XCTAssertEqual(normalized.scope, .guild("guild"))
+        XCTAssertEqual(normalized.status, .online)
+        XCTAssertEqual(normalized.clientStatus, update.client_status)
+        XCTAssertEqual(normalized.activities.count, 2)
+        XCTAssertEqual(normalized.processedAtTimestamp, 1_791_234_567_890)
+
+        let encoded = try encodeObject(update)
+        let activities = try XCTUnwrap(encoded["activities"] as? [[String: Any]])
+        XCTAssertEqual(activities[1]["type"] as? Int, 99)
+    }
+
+    func testReadySupplementalDefaultsMissingAndSkipsMalformedActivities() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {
+          "op":0,
+          "s":54,
+          "t":"READY_SUPPLEMENTAL",
+          "d":{
+            "guilds":[{"id":"guild"}],
+            "merged_presences":{
+              "guilds":[[{
+                "user_id":"guild-user",
+                "status":"idle",
+                "processed_at_timestamp":1791234567890,
+                "activities":[
+                  {"name":"Game","type":0},
+                  {"name":42,"type":1}
+                ]
+              }]],
+              "friends":[{
+                "user_id":"friend-user",
+                "status":"online"
+              }]
+            }
+          }
+        }
+        """)
+
+        guard case .readySupplemental(let supplemental) = incoming.data else {
+            XCTFail("Expected ready supplemental, got \(incoming.data)")
+            return
+        }
+
+        let presence = try XCTUnwrap(supplemental.merged_presences.guilds.first?.first)
+        let friendPresence = try XCTUnwrap(supplemental.merged_presences.friends.first)
+        XCTAssertEqual(presence.status, .idle)
+        XCTAssertEqual(presence.processed_at_timestamp, 1_791_234_567_890)
+        XCTAssertEqual(presence.activities.count, 1)
+        XCTAssertEqual(presence.activities[0].type, .game)
+        XCTAssertNil(presence.activities[0].created_at)
+        XCTAssertTrue(friendPresence.activities.isEmpty)
+
+        let normalized = NormalizedPresence(supplemental: presence, scope: .guild("guild"))
+        XCTAssertEqual(normalized.userID, "guild-user")
+        XCTAssertEqual(normalized.scope, .guild("guild"))
+        XCTAssertEqual(normalized.status, .idle)
+        XCTAssertEqual(normalized.activities.count, 1)
+        XCTAssertEqual(normalized.processedAtTimestamp, 1_791_234_567_890)
+    }
+
+    func testGuildMembersChunkUsesOrdinaryPresenceShape() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {
+          "op":0,
+          "s":55,
+          "t":"GUILD_MEMBERS_CHUNK",
+          "d":{
+            "guild_id":"guild",
+            "members":[],
+            "chunk_index":0,
+            "chunk_count":1,
+            "presences":[{
+              "user":{"id":"chunk-user"},
+              "status":"dnd",
+              "client_status":{"desktop":"online"},
+              "activities":[]
+            }]
+          }
+        }
+        """)
+
+        guard case .guildMembersChunk(let chunk) = incoming.data else {
+            XCTFail("Expected guild members chunk, got \(incoming.data)")
+            return
+        }
+
+        let presence = try XCTUnwrap(chunk.presences?.first)
+        let normalized = NormalizedPresence(update: presence, scope: .guild(chunk.guild_id))
+        XCTAssertEqual(normalized.userID, "chunk-user")
+        XCTAssertEqual(normalized.scope, .guild("guild"))
+        XCTAssertEqual(normalized.status, .dnd)
+        XCTAssertEqual(normalized.clientStatus?.desktop, .online)
+    }
+
     func testVoiceStateUpdateEncodesVoiceJoinFields() throws {
         let payload = GatewayOutgoing(
             opcode: .voiceStateUpdate,
