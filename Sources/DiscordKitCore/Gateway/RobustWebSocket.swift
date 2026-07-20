@@ -359,11 +359,18 @@ private extension RobustWebSocket {
     }
 
     func doResumeOrIdentify() {
-        if canResumeSession, let sessionID {
-            doResume(sessionID: sessionID)
-        } else {
+        guard let sessionID else {
             doIdentify()
+            return
         }
+
+        guard canResumeSession else {
+            onSessionInvalid.notify()
+            doIdentify()
+            return
+        }
+
+        doResume(sessionID: sessionID)
     }
 
     func doResume(sessionID: String) {
