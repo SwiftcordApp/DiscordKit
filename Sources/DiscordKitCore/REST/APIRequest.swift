@@ -53,6 +53,27 @@ public extension DiscordREST {
         body: Data? = nil,
         method: RequestMethod = .get
     ) async throws -> Data {
+        try await makeRequestWithResponse(
+            path: path,
+            query: query,
+            attachments: attachments,
+            body: body,
+            method: method
+        ).0
+    }
+
+    /// Make a Discord REST API request, returning the `HTTPURLResponse`
+    ///
+    /// Identical to `makeRequest()`, for endpoints that need to inspect the
+    /// response status code or headers (e.g. message search's `202 Accepted`
+    /// indexing responses with a `retry-after` header).
+    func makeRequestWithResponse(
+        path: String,
+        query: [URLQueryItem] = [],
+        attachments: [URL] = [],
+        body: Data? = nil,
+        method: RequestMethod = .get
+    ) async throws -> (Data, HTTPURLResponse) {
         assert(token != nil, "Token should not be nil. Please set a token before using the REST API.")
         let token = token! // Force unwrapping is appropriete here
 
@@ -112,7 +133,7 @@ public extension DiscordREST {
             throw RequestError.unexpectedResponseCode(httpResponse.statusCode)
         }
 
-        return data
+        return (data, httpResponse)
     }
 
     /// Make a `GET` request to the Discord REST API
