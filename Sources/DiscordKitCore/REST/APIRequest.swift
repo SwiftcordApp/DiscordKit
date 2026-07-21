@@ -242,18 +242,20 @@ public extension DiscordREST {
     ///
     /// For endpoints that returns a 204 empty response and doesn't have any body
     func putReq(
-        path: String
+        path: String,
+        query: [URLQueryItem] = []
     ) async throws {
         _ = try await makeRequest(
             path: path,
+            query: query,
             body: nil,
             method: .put
         )
     }
 
     /// Make a `DELETE` request to the Discord REST API
-    func deleteReq(path: String) async throws {
-        _ = try await makeRequest(path: path, method: .delete)
+    func deleteReq(path: String, query: [URLQueryItem] = []) async throws {
+        _ = try await makeRequest(path: path, query: query, method: .delete)
     }
 
     /// Make a `PATCH` request to the Discord REST API

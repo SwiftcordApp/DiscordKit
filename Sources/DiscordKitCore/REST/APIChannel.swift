@@ -117,19 +117,27 @@ public extension DiscordREST {
         _ emoji: String
     ) async throws {
         return try await putReq(
-            path: "channels/\(channelId)/messages/\(messageId)/reactions/\(emoji)/@me"
+            path: "channels/\(channelId)/messages/\(messageId)/reactions/\(emoji)/@me",
+            query: [
+                URLQueryItem(name: "location", value: "Message Inline Button"),
+                URLQueryItem(name: "type", value: "0")
+            ]
         )
     }
     /// Delete Own Reaction
     ///
-    /// > DELETE: `/channels/{channel.id}/messages/{message.id}/reactions/{emoji}/@me`
+    /// > DELETE: `/channels/{channel.id}/messages/{message.id}/reactions/{emoji}/{type}/@me`
     func deleteOwnReaction(
         _ channelId: Snowflake,
         _ messageId: Snowflake,
         _ emoji: String
     ) async throws {
         try await deleteReq(
-            path: "channels/\(channelId)/messages/\(messageId)/reactions/\(emoji)/@me"
+            path: "channels/\(channelId)/messages/\(messageId)/reactions/\(emoji)/0/@me",
+            query: [
+                URLQueryItem(name: "location", value: "Message Inline Button"),
+                URLQueryItem(name: "burst", value: "false")
+            ]
         )
     }
     /// Delete User Reaction

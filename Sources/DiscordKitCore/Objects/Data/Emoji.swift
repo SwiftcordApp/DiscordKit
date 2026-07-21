@@ -28,3 +28,15 @@ public struct Emoji: Codable {
     public let animated: Bool?
     public let available: Bool? // Whether this emoji can be used, may be false due to loss of Server Boosts
 }
+
+public extension Emoji {
+    /// Emoji path component for reaction REST routes
+    ///
+    /// Custom emoji are addressed as `name:id`; the server only validates the ID, so a
+    /// placeholder name keeps deleted emoji (whose name is null) reactable. Unicode emoji
+    /// are addressed by the raw emoji itself.
+    var reactionRouteToken: String? {
+        guard let id else { return name }
+        return "\(name ?? "_"):\(id)"
+    }
+}
