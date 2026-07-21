@@ -13,17 +13,3 @@ public extension Message {
         return mentions.first(identifiedBy: userID) != nil
     }
 }
-
-// MARK: Protocol Conformance
-extension Message: Equatable, Hashable {
-    public static func == (lhs: Message, rhs: Message) -> Bool {
-        lhs.id == rhs.id && lhs.content == rhs.content && lhs.attachments == rhs.attachments && lhs.embeds == rhs.embeds
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-        hasher.combine(content)
-        hasher.combine(attachments)
-        hasher.combine(embeds)
-    }
-}

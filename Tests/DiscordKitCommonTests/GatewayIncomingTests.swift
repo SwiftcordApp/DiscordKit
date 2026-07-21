@@ -211,6 +211,32 @@ final class GatewayIncomingTests: XCTestCase {
         XCTAssertEqual(reaction.emoji.name, "party")
     }
 
+    func testMessageUpdateDispatchDecodesEndedCall() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {
+          "op":0,
+          "s":51,
+          "t":"MESSAGE_UPDATE",
+          "d":{
+            "id":"message",
+            "channel_id":"channel",
+            "call":{
+              "participants":["first","second"],
+              "ended_timestamp":"2026-07-08T03:17:21.769000+00:00"
+            }
+          }
+        }
+        """)
+
+        guard case .messageUpdate(let message) = incoming.data else {
+            XCTFail("Expected message update, got \(incoming.data)")
+            return
+        }
+
+        XCTAssertEqual(message.call?.participants, ["first", "second"])
+        XCTAssertNotNil(message.call?.ended_timestamp)
+    }
+
     func testQOSHeartbeatEncodesExplicitNulls() throws {
         let payload = GatewayOutgoing(
             opcode: .qosHeartbeat,

@@ -68,7 +68,7 @@ public extension MessageType {
 }
 
 /// Represents a message sent in a channel within Discord
-public class Message: Codable, GatewayData, Identifiable {
+public class Message: Codable, GatewayData, Identifiable, Equatable, Hashable {
     public struct Flags: OptionSet, Codable {
         public init(rawValue: UInt8) {
             self.rawValue = rawValue
@@ -248,6 +248,27 @@ public class Message: Codable, GatewayData, Identifiable {
 
     /// Present if the message is a call in DM
     public let call: CallMessageComponent?
+
+    /// Selective equality used by consumers to suppress unchanged message renders.
+    ///
+    /// Any newly rendered field that can change through `MESSAGE_UPDATE` must be
+    /// included here and in ``hash(into:)``. Otherwise retained views can treat
+    /// the update as unchanged until they are recreated.
+    public static func == (lhs: Message, rhs: Message) -> Bool {
+        lhs.id == rhs.id
+            && lhs.content == rhs.content
+            && lhs.attachments == rhs.attachments
+            && lhs.embeds == rhs.embeds
+            && lhs.call == rhs.call
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(content)
+        hasher.combine(attachments)
+        hasher.combine(embeds)
+        hasher.combine(call)
+    }
 }
 
 /// A complete copy of ``Message`` but with most properties marked as Optional
@@ -287,6 +308,7 @@ public struct PartialMessage: Codable, GatewayData {
     public let thread: Channel?
     public let components: [MessageComponent]?
     public let sticker_items: [StickerItem]?
+    public let call: CallMessageComponent?
 }
 
 public enum MessageActivityType: Int, Codable {
@@ -336,7 +358,7 @@ public protocol Component: Encodable {
 
 /// Call message component
 /// Representation of a call message shown in DMs
-public struct CallMessageComponent: Codable {
+public struct CallMessageComponent: Codable, Equatable, Hashable {
     public let participants: [String] // If there's a missed call there will be only 1 participant.
     public let ended_timestamp: Date? // If there's an active call, this will be nil
 }
