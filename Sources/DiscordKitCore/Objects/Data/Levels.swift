@@ -18,6 +18,8 @@ public enum VerificationLevel: Int, Codable {
 public enum MessageNotifLevel: Int, Codable {
     case all = 0
     case mentions = 1
+    case none = 2
+    case inherit = 3
 }
 
 public enum ExplicitContentFilterLevel: Int, Codable {

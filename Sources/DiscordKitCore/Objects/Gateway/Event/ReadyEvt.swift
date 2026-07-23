@@ -31,6 +31,9 @@ public struct ReadyEvt: Decodable, GatewayData {
     /// Per-guild and per-channel notification settings, including mutes.
     @DefaultInitialDecodable public var user_guild_settings: UserGuildSettings
 
+    /// Account-wide notification behavior flags.
+    @DefaultInitialDecodable public var notification_settings: AccountNotificationSettings
+
     public let auth_token: String?
 
     public let resume_gateway_url: URL

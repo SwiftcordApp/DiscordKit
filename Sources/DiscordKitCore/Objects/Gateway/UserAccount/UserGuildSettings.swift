@@ -7,6 +7,30 @@
 
 import Foundation
 
+/// Account-wide notification feature flags delivered in READY.
+public struct AccountNotificationSettings: Codable, GatewayData, DefaultInitializable {
+    public static let useNewNotificationsFlag = 16
+    public static let mentionOnAllMessagesFlag = 32
+
+    @DefaultZeroDecodable public var flags: Int
+
+    public init() {
+        _flags = DefaultZeroDecodable()
+    }
+
+    public init(flags: Int) {
+        _flags = DefaultZeroDecodable(wrappedValue: flags)
+    }
+
+    public var usesNewNotifications: Bool {
+        flags & Self.useNewNotificationsFlag != 0
+    }
+
+    public var mentionsOnAllMessages: Bool {
+        flags & Self.mentionOnAllMessagesFlag != 0
+    }
+}
+
 /// Per-guild notification settings delivered for user accounts.
 public struct UserGuildSettings: Codable, GatewayData, DefaultInitializable {
     public struct MuteConfig: Codable, Equatable {
@@ -21,15 +45,21 @@ public struct UserGuildSettings: Codable, GatewayData, DefaultInitializable {
         public let channel_id: Snowflake
         @DefaultFalseDecodable public var muted: Bool
         public let mute_config: MuteConfig?
+        public let message_notifications: MessageNotifLevel?
+        @DefaultZeroDecodable public var flags: Int
 
         public init(
             channelID: Snowflake,
             muted: Bool = false,
-            muteConfig: MuteConfig? = nil
+            muteConfig: MuteConfig? = nil,
+            messageNotifications: MessageNotifLevel? = nil,
+            flags: Int = 0
         ) {
             self.channel_id = channelID
             _muted = DefaultFalseDecodable(wrappedValue: muted)
             self.mute_config = muteConfig
+            self.message_notifications = messageNotifications
+            _flags = DefaultZeroDecodable(wrappedValue: flags)
         }
     }
 
@@ -37,6 +67,10 @@ public struct UserGuildSettings: Codable, GatewayData, DefaultInitializable {
         public let guild_id: Snowflake?
         @DefaultFalseDecodable public var muted: Bool
         public let mute_config: MuteConfig?
+        @DefaultFalseDecodable public var suppress_everyone: Bool
+        @DefaultFalseDecodable public var suppress_roles: Bool
+        public let message_notifications: MessageNotifLevel?
+        @DefaultZeroDecodable public var flags: Int
         @DefaultEmptyArrayDecodable public var channel_overrides: [ChannelOverride]
         @DefaultZeroDecodable public var version: Int
 
@@ -44,12 +78,20 @@ public struct UserGuildSettings: Codable, GatewayData, DefaultInitializable {
             guildID: Snowflake?,
             muted: Bool = false,
             muteConfig: MuteConfig? = nil,
+            suppressEveryone: Bool = false,
+            suppressRoles: Bool = false,
+            messageNotifications: MessageNotifLevel? = nil,
+            flags: Int = 0,
             channelOverrides: [ChannelOverride] = [],
             version: Int = 0
         ) {
             self.guild_id = guildID
             _muted = DefaultFalseDecodable(wrappedValue: muted)
             self.mute_config = muteConfig
+            _suppress_everyone = DefaultFalseDecodable(wrappedValue: suppressEveryone)
+            _suppress_roles = DefaultFalseDecodable(wrappedValue: suppressRoles)
+            self.message_notifications = messageNotifications
+            _flags = DefaultZeroDecodable(wrappedValue: flags)
             _channel_overrides = DefaultEmptyArrayDecodable(wrappedValue: channelOverrides)
             _version = DefaultZeroDecodable(wrappedValue: version)
         }

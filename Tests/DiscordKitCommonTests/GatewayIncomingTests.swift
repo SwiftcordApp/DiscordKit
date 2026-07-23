@@ -420,6 +420,7 @@ final class GatewayIncomingTests: XCTestCase {
             "private_channels":[],
             "merged_members":[],
             "read_state":{"entries":[]},
+            "notification_settings":{"flags":48},
             "user_guild_settings":{
               "version":12,
               "partial":false,
@@ -427,10 +428,16 @@ final class GatewayIncomingTests: XCTestCase {
                 "guild_id":"guild",
                 "muted":true,
                 "mute_config":{"end_time":"2026-07-24T10:00:00.000Z"},
+                "suppress_everyone":true,
+                "suppress_roles":true,
+                "message_notifications":1,
+                "flags":2048,
                 "channel_overrides":[{
                   "channel_id":"channel",
                   "muted":true,
-                  "mute_config":null
+                  "mute_config":null,
+                  "message_notifications":2,
+                  "flags":1024
                 }],
                 "version":4
               }]
@@ -447,12 +454,21 @@ final class GatewayIncomingTests: XCTestCase {
         }
         XCTAssertEqual(ready.user_guild_settings.version, 12)
         XCTAssertFalse(ready.user_guild_settings.partial)
+        XCTAssertTrue(ready.notification_settings.usesNewNotifications)
+        XCTAssertTrue(ready.notification_settings.mentionsOnAllMessages)
         let entry = try XCTUnwrap(ready.user_guild_settings.entries.first)
         XCTAssertEqual(entry.guild_id, "guild")
         XCTAssertTrue(entry.muted)
         XCTAssertNotNil(entry.mute_config?.end_time)
-        XCTAssertEqual(entry.channel_overrides.first?.channel_id, "channel")
-        XCTAssertTrue(entry.channel_overrides.first?.muted == true)
+        XCTAssertTrue(entry.suppress_everyone)
+        XCTAssertTrue(entry.suppress_roles)
+        XCTAssertEqual(entry.message_notifications, .mentions)
+        XCTAssertEqual(entry.flags, 2048)
+        let override = try XCTUnwrap(entry.channel_overrides.first)
+        XCTAssertEqual(override.channel_id, "channel")
+        XCTAssertTrue(override.muted)
+        XCTAssertEqual(override.message_notifications, MessageNotifLevel.none)
+        XCTAssertEqual(override.flags, 1024)
     }
 
     func testUserGuildSettingsUpdateDispatchDecodes() throws {
