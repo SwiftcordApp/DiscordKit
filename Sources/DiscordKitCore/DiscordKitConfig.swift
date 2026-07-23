@@ -81,7 +81,7 @@ public struct DiscordKitConfig {
 
     /// Populate struct values with provided parameters
     public init(
-        baseURL: String = "canary.discord.com",
+        baseURL: String = "discord.com",
         version: Int? = nil,
         properties: GatewayConnProperties? = nil,
         intents: Intents? = nil,
