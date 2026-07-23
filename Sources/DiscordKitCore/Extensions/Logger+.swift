@@ -16,7 +16,7 @@ public extension Logger {
             logLevel = level
         } else {
 #if DEBUG
-            logLevel = .trace
+            logLevel = .debug
 #endif
         }
     }
