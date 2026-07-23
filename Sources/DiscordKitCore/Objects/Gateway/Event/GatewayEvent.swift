@@ -106,6 +106,7 @@ public enum GatewayEvent: String, Codable {
 
     // MARK: Human account-specific Events
     case channelUnreadUpdate = "CHANNEL_UNREAD_UPDATE"
+    case userGuildSettingsUpdate = "USER_GUILD_SETTINGS_UPDATE"
     case userSettingsUpdate = "USER_SETTINGS_UPDATE"
     case userSettingsProtoUpdate = "USER_SETTINGS_PROTO_UPDATE"
 }

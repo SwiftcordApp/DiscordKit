@@ -28,6 +28,9 @@ public struct ReadyEvt: Decodable, GatewayData {
     /// > An implementation for unreads is still WIP in Swiftcord
     public let read_state: ReadState
 
+    /// Per-guild and per-channel notification settings, including mutes.
+    @DefaultInitialDecodable public var user_guild_settings: UserGuildSettings
+
     public let auth_token: String?
 
     public let resume_gateway_url: URL

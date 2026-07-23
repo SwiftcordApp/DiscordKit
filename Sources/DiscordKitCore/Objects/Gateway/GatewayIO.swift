@@ -259,6 +259,9 @@ public struct GatewayIncoming: Decodable {
         /// Channel unread state update event.
         case channelUnreadUpdate(ChannelUnreadUpdate)
 
+        /// Per-guild notification settings update event.
+        case userGuildSettingsUpdate(UserGuildSettings.Entry)
+
         /// Handling this payload/event isn't implemented yet
         case unknown
     }
@@ -350,6 +353,9 @@ public struct GatewayIncoming: Decodable {
         case .typingStart: return .typingStart(try values.decode(TypingStart.self, forKey: .data))
         // MARK: - User account-specific events
         case .channelUnreadUpdate: return .channelUnreadUpdate(try values.decode(ChannelUnreadUpdate.self, forKey: .data))
+        case .userGuildSettingsUpdate: return .userGuildSettingsUpdate(
+            try values.decode(UserGuildSettings.Entry.self, forKey: .data)
+        )
         case .userSettingsProtoUpdate: return .settingsProtoUpdate(
             try values.decode(GatewaySettingsProtoUpdate.self, forKey: .data)
         )
