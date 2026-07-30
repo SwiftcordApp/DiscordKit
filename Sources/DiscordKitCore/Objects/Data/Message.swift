@@ -94,7 +94,7 @@ public class Message: Codable, GatewayData, Identifiable, Equatable, Hashable {
         public static let ephemeral = Self(rawValue: 1 << 6)
     }
 
-    public init(id: Snowflake, channel_id: Snowflake, guild_id: Snowflake? = nil, author: User, member: Member? = nil, content: String, timestamp: Date, edited_timestamp: Date? = nil, nonce: Nonce? = nil, tts: Bool, mention_everyone: Bool, mentions: [User], mention_roles: [Snowflake], mention_channels: [ChannelMention]? = nil, attachments: [Attachment], embeds: [Embed], reactions: [Reaction]? = nil, pinned: Bool, webhook_id: Snowflake? = nil, type: MessageType, activity: MessageActivity? = nil, application: Application? = nil, application_id: Snowflake? = nil, message_reference: MessageReference? = nil, flags: Int? = nil, referenced_message: Message? = nil, interaction: MessageInteraction? = nil, thread: Channel? = nil, components: [MessageComponent]? = nil, sticker_items: [StickerItem]? = nil, call: CallMessageComponent? = nil) {
+    public init(id: Snowflake, channel_id: Snowflake, guild_id: Snowflake? = nil, author: User, member: Member? = nil, content: String, timestamp: Date, edited_timestamp: Date? = nil, nonce: Nonce? = nil, tts: Bool, mention_everyone: Bool, mentions: [User], mention_roles: [Snowflake], mention_channels: [ChannelMention]? = nil, attachments: [Attachment], embeds: [Embed], reactions: [Reaction]? = nil, pinned: Bool, webhook_id: Snowflake? = nil, type: MessageType, activity: MessageActivity? = nil, application: Application? = nil, application_id: Snowflake? = nil, message_reference: MessageReference? = nil, message_snapshots: [MessageSnapshot]? = nil, flags: Int? = nil, referenced_message: Message? = nil, interaction: MessageInteraction? = nil, thread: Channel? = nil, components: [MessageComponent]? = nil, sticker_items: [StickerItem]? = nil, call: CallMessageComponent? = nil) {
         self.id = id
         self.channel_id = channel_id
         self.guild_id = guild_id
@@ -119,6 +119,7 @@ public class Message: Codable, GatewayData, Identifiable, Equatable, Hashable {
         self.application = application
         self.application_id = application_id
         self.message_reference = message_reference
+        self.message_snapshots = message_snapshots
         self.flags = flags
         self.referenced_message = referenced_message
         self.interaction = interaction
@@ -218,6 +219,9 @@ public class Message: Codable, GatewayData, Identifiable, Equatable, Hashable {
     /// Data showing the source of a crosspost, channel follow add, pin, or reply message
     public let message_reference: MessageReference?
 
+    /// Point-in-time source message copies associated with a forwarded message
+    public let message_snapshots: [MessageSnapshot]?
+
     /// Message flags
     public let flags: Int?
 
@@ -259,6 +263,9 @@ public class Message: Codable, GatewayData, Identifiable, Equatable, Hashable {
             && lhs.content == rhs.content
             && lhs.attachments == rhs.attachments
             && lhs.embeds == rhs.embeds
+            && lhs.message_reference?.type == rhs.message_reference?.type
+            && lhs.message_snapshots?.map(\.renderingSignature)
+                == rhs.message_snapshots?.map(\.renderingSignature)
             && lhs.call == rhs.call
     }
 
@@ -267,6 +274,8 @@ public class Message: Codable, GatewayData, Identifiable, Equatable, Hashable {
         hasher.combine(content)
         hasher.combine(attachments)
         hasher.combine(embeds)
+        hasher.combine(message_reference?.type)
+        hasher.combine(message_snapshots?.map(\.renderingSignature))
         hasher.combine(call)
     }
 }
@@ -302,6 +311,7 @@ public struct PartialMessage: Codable, GatewayData {
     public let application: Application?
     public let application_id: Snowflake?
     public let message_reference: MessageReference?
+    public let message_snapshots: [MessageSnapshot]?
     public let flags: Int?
     public let referenced_message: Message?
     public let interaction: MessageInteraction?
@@ -323,19 +333,21 @@ public struct MessageActivity: Codable {
     public let party_id: String? // party_id from a Rich Presence event
 }
 
-// MARK: Reference an existing message as a reply
+// MARK: Reference an existing message
 public struct MessageReference: Codable {
-    public init(message_id: Snowflake? = nil, channel_id: Snowflake? = nil, guild_id: Snowflake? = nil, fail_if_not_exists: Bool? = nil) {
+    public init(message_id: Snowflake? = nil, channel_id: Snowflake? = nil, guild_id: Snowflake? = nil, fail_if_not_exists: Bool? = nil, type: MessageReferenceType? = nil) {
         self.message_id = message_id
         self.channel_id = channel_id
         self.guild_id = guild_id
         self.fail_if_not_exists = fail_if_not_exists
+        self.type = type
     }
 
     public let message_id: Snowflake? // id of the originating message
     public let channel_id: Snowflake? // id of the originating message's channel
     public let guild_id: Snowflake? // id of the originating message's guild
     public let fail_if_not_exists: Bool? // When sending, whether to error if the referenced message doesn't exist instead of sending as a normal (non-reply) message (default true)
+    public let type: MessageReferenceType? // how the reference relates this message to its source
 }
 
 public enum MessageComponentTypes: Int, Codable {
