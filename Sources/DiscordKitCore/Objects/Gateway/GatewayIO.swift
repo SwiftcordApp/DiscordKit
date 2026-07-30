@@ -221,6 +221,16 @@ public struct GatewayIncoming: Decodable {
         /// Sent for DM/group calls and may include the initial voice states.
         case callCreate(CallCreate)
 
+        /// Call update event
+        ///
+        /// Updates the metadata and ringing state of a DM/group call.
+        case callUpdate(CallUpdate)
+
+        /// Call delete event
+        ///
+        /// Ends the ephemeral call associated with a DM/group channel.
+        case callDelete(CallDelete)
+
         // MARK: - Guild Members
 
         /// Guild member add
@@ -338,6 +348,8 @@ public struct GatewayIncoming: Decodable {
         case .voiceStateUpdateBatch: return .voiceStateUpdateBatch(try values.decode(VoiceStateUpdateBatch.self, forKey: .data))
         case .voiceServerUpdate: return .voiceServerUpdate(try values.decode(VoiceServerUpdate.self, forKey: .data))
         case .callCreate: return .callCreate(try values.decode(CallCreate.self, forKey: .data))
+        case .callUpdate: return .callUpdate(try values.decode(CallUpdate.self, forKey: .data))
+        case .callDelete: return .callDelete(try values.decode(CallDelete.self, forKey: .data))
 
         // MARK: Members
         case .guildMemberAdd: return .guildMemberAdd(try values.decode(Member.self, forKey: .data))

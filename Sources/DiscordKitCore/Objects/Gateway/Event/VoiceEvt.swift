@@ -58,25 +58,59 @@ public struct VoiceStateUpdateBatch: GatewayData {
 /// useful for establishing the initial participant set.
 public struct CallCreate: GatewayData {
     public let channel_id: Snowflake
-    public let message_id: Snowflake?
+    public let message_id: Snowflake
     public let region: String?
-    public let ringing: [Snowflake]?
-    public let unavailable: Bool?
+    /// Keys are users being rung; values are the users who initiated each ring.
+    public let ongoing_rings: [Snowflake: Snowflake]
     public let voice_states: [VoiceState]?
 
     public init(
         channel_id: Snowflake,
-        message_id: Snowflake? = nil,
+        message_id: Snowflake,
         region: String? = nil,
-        ringing: [Snowflake]? = nil,
-        unavailable: Bool? = nil,
+        ongoing_rings: [Snowflake: Snowflake] = [:],
         voice_states: [VoiceState]? = nil
     ) {
         self.channel_id = channel_id
         self.message_id = message_id
         self.region = region
-        self.ringing = ringing
-        self.unavailable = unavailable
+        self.ongoing_rings = ongoing_rings
         self.voice_states = voice_states
+    }
+}
+
+/// Call update event.
+///
+/// Replaces the mutable server-owned metadata for an existing DM/group call.
+public struct CallUpdate: GatewayData {
+    public let channel_id: Snowflake
+    public let message_id: Snowflake
+    public let region: String?
+    /// Keys are users being rung; values are the users who initiated each ring.
+    public let ongoing_rings: [Snowflake: Snowflake]
+
+    public init(
+        channel_id: Snowflake,
+        message_id: Snowflake,
+        region: String? = nil,
+        ongoing_rings: [Snowflake: Snowflake] = [:]
+    ) {
+        self.channel_id = channel_id
+        self.message_id = message_id
+        self.region = region
+        self.ongoing_rings = ongoing_rings
+    }
+}
+
+/// Call delete event.
+///
+/// Ends the ephemeral call associated with a private text channel.
+public struct CallDelete: GatewayData {
+    public let channel_id: Snowflake
+    public let unavailable: Bool
+
+    public init(channel_id: Snowflake, unavailable: Bool) {
+        self.channel_id = channel_id
+        self.unavailable = unavailable
     }
 }

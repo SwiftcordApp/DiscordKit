@@ -103,6 +103,8 @@ public enum GatewayEvent: String, Codable {
 
     // MARK: Calls
     case callCreate = "CALL_CREATE"
+    case callUpdate = "CALL_UPDATE"
+    case callDelete = "CALL_DELETE"
 
     // MARK: Human account-specific Events
     case channelUnreadUpdate = "CHANNEL_UNREAD_UPDATE"

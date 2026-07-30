@@ -371,8 +371,7 @@ final class GatewayIncomingTests: XCTestCase {
             "channel_id":"channel",
             "message_id":"message",
             "region":"us-central",
-            "ringing":["user"],
-            "unavailable":false,
+            "ongoing_rings":{"user":"ringer"},
             "voice_states":[\(voiceStateJSON)]
           }
         }
@@ -386,7 +385,58 @@ final class GatewayIncomingTests: XCTestCase {
 
         XCTAssertEqual(call.channel_id, "channel")
         XCTAssertEqual(call.message_id, "message")
+        XCTAssertEqual(call.ongoing_rings, ["user": "ringer"])
         XCTAssertEqual(call.voice_states?.first?.session_id, "voice-session")
+    }
+
+    func testCallUpdateDispatchDecodesOngoingRingMap() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {
+          "op":0,
+          "s":49,
+          "t":"CALL_UPDATE",
+          "d":{
+            "channel_id":"channel",
+            "message_id":"message",
+            "region":null,
+            "ongoing_rings":{"recipient":"ringer"}
+          }
+        }
+        """)
+
+        XCTAssertEqual(incoming.type, .callUpdate)
+        guard case .callUpdate(let call) = incoming.data else {
+            XCTFail("Expected call update, got \(incoming.data)")
+            return
+        }
+
+        XCTAssertEqual(call.channel_id, "channel")
+        XCTAssertEqual(call.message_id, "message")
+        XCTAssertNil(call.region)
+        XCTAssertEqual(call.ongoing_rings["recipient"], "ringer")
+    }
+
+    func testCallDeleteDispatchDecodesAvailability() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {
+          "op":0,
+          "s":50,
+          "t":"CALL_DELETE",
+          "d":{
+            "channel_id":"channel",
+            "unavailable":true
+          }
+        }
+        """)
+
+        XCTAssertEqual(incoming.type, .callDelete)
+        guard case .callDelete(let call) = incoming.data else {
+            XCTFail("Expected call delete, got \(incoming.data)")
+            return
+        }
+
+        XCTAssertEqual(call.channel_id, "channel")
+        XCTAssertTrue(call.unavailable)
     }
 
     func testReadySupplementalDispatchDecodesInitialVoiceStates() throws {
@@ -869,6 +919,23 @@ final class GatewayIncomingTests: XCTestCase {
 
         XCTAssertEqual(object["op"] as? Int, 13)
         XCTAssertEqual(data["channel_id"] as? String, "channel")
+    }
+
+    func testRingPrivateCallRequestOmitsAllRecipientSentinel() throws {
+        let object = try encodeObject(RingPrivateCallRequest())
+
+        XCTAssertNil(object["recipients"])
+        XCTAssertNil(object["analytics_location"])
+    }
+
+    func testRingPrivateCallRequestEncodesTargetedRecipients() throws {
+        let object = try encodeObject(RingPrivateCallRequest(
+            recipients: ["recipient"],
+            analytics_location: "dm_invite"
+        ))
+
+        XCTAssertEqual(object["recipients"] as? [String], ["recipient"])
+        XCTAssertEqual(object["analytics_location"] as? String, "dm_invite")
     }
 
     func testUserIdentifyPayloadMatchesOfficialShape() throws {
