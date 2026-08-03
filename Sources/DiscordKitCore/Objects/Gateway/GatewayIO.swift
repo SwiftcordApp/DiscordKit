@@ -270,12 +270,10 @@ public struct GatewayIncoming: Decodable {
         // Cue the long switch case to parse every single event
         switch type {
         case .ready:
-            do {
-                return .userReady(try values.decode(ReadyEvt.self, forKey: .data))
-            } catch {
-                print("Decoding ready dispatch as user ready failed: \(error), trying bot")
+            if DiscordKitConfig.default.isBot {
                 return .botReady(try values.decode(BotReadyEvt.self, forKey: .data))
             }
+            return .userReady(try values.decode(ReadyEvt.self, forKey: .data))
         case .readySupplemental: return .readySupplemental(try values.decode(ReadySuppEvt.self, forKey: .data))
         case .resumed: return .resumed
 

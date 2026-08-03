@@ -7,6 +7,14 @@
 
 import Foundation
 
+public enum DefaultResumeGatewayURL: DefaultDecodingType {
+    public static var defaultValue: URL {
+        URL(string: DiscordKitConfig.default.gateway)!
+    }
+}
+
+public typealias DefaultResumeGatewayURLDecodable = DefaultDecodable<DefaultResumeGatewayURL>
+
 /// The ready event palyoad for user accounts
 public struct ReadyEvt: Decodable, GatewayData {
     // swiftlint:disable:next identifier_name
@@ -17,11 +25,11 @@ public struct ReadyEvt: Decodable, GatewayData {
     public let session_id: String
     public let user_settings: UserSettings? // Depreciated, no longer sent
     /// Protobuf of user settings
-    public let user_settings_proto: String
+    @DefaultEmptyStringDecodable public var user_settings_proto: String
     /// DMs for this user
-    public let private_channels: [DecodeThrowable<Channel>]
+    @DefaultEmptyArrayDecodable public var private_channels: [DecodeThrowable<Channel>]
 
-    public let merged_members: [[Member]]
+    @LossyNestedArrayDecodable public var merged_members: [[Member]]
 
     /// The user's unreads
     ///
@@ -36,7 +44,7 @@ public struct ReadyEvt: Decodable, GatewayData {
 
     public let auth_token: String?
 
-    public let resume_gateway_url: URL
+    @DefaultResumeGatewayURLDecodable public var resume_gateway_url: URL
 }
 
 /// The ready event payload for bot accounts

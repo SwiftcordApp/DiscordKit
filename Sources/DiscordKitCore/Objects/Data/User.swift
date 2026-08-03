@@ -105,7 +105,7 @@ public struct CurrentUser: Codable, GatewayData, Equatable {
     /// Email associated with this account
     ///
     /// > Will only be present for the current user
-    public let email: String
+    public let email: String?
 
     /// ID of the current user
     public let id: Snowflake
@@ -124,7 +124,7 @@ public struct CurrentUser: Codable, GatewayData, Equatable {
     /// The flags of this user
     ///
     /// Use ``CurrentUser/flagsArr`` for a decoded array of ``UserFlags``.
-    public let flags: User.Flags
+    @DefaultEmptyOptionSetDecodable public var flags: User.Flags
 
     /// The public flags of this user
     ///
@@ -139,20 +139,20 @@ public struct CurrentUser: Codable, GatewayData, Equatable {
     /// > this property, please make a PR with relevant changes :D
     public let purchased_flags: Int?
 
-    /// If this user is a premium (nitro) user
-    public let premium: Bool
+    /// The type of Nitro subscription this user has.
+    public let premium_type: User.PremiumType?
 
     /// If this user has consented to viewing 18+ (NSFW) channels
     public let nsfw_allowed: Bool?
 
     /// If this user has logged in from a mobile client before
-    public let mobile: Bool
+    @DefaultFalseDecodable public var mobile: Bool
 
     /// If this user has logged in from a desktop desktop before
-    public let desktop: Bool
+    @DefaultFalseDecodable public var desktop: Bool
 
     /// If the user has 2FA enabled on their account
-    public let mfa_enabled: Bool
+    @DefaultFalseDecodable public var mfa_enabled: Bool
 
     /// Bio of this user
     public let bio: String?
@@ -272,7 +272,7 @@ public extension User {
             locale: nil,
             verified: nil,
             flags: user.flags,
-            premium_type: user.premium ? .nitro : User.PremiumType.none,
+            premium_type: user.premium_type,
             public_flags: user.public_flags,
             collectibles: user.collectibles
         )

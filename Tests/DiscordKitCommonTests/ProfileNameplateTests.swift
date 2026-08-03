@@ -75,7 +75,7 @@ final class ProfileNameplateTests: XCTestCase {
           "flags": 0,
           "public_flags": 0,
           "purchased_flags": null,
-          "premium": true,
+          "premium_type": 2,
           "nsfw_allowed": true,
           "mobile": true,
           "desktop": true,
@@ -95,6 +95,7 @@ final class ProfileNameplateTests: XCTestCase {
         """.utf8))
 
         XCTAssertEqual(currentUser.collectibles?.nameplate?.sku_id, "789")
+        XCTAssertEqual(currentUser.premium_type, .nitro)
 
         let update = try DiscordREST.decoder.decode(GuildMemberUpdate.self, from: Data("""
         {

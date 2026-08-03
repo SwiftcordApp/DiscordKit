@@ -13,10 +13,10 @@ public struct Member: Codable, GatewayData {
     public let avatar: HashedAsset<GuildMemberAvatar>?
     public let banner: HashedAsset<GuildMemberBanner>?
     public let roles: [Snowflake]
-    public let joined_at: Date
+    @DefaultDistantPastDateDecodable public var joined_at: Date
     public let premium_since: Date? // When the user started boosting the guild
-    public let deaf: Bool
-    public let mute: Bool
+    @DefaultFalseDecodable public var deaf: Bool
+    @DefaultFalseDecodable public var mute: Bool
     public let pending: Bool?
     public let permissions: String? // Total permissions of the member in the channel, including overwrites, returned when in the interaction object
     public let communication_disabled_until: Date? // When the user's timeout will expire and the user will be able to communicate in the guild again, null or a time in the past if the user is not timed out
@@ -49,10 +49,10 @@ public struct Member: Codable, GatewayData {
         self.avatar = avatar
         self.banner = banner
         self.roles = roles
-        self.joined_at = joined_at
+        _joined_at = DefaultDistantPastDateDecodable(wrappedValue: joined_at)
         self.premium_since = premium_since
-        self.deaf = deaf
-        self.mute = mute
+        _deaf = DefaultFalseDecodable(wrappedValue: deaf)
+        _mute = DefaultFalseDecodable(wrappedValue: mute)
         self.pending = pending
         self.permissions = permissions
         self.communication_disabled_until = communication_disabled_until
@@ -68,10 +68,12 @@ public struct Member: Codable, GatewayData {
         self.avatar = updateMember.avatar
         self.banner = updateMember.banner
         self.roles = updateMember.roles
-        self.joined_at = merging?.joined_at ?? updateMember.joined_at ?? .distantPast
+        _joined_at = DefaultDistantPastDateDecodable(
+            wrappedValue: merging?.joined_at ?? updateMember.joined_at ?? .distantPast
+        )
         self.premium_since = updateMember.premium_since
-        self.deaf = merging?.deaf ?? updateMember.deaf ?? false
-        self.mute = merging?.mute ?? updateMember.mute ?? false
+        _deaf = DefaultFalseDecodable(wrappedValue: merging?.deaf ?? updateMember.deaf ?? false)
+        _mute = DefaultFalseDecodable(wrappedValue: merging?.mute ?? updateMember.mute ?? false)
         self.pending = updateMember.pending
         self.permissions = merging?.permissions
         self.communication_disabled_until = updateMember.communication_disabled_until
