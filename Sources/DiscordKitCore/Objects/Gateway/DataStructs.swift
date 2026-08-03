@@ -165,17 +165,33 @@ public struct UpdateGuildSubscriptions: OutgoingGatewayData {
         public let activities: Bool?
         public let threads: Bool?
         public let typing: Bool?
+        public let members: [Snowflake]?
+        public let member_updates: Bool?
         /// Range of members to request from each channel
         ///
         /// - Important: Returned members will only be correctly sorted up to
         /// 100 members (e.g. a range of 0-99).
-        public let channels: [Snowflake : [DiscordRange]]
+        public let channels: [Snowflake : [DiscordRange]]?
+        public let thread_member_lists: [Snowflake]?
 
-        public init(activities: Bool? = nil, threads: Bool? = nil, typing: Bool? = nil, channels: [Snowflake : [DiscordRange]]) {
+        /// Guild subscriptions use patch semantics: omitted fields retain their
+        /// current values, while explicit false or empty values clear them.
+        public init(
+            activities: Bool? = nil,
+            threads: Bool? = nil,
+            typing: Bool? = nil,
+            members: [Snowflake]? = nil,
+            member_updates: Bool? = nil,
+            channels: [Snowflake : [DiscordRange]]? = nil,
+            thread_member_lists: [Snowflake]? = nil
+        ) {
             self.activities = activities
             self.threads = threads
             self.typing = typing
+            self.members = members
+            self.member_updates = member_updates
             self.channels = channels
+            self.thread_member_lists = thread_member_lists
         }
     }
 

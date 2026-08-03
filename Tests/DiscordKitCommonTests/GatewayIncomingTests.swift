@@ -250,6 +250,56 @@ final class GatewayIncomingTests: XCTestCase {
         XCTAssertTrue(data["qos"] is NSNull)
     }
 
+    func testGuildSubscriptionEncodesBaselinePatchWithoutChannels() throws {
+        let payload = GatewayOutgoing(
+            opcode: .updateGuildSubscriptions,
+            data: UpdateGuildSubscriptions(subscriptions: [
+                "guild": .init(activities: true, threads: true, typing: true)
+            ])
+        )
+        let object = try encodePayloadObject(payload)
+        let data = try XCTUnwrap(object["d"] as? [String: Any])
+        let subscriptions = try XCTUnwrap(data["subscriptions"] as? [String: Any])
+        let guild = try XCTUnwrap(subscriptions["guild"] as? [String: Any])
+
+        XCTAssertEqual(object["op"] as? Int, 37)
+        XCTAssertEqual(guild["typing"] as? Bool, true)
+        XCTAssertEqual(guild["activities"] as? Bool, true)
+        XCTAssertEqual(guild["threads"] as? Bool, true)
+        XCTAssertNil(guild["channels"])
+        XCTAssertNil(guild["members"])
+        XCTAssertNil(guild["member_updates"])
+        XCTAssertNil(guild["thread_member_lists"])
+    }
+
+    func testGuildSubscriptionEncodesFullRetainedState() throws {
+        let payload = GatewayOutgoing(
+            opcode: .updateGuildSubscriptions,
+            data: UpdateGuildSubscriptions(subscriptions: [
+                "guild": .init(
+                    activities: true,
+                    threads: true,
+                    typing: true,
+                    members: [],
+                    member_updates: false,
+                    channels: ["channel": [.init(start: 0, end: 99)]],
+                    thread_member_lists: []
+                )
+            ])
+        )
+        let object = try encodePayloadObject(payload)
+        let data = try XCTUnwrap(object["d"] as? [String: Any])
+        let subscriptions = try XCTUnwrap(data["subscriptions"] as? [String: Any])
+        let guild = try XCTUnwrap(subscriptions["guild"] as? [String: Any])
+        let channels = try XCTUnwrap(guild["channels"] as? [String: Any])
+        let ranges = try XCTUnwrap(channels["channel"] as? [[Int]])
+
+        XCTAssertEqual(guild["members"] as? [String], [])
+        XCTAssertEqual(guild["member_updates"] as? Bool, false)
+        XCTAssertEqual(guild["thread_member_lists"] as? [String], [])
+        XCTAssertEqual(ranges, [[0, 99]])
+    }
+
     func testVoiceStateUpdateDispatchDecodes() throws {
         let incoming = try decodeGatewayIncoming("""
         {"op":0,"s":45,"t":"VOICE_STATE_UPDATE","d":\(voiceStateJSON)}
