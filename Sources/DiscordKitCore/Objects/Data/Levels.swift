@@ -15,11 +15,41 @@ public enum VerificationLevel: Int, Codable {
     case veryHigh = 4 // Must have verified hp
 }
 
-public enum MessageNotifLevel: Int, Codable {
-    case all = 0
-    case mentions = 1
-    case none = 2
-    case inherit = 3
+public enum MessageNotifLevel: RawRepresentable, Codable, Equatable {
+    case all
+    case mentions
+    case none
+    case inherit
+    case unknown(Int)
+
+    public init(rawValue: Int) {
+        switch rawValue {
+        case 0: self = .all
+        case 1: self = .mentions
+        case 2: self = .none
+        case 3: self = .inherit
+        default: self = .unknown(rawValue)
+        }
+    }
+
+    public var rawValue: Int {
+        switch self {
+        case .all: 0
+        case .mentions: 1
+        case .none: 2
+        case .inherit: 3
+        case .unknown(let rawValue): rawValue
+        }
+    }
+
+    public init(from decoder: Decoder) throws {
+        self.init(rawValue: try decoder.singleValueContainer().decode(Int.self))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
+    }
 }
 
 public enum ExplicitContentFilterLevel: Int, Codable {

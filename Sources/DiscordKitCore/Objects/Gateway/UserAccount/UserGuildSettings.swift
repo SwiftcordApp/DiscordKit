@@ -34,18 +34,18 @@ public struct AccountNotificationSettings: Codable, GatewayData, DefaultInitiali
 /// Per-guild notification settings delivered for user accounts.
 public struct UserGuildSettings: Codable, GatewayData, DefaultInitializable {
     public struct MuteConfig: Codable, Equatable {
-        public let end_time: Date?
+        @LossyOptionalDecodable public var end_time: Date?
 
         public init(endTime: Date? = nil) {
-            self.end_time = endTime
+            _end_time = LossyOptionalDecodable(wrappedValue: endTime)
         }
     }
 
     public struct ChannelOverride: Codable {
         public let channel_id: Snowflake
         @DefaultFalseDecodable public var muted: Bool
-        public let mute_config: MuteConfig?
-        public let message_notifications: MessageNotifLevel?
+        @LossyOptionalDecodable public var mute_config: MuteConfig?
+        @LossyOptionalDecodable public var message_notifications: MessageNotifLevel?
         @DefaultZeroDecodable public var flags: Int
 
         public init(
@@ -57,8 +57,8 @@ public struct UserGuildSettings: Codable, GatewayData, DefaultInitializable {
         ) {
             self.channel_id = channelID
             _muted = DefaultFalseDecodable(wrappedValue: muted)
-            self.mute_config = muteConfig
-            self.message_notifications = messageNotifications
+            _mute_config = LossyOptionalDecodable(wrappedValue: muteConfig)
+            _message_notifications = LossyOptionalDecodable(wrappedValue: messageNotifications)
             _flags = DefaultZeroDecodable(wrappedValue: flags)
         }
     }
@@ -66,12 +66,12 @@ public struct UserGuildSettings: Codable, GatewayData, DefaultInitializable {
     public struct Entry: Codable, GatewayData {
         public let guild_id: Snowflake?
         @DefaultFalseDecodable public var muted: Bool
-        public let mute_config: MuteConfig?
+        @LossyOptionalDecodable public var mute_config: MuteConfig?
         @DefaultFalseDecodable public var suppress_everyone: Bool
         @DefaultFalseDecodable public var suppress_roles: Bool
-        public let message_notifications: MessageNotifLevel?
+        @LossyOptionalDecodable public var message_notifications: MessageNotifLevel?
         @DefaultZeroDecodable public var flags: Int
-        @DefaultEmptyArrayDecodable public var channel_overrides: [ChannelOverride]
+        @LossyArrayDecodable public var channel_overrides: [ChannelOverride]
         @DefaultZeroDecodable public var version: Int
 
         public init(
@@ -87,22 +87,22 @@ public struct UserGuildSettings: Codable, GatewayData, DefaultInitializable {
         ) {
             self.guild_id = guildID
             _muted = DefaultFalseDecodable(wrappedValue: muted)
-            self.mute_config = muteConfig
+            _mute_config = LossyOptionalDecodable(wrappedValue: muteConfig)
             _suppress_everyone = DefaultFalseDecodable(wrappedValue: suppressEveryone)
             _suppress_roles = DefaultFalseDecodable(wrappedValue: suppressRoles)
-            self.message_notifications = messageNotifications
+            _message_notifications = LossyOptionalDecodable(wrappedValue: messageNotifications)
             _flags = DefaultZeroDecodable(wrappedValue: flags)
-            _channel_overrides = DefaultEmptyArrayDecodable(wrappedValue: channelOverrides)
+            _channel_overrides = LossyArrayDecodable(wrappedValue: channelOverrides)
             _version = DefaultZeroDecodable(wrappedValue: version)
         }
     }
 
-    @DefaultEmptyArrayDecodable public var entries: [Entry]
+    @LossyArrayDecodable public var entries: [Entry]
     @DefaultFalseDecodable public var partial: Bool
     @DefaultZeroDecodable public var version: Int
 
     public init() {
-        _entries = DefaultEmptyArrayDecodable()
+        _entries = LossyArrayDecodable()
         _partial = DefaultFalseDecodable()
         _version = DefaultZeroDecodable()
     }
@@ -112,7 +112,7 @@ public struct UserGuildSettings: Codable, GatewayData, DefaultInitializable {
         partial: Bool = false,
         version: Int = 0
     ) {
-        _entries = DefaultEmptyArrayDecodable(wrappedValue: entries)
+        _entries = LossyArrayDecodable(wrappedValue: entries)
         _partial = DefaultFalseDecodable(wrappedValue: partial)
         _version = DefaultZeroDecodable(wrappedValue: version)
     }
