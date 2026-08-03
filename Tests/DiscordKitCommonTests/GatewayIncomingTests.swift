@@ -407,7 +407,7 @@ final class GatewayIncomingTests: XCTestCase {
               "flags":0,
               "public_flags":0,
               "purchased_flags":null,
-              "premium":false,
+              "premium_type":0,
               "nsfw_allowed":true,
               "mobile":false,
               "desktop":true,
@@ -469,6 +469,121 @@ final class GatewayIncomingTests: XCTestCase {
         XCTAssertTrue(override.muted)
         XCTAssertEqual(override.message_notifications, MessageNotifLevel.none)
         XCTAssertEqual(override.flags, 1024)
+    }
+
+    func testReadyDispatchDefaultsOptionalAccountAndSupplementalFields() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {
+          "op":0,
+          "s":50,
+          "t":"READY",
+          "d":{
+            "v":9,
+            "user":{
+              "id":"me",
+              "username":"current",
+              "discriminator":"0",
+              "premium_type":4
+            },
+            "users":[],
+            "guilds":[],
+            "session_id":"session",
+            "read_state":{"entries":[]},
+            "user_guild_settings":{"entries":[]},
+            "notification_settings":{}
+          }
+        }
+        """)
+
+        guard case .userReady(let ready) = incoming.data else {
+            XCTFail("Expected user READY, got \(incoming.data)")
+            return
+        }
+
+        XCTAssertNil(ready.user.email)
+        XCTAssertEqual(ready.user.flags.rawValue, 0)
+        XCTAssertEqual(ready.user.premium_type, .unknown(4))
+        XCTAssertFalse(ready.user.mobile)
+        XCTAssertFalse(ready.user.desktop)
+        XCTAssertFalse(ready.user.mfa_enabled)
+        XCTAssertTrue(ready.user_settings_proto.isEmpty)
+        XCTAssertTrue(ready.private_channels.isEmpty)
+        XCTAssertTrue(ready.merged_members.isEmpty)
+        XCTAssertEqual(ready.resume_gateway_url, URL(string: DiscordKitConfig.default.gateway))
+    }
+
+    func testReadyDispatchLossilyDecodesMergedMembersWithoutShiftingGroups() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {
+          "op":0,
+          "s":51,
+          "t":"READY",
+          "d":{
+            "v":9,
+            "user":{"id":"me","username":"current","discriminator":"0"},
+            "users":[],
+            "guilds":[],
+            "session_id":"session",
+            "merged_members":[
+              [{"user_id":"me","roles":[]}],
+              [{"user_id":"invalid","roles":"not-an-array"},null],
+              null
+            ],
+            "read_state":{"entries":[]},
+            "user_guild_settings":{"entries":[]},
+            "notification_settings":{}
+          }
+        }
+        """)
+
+        guard case .userReady(let ready) = incoming.data else {
+            XCTFail("Expected user READY, got \(incoming.data)")
+            return
+        }
+
+        XCTAssertEqual(ready.merged_members.count, 3)
+        let member = try XCTUnwrap(ready.merged_members[0].first)
+        XCTAssertEqual(member.user_id, "me")
+        XCTAssertEqual(member.joined_at, .distantPast)
+        XCTAssertFalse(member.deaf)
+        XCTAssertFalse(member.mute)
+        XCTAssertTrue(ready.merged_members[1].isEmpty)
+        XCTAssertTrue(ready.merged_members[2].isEmpty)
+    }
+
+    func testUserGuildSettingsToleratesUnknownValuesAndMalformedSupplementalRows() throws {
+        let settings = try DiscordREST.decoder.decode(
+            UserGuildSettings.self,
+            from: Data("""
+            {
+              "entries":[
+                {
+                  "guild_id":"guild",
+                  "message_notifications":99,
+                  "mute_config":{"end_time":"not-a-date"},
+                  "channel_overrides":[
+                    {
+                      "channel_id":"channel",
+                      "message_notifications":98,
+                      "mute_config":{"end_time":"also-not-a-date"}
+                    },
+                    {"channel_id":true}
+                  ]
+                },
+                {"guild_id":true}
+              ]
+            }
+            """.utf8)
+        )
+
+        XCTAssertEqual(settings.entries.count, 1)
+        let entry = try XCTUnwrap(settings.entries.first)
+        XCTAssertEqual(entry.message_notifications, .unknown(99))
+        XCTAssertNil(entry.mute_config?.end_time)
+        XCTAssertEqual(entry.channel_overrides.count, 1)
+        let override = try XCTUnwrap(entry.channel_overrides.first)
+        XCTAssertEqual(override.message_notifications, .unknown(98))
+        XCTAssertNil(override.mute_config?.end_time)
     }
 
     func testUserGuildSettingsUpdateDispatchDecodes() throws {
