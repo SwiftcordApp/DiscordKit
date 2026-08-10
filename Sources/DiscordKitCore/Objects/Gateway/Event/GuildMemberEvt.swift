@@ -29,6 +29,7 @@ public struct GuildMemberUpdate: Codable, GatewayData {
     public let pending: Bool?
     public let communication_disabled_until: Date?
     public let collectibles: UserCollectibles?
+    public let flags: Member.Flags?
 }
 
 public struct GuildMemberListUpdate: Decodable, GatewayData {

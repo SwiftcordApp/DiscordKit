@@ -92,3 +92,10 @@ public extension UserProfileBadge {
         icon.scoped()
     }
 }
+
+public extension UserPrimaryGuild {
+    var badgeAsset: ScopedHashedAsset<ServerTagBadge>? {
+        guard let identity_guild_id else { return nil }
+        return badge?.scoped(to: identity_guild_id)
+    }
+}

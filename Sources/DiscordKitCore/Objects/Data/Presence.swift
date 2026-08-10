@@ -59,6 +59,7 @@ public struct PresenceUser: Codable, GatewayData {
     public let username: String?
     public let discriminator: String?
     public let avatar: String?
+    public let primary_guild: UserPrimaryGuild?
 }
 
 public struct PresenceUpdate: Codable, GatewayData {

@@ -12,7 +12,7 @@ public struct User: Codable, GatewayData, Identifiable, Equatable {
     }
 
     // To work around the default access level
-    public init(id: Snowflake, username: String, discriminator: String, global_name: String?, avatar: HashedAsset<UserAvatar>?, bot: Bool?, bio: String?, system: Bool?, mfa_enabled: Bool?, banner: HashedAsset<UserBanner>?, accent_color: Int?, locale: Locale?, verified: Bool?, flags: User.Flags?, premium_type: PremiumType?, public_flags: User.Flags?, collectibles: UserCollectibles? = nil) {
+    public init(id: Snowflake, username: String, discriminator: String, global_name: String?, avatar: HashedAsset<UserAvatar>?, bot: Bool?, bio: String?, system: Bool?, mfa_enabled: Bool?, banner: HashedAsset<UserBanner>?, accent_color: Int?, locale: Locale?, verified: Bool?, flags: User.Flags?, premium_type: PremiumType?, public_flags: User.Flags?, collectibles: UserCollectibles? = nil, primary_guild: UserPrimaryGuild? = nil) {
         self.id = id
         self.username = username
         self.discriminator = discriminator
@@ -30,6 +30,7 @@ public struct User: Codable, GatewayData, Identifiable, Equatable {
         self.premium_type = premium_type
         self.public_flags = public_flags
         self.collectibles = collectibles
+        self.primary_guild = primary_guild
     }
 
     /// ID of this user
@@ -88,6 +89,33 @@ public struct User: Codable, GatewayData, Identifiable, Equatable {
 
     /// Compact collectibles attached to this user's global profile.
     public let collectibles: UserCollectibles?
+
+    /// The server tag identity this user has selected for display.
+    public let primary_guild: UserPrimaryGuild?
+}
+
+/// A user's selected server tag identity.
+public struct UserPrimaryGuild: Codable, GatewayData, Equatable {
+    /// The guild that owns the selected tag.
+    public let identity_guild_id: Snowflake?
+    /// Whether the user currently displays this identity.
+    public let identity_enabled: Bool?
+    /// The visible tag text.
+    public let tag: String?
+    /// The optional clan-badge asset token.
+    public let badge: HashedAsset<ServerTagBadge>?
+
+    public init(
+        identity_guild_id: Snowflake?,
+        identity_enabled: Bool?,
+        tag: String?,
+        badge: HashedAsset<ServerTagBadge>?
+    ) {
+        self.identity_guild_id = identity_guild_id
+        self.identity_enabled = identity_enabled
+        self.tag = tag
+        self.badge = badge
+    }
 }
 
 /// A subset of the ``User`` struct with less properties and less optionals
@@ -168,6 +196,9 @@ public struct CurrentUser: Codable, GatewayData, Equatable {
 
     /// Compact collectibles attached to this user's global profile.
     public let collectibles: UserCollectibles?
+
+    /// The server tag identity this user has selected for display.
+    public let primary_guild: UserPrimaryGuild?
 }
 
 /// A user's profile, containing more data about the user and a fuller ``User`` struct
@@ -274,7 +305,8 @@ public extension User {
             flags: user.flags,
             premium_type: user.premium_type,
             public_flags: user.public_flags,
-            collectibles: user.collectibles
+            collectibles: user.collectibles,
+            primary_guild: user.primary_guild
         )
     }
 }

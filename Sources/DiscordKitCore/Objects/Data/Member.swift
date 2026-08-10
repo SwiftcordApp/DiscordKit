@@ -20,6 +20,7 @@ public struct Member: Codable, GatewayData {
     public let pending: Bool?
     public let permissions: String? // Total permissions of the member in the channel, including overwrites, returned when in the interaction object
     public let communication_disabled_until: Date? // When the user's timeout will expire and the user will be able to communicate in the guild again, null or a time in the past if the user is not timed out
+    public let flags: Flags?
     public let guild_id: Snowflake?
     public let user_id: Snowflake? // Only present in merged_members in READY payload!
     public let collectibles: UserCollectibles?
@@ -39,6 +40,7 @@ public struct Member: Codable, GatewayData {
         pending: Bool?,
         permissions: String?,
         communication_disabled_until: Date?,
+        flags: Flags? = nil,
         guild_id: Snowflake?,
         user_id: Snowflake?,
         collectibles: UserCollectibles? = nil,
@@ -56,6 +58,7 @@ public struct Member: Codable, GatewayData {
         self.pending = pending
         self.permissions = permissions
         self.communication_disabled_until = communication_disabled_until
+        self.flags = flags
         self.guild_id = guild_id
         self.user_id = user_id
         self.collectibles = collectibles
@@ -77,19 +80,17 @@ public struct Member: Codable, GatewayData {
         self.pending = updateMember.pending
         self.permissions = merging?.permissions
         self.communication_disabled_until = updateMember.communication_disabled_until
+        self.flags = updateMember.flags ?? merging?.flags
         self.guild_id = updateMember.guild_id
         self.user_id = merging?.user_id
         self.collectibles = updateMember.collectibles ?? merging?.collectibles
         self.presence = merging?.presence
     }
 
-    public func preservingCollectibles(from existing: Self?) -> Self {
-        guard collectibles == nil, let existingCollectibles = existing?.collectibles else {
-            return self
-        }
-
+    /// Returns a member whose independently cached fields retain richer existing values.
+    public func preservingCachedFields(from existing: Self?, resolvedUser: User? = nil) -> Self {
         return Self(
-            user: user,
+            user: resolvedUser ?? user,
             nick: nick,
             avatar: avatar,
             banner: banner,
@@ -101,9 +102,10 @@ public struct Member: Codable, GatewayData {
             pending: pending,
             permissions: permissions,
             communication_disabled_until: communication_disabled_until,
+            flags: flags ?? existing?.flags,
             guild_id: guild_id,
             user_id: user_id,
-            collectibles: existingCollectibles,
+            collectibles: collectibles ?? existing?.collectibles,
             presence: presence
         )
     }

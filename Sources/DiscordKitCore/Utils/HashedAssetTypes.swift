@@ -87,3 +87,12 @@ public enum UserProfileBadgeIcon: HashedAssetKind {
         ["badge-icons", hash]
     }
 }
+
+public enum ServerTagBadge: HashedAssetKind {
+    public typealias Scope = Snowflake
+    public typealias Format = PNGAssetFormat
+
+    public static func pathComponents(for hash: String, scope guildID: Snowflake) -> [String] {
+        ["clan-badges", guildID, hash]
+    }
+}
