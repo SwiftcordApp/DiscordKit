@@ -231,6 +231,20 @@ public struct GatewayIncoming: Decodable {
         /// Ends the ephemeral call associated with a DM/group channel.
         case callDelete(CallDelete)
 
+        // MARK: - Go Live Streams
+
+        /// A Go Live stream was created and assigned RTC identifiers.
+        case streamCreate(StreamCreate)
+
+        /// A Go Live stream RTC endpoint and token became available.
+        case streamServerUpdate(StreamServerUpdate)
+
+        /// A Go Live stream's viewer, region, or pause state changed.
+        case streamUpdate(StreamUpdate)
+
+        /// A Go Live stream ended or became unavailable.
+        case streamDelete(StreamDelete)
+
         // MARK: - Guild Members
 
         /// Guild member add
@@ -350,6 +364,11 @@ public struct GatewayIncoming: Decodable {
         case .callCreate: return .callCreate(try values.decode(CallCreate.self, forKey: .data))
         case .callUpdate: return .callUpdate(try values.decode(CallUpdate.self, forKey: .data))
         case .callDelete: return .callDelete(try values.decode(CallDelete.self, forKey: .data))
+        case .streamCreate: return .streamCreate(try values.decode(StreamCreate.self, forKey: .data))
+        case .streamServerUpdate:
+            return .streamServerUpdate(try values.decode(StreamServerUpdate.self, forKey: .data))
+        case .streamUpdate: return .streamUpdate(try values.decode(StreamUpdate.self, forKey: .data))
+        case .streamDelete: return .streamDelete(try values.decode(StreamDelete.self, forKey: .data))
 
         // MARK: Members
         case .guildMemberAdd: return .guildMemberAdd(try values.decode(Member.self, forKey: .data))

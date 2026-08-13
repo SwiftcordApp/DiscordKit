@@ -106,6 +106,12 @@ public enum GatewayEvent: String, Codable {
     case callUpdate = "CALL_UPDATE"
     case callDelete = "CALL_DELETE"
 
+    // MARK: Streams
+    case streamCreate = "STREAM_CREATE"
+    case streamServerUpdate = "STREAM_SERVER_UPDATE"
+    case streamUpdate = "STREAM_UPDATE"
+    case streamDelete = "STREAM_DELETE"
+
     // MARK: Human account-specific Events
     case channelUnreadUpdate = "CHANNEL_UNREAD_UPDATE"
     case userGuildSettingsUpdate = "USER_GUILD_SETTINGS_UPDATE"

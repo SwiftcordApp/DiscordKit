@@ -104,6 +104,89 @@ public struct GatewayCallConnect: OutgoingGatewayData, GatewayData {
     }
 }
 
+/// Creates a Go Live stream for the current voice channel.
+///
+/// > Outgoing Gateway data struct for opcode 18
+public struct GatewayStreamCreate: OutgoingGatewayData, GatewayData {
+    public let type: DiscordStreamType
+    public let guild_id: Snowflake?
+    public let channel_id: Snowflake
+    public let preferred_region: String?
+
+    public init(
+        type: DiscordStreamType,
+        guild_id: Snowflake?,
+        channel_id: Snowflake,
+        preferred_region: String? = nil
+    ) {
+        self.type = type
+        self.guild_id = guild_id
+        self.channel_id = channel_id
+        self.preferred_region = preferred_region
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case type
+        case guild_id
+        case channel_id
+        case preferred_region
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(type, forKey: .type)
+        try container.encode(guild_id, forKey: .guild_id)
+        try container.encode(channel_id, forKey: .channel_id)
+        try container.encode(preferred_region, forKey: .preferred_region)
+    }
+}
+
+/// Requests delivery of a Go Live stream.
+///
+/// > Outgoing Gateway data struct for opcode 20
+public struct GatewayStreamWatch: OutgoingGatewayData, GatewayData {
+    public let stream_key: DiscordStreamKey
+
+    public init(stream_key: DiscordStreamKey) {
+        self.stream_key = stream_key
+    }
+}
+
+/// Keeps an interrupted Go Live stream session alive while it reconnects.
+///
+/// > Outgoing Gateway data struct for opcode 21
+public struct GatewayStreamPing: OutgoingGatewayData, GatewayData {
+    public let stream_key: DiscordStreamKey
+
+    public init(stream_key: DiscordStreamKey) {
+        self.stream_key = stream_key
+    }
+}
+
+/// Stops broadcasting or watching a Go Live stream.
+///
+/// > Outgoing Gateway data struct for opcode 19
+public struct GatewayStreamDelete: OutgoingGatewayData, GatewayData {
+    public let stream_key: DiscordStreamKey
+
+    public init(stream_key: DiscordStreamKey) {
+        self.stream_key = stream_key
+    }
+}
+
+/// Pauses or resumes a Go Live broadcast.
+///
+/// > Outgoing Gateway data struct for opcode 22
+public struct GatewayStreamSetPaused: OutgoingGatewayData, GatewayData {
+    public let stream_key: DiscordStreamKey
+    public let paused: Bool
+
+    public init(stream_key: DiscordStreamKey, paused: Bool) {
+        self.stream_key = stream_key
+        self.paused = paused
+    }
+}
+
 /// Guild Request Members
 ///
 /// > Outgoing Gateway data struct for opcode 8
