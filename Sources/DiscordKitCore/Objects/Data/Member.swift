@@ -25,7 +25,7 @@ public struct Member: Codable, GatewayData {
     public let user_id: Snowflake? // Only present in merged_members in READY payload!
     public let collectibles: UserCollectibles?
     /// Presence nested in this member, only present in ``GuildMemberListUpdate`` items
-    public let presence: PresenceUpdate?
+    public let presence: MemberPresence?
 
     init(
         user: User?,
@@ -44,7 +44,7 @@ public struct Member: Codable, GatewayData {
         guild_id: Snowflake?,
         user_id: Snowflake?,
         collectibles: UserCollectibles? = nil,
-        presence: PresenceUpdate? = nil
+        presence: MemberPresence? = nil
     ) {
         self.user = user
         self.nick = nick

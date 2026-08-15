@@ -25,6 +25,7 @@ public struct NormalizedPresence {
     public let status: PresenceStatus
     public let clientStatus: PresenceClientStatus?
     public let activities: [Activity]
+    public let hiddenActivities: [Activity]
     public let processedAtTimestamp: Double?
 
     public init(
@@ -33,6 +34,7 @@ public struct NormalizedPresence {
         status: PresenceStatus,
         clientStatus: PresenceClientStatus?,
         activities: [Activity],
+        hiddenActivities: [Activity] = [],
         processedAtTimestamp: Double?
     ) {
         self.userID = userID
@@ -40,6 +42,7 @@ public struct NormalizedPresence {
         self.status = status
         self.clientStatus = clientStatus
         self.activities = activities
+        self.hiddenActivities = hiddenActivities
         self.processedAtTimestamp = processedAtTimestamp
     }
 
@@ -52,6 +55,7 @@ public struct NormalizedPresence {
             status: update.status,
             clientStatus: update.client_status,
             activities: update.activities,
+            hiddenActivities: update.hidden_activities,
             processedAtTimestamp: update.processed_at_timestamp
         )
     }
@@ -64,6 +68,21 @@ public struct NormalizedPresence {
             status: presence.status,
             clientStatus: presence.client_status,
             activities: presence.activities,
+            hiddenActivities: presence.hidden_activities,
+            processedAtTimestamp: presence.processed_at_timestamp
+        )
+    }
+
+    /// Adapts presence embedded in a member-list item. The outer member owns
+    /// the user identity and the member-list event owns the guild scope.
+    public init(member presence: MemberPresence, userID: Snowflake, guildID: Snowflake) {
+        self.init(
+            userID: userID,
+            scope: .guild(guildID),
+            status: presence.status,
+            clientStatus: presence.client_status,
+            activities: presence.activities,
+            hiddenActivities: presence.hidden_activities,
             processedAtTimestamp: presence.processed_at_timestamp
         )
     }

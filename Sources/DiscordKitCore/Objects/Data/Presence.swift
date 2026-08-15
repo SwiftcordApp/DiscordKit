@@ -13,6 +13,7 @@ public struct Presence: GatewayData {
     public let status: PresenceStatus
     public let client_status: PresenceClientStatus?
     @LossyArrayDecodable public var activities: [Activity]
+    @LossyArrayDecodable public var hidden_activities: [Activity]
     public let processed_at_timestamp: Double?
 
     public init(
@@ -20,12 +21,14 @@ public struct Presence: GatewayData {
         status: PresenceStatus,
         clientStatus: PresenceClientStatus?,
         activities: [Activity],
+        hiddenActivities: [Activity] = [],
         processedAtTimestamp: Double? = nil
     ) {
         self.user_id = userID
         self.status = status
         self.client_status = clientStatus
         self._activities = LossyArrayDecodable(wrappedValue: activities)
+        self._hidden_activities = LossyArrayDecodable(wrappedValue: hiddenActivities)
         self.processed_at_timestamp = processedAtTimestamp
     }
 
@@ -34,6 +37,7 @@ public struct Presence: GatewayData {
         status = update.status
         client_status = update.client_status
         _activities = LossyArrayDecodable(wrappedValue: update.activities)
+        _hidden_activities = LossyArrayDecodable(wrappedValue: update.hidden_activities)
         processed_at_timestamp = update.processed_at_timestamp
     }
 }
@@ -67,6 +71,19 @@ public struct PresenceUpdate: Codable, GatewayData {
     public let guild_id: Snowflake?
     public let status: PresenceStatus
     @LossyArrayDecodable public var activities: [Activity]
+    @LossyArrayDecodable public var hidden_activities: [Activity]
+    public let client_status: PresenceClientStatus?
+    public let processed_at_timestamp: Double?
+}
+
+/// Presence nested in a guild member-list item.
+///
+/// Unlike ``PresenceUpdate``, this wire shape does not carry a `user`; the
+/// containing ``Member`` supplies the user ID.
+public struct MemberPresence: Codable, GatewayData {
+    public let status: PresenceStatus
+    @LossyArrayDecodable public var activities: [Activity]
+    @LossyArrayDecodable public var hidden_activities: [Activity]
     public let client_status: PresenceClientStatus?
     public let processed_at_timestamp: Double?
 }
@@ -76,6 +93,7 @@ public struct PartialPresenceUpdate: GatewayData {
     public let guild_id: Snowflake?
     public let status: PresenceStatus?
     public let activities: [Activity]?
+    public let hidden_activities: [Activity]?
     public let client_status: PresenceClientStatus?
     public let processed_at_timestamp: Double?
 }

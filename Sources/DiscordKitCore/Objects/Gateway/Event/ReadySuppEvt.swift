@@ -10,7 +10,7 @@ import Foundation
 /// Payload sent with ``GatewayEvent/readySupplemental``
 public struct ReadySuppEvt: Decodable, GatewayData {
     public let guilds: [ReadySupplementalGuild]?
-    public let merged_members: [[Member]]?
+    @LossyNestedArrayDecodable public var merged_members: [[Member]]
     @DefaultInitialDecodable public var merged_presences: MergedPresences
     public let lazy_private_channels: [DecodeThrowable<Channel>]?
 }
@@ -22,15 +22,15 @@ public struct ReadySupplementalGuild: Decodable, GatewayData {
 }
 
 public struct MergedPresences: GatewayData, DefaultInitializable {
-    @DefaultEmptyArrayDecodable public var guilds: [[Presence]]
-    @DefaultEmptyArrayDecodable public var friends: [Presence]
+    @LossyNestedArrayDecodable public var guilds: [[Presence]]
+    @LossyArrayDecodable public var friends: [Presence]
 
     public init() {
         self.init(guilds: [], friends: [])
     }
 
     public init(guilds: [[Presence]] = [], friends: [Presence] = []) {
-        _guilds = DefaultEmptyArrayDecodable(wrappedValue: guilds)
-        _friends = DefaultEmptyArrayDecodable(wrappedValue: friends)
+        _guilds = LossyNestedArrayDecodable(wrappedValue: guilds)
+        _friends = LossyArrayDecodable(wrappedValue: friends)
     }
 }
