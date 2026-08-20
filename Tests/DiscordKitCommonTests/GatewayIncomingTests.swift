@@ -490,6 +490,93 @@ final class GatewayIncomingTests: XCTestCase {
         XCTAssertNotNil(voiceState.connected_at)
     }
 
+    func testReadySupplementalLossilyKeepsValidPresenceRows() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {
+          "op":0,
+          "s":50,
+          "t":"READY_SUPPLEMENTAL",
+          "d":{
+            "guilds":[{"id":"guild-1"},{"id":"guild-2"}],
+            "merged_members":[
+              [{"user_id":"one","roles":[]}],
+              [{"user_id":"broken","roles":"not-an-array"},null]
+            ],
+            "merged_presences":{
+              "guilds":[
+                [
+                  {"user_id":"one","status":"online","activities":[]},
+                  {"user_id":"broken","status":7,"activities":[]}
+                ],
+                [{"user_id":"two","status":"idle","activities":[]}]
+              ],
+              "friends":[
+                {"user_id":"broken-friend","status":false,"activities":[]},
+                {"user_id":"friend","status":"dnd","activities":[]}
+              ]
+            }
+          }
+        }
+        """)
+
+        guard case .readySupplemental(let supplemental) = incoming.data else {
+            XCTFail("Expected ready supplemental, got \(incoming.data)")
+            return
+        }
+
+        XCTAssertEqual(supplemental.merged_members.count, 2)
+        XCTAssertEqual(supplemental.merged_members[0].first?.user_id, "one")
+        XCTAssertTrue(supplemental.merged_members[1].isEmpty)
+        XCTAssertEqual(supplemental.merged_presences.guilds.count, 2)
+        XCTAssertEqual(supplemental.merged_presences.guilds[0].map(\.user_id), ["one"])
+        XCTAssertEqual(supplemental.merged_presences.guilds[1].map(\.user_id), ["two"])
+        XCTAssertEqual(supplemental.merged_presences.friends.map(\.user_id), ["friend"])
+    }
+
+    func testGuildMemberListDispatchDecodesPresenceFromOuterMember() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {
+          "op":0,
+          "s":51,
+          "t":"GUILD_MEMBER_LIST_UPDATE",
+          "d":{
+            "groups":[{"id":"online","count":1}],
+            "guild_id":"guild",
+            "id":"everyone",
+            "member_count":1,
+            "online_count":1,
+            "ops":[{
+              "op":"SYNC",
+              "range":[0,99],
+              "items":[{
+                "member":{
+                  "user":{"id":"user","username":"one","discriminator":"0"},
+                  "roles":[],
+                  "presence":{
+                    "status":"online",
+                    "activities":[{"name":"Game","type":0}],
+                    "client_status":{"desktop":"online"}
+                  }
+                }
+              }]
+            }]
+          }
+        }
+        """)
+
+        guard case .guildMemberListUpdate(let update) = incoming.data,
+              let firstOp = update.ops.first,
+              case .sync(let items, _) = firstOp,
+              let member = items.first?.member else {
+            XCTFail("Expected guild member-list presence, got \(incoming.data)")
+            return
+        }
+
+        XCTAssertEqual(member.user?.id, "user")
+        XCTAssertEqual(member.presence?.status, .online)
+        XCTAssertEqual(member.presence?.activities.first?.name, "Game")
+    }
+
     func testReadyDispatchDecodesUserGuildSettings() throws {
         let incoming = try decodeGatewayIncoming("""
         {
@@ -765,9 +852,25 @@ final class GatewayIncomingTests: XCTestCase {
             "status":"online",
             "processed_at_timestamp":1791234567890,
             "activities":[
-              {"name":"Hang Status","type":6},
+              {
+                "name":"Hang Status",
+                "type":6,
+                "status_display_type":27,
+                "assets":{
+                  "large_image":"mp:external/example.webp",
+                  "large_text":"Large",
+                  "large_url":"https://example.com/large",
+                  "small_image":"small",
+                  "small_text":"Small",
+                  "small_url":"https://example.com/small"
+                }
+              },
               {"name":false,"type":1},
               {"name":"Future Activity","type":99}
+            ],
+            "hidden_activities":[
+              {"name":"Hidden Game","type":0},
+              {"name":42,"type":1}
             ]
           }
         }
@@ -782,8 +885,13 @@ final class GatewayIncomingTests: XCTestCase {
         XCTAssertEqual(update.processed_at_timestamp, 1_791_234_567_890)
         XCTAssertEqual(update.activities.count, 2)
         XCTAssertEqual(update.activities[0].type, .hangStatus)
+        XCTAssertEqual(update.activities[0].status_display_type, .unknown(27))
+        XCTAssertEqual(update.activities[0].assets?.large_url, "https://example.com/large")
+        XCTAssertEqual(update.activities[0].assets?.small_url, "https://example.com/small")
         XCTAssertNil(update.activities[0].created_at)
         XCTAssertEqual(update.activities[1].type, .unknown(99))
+        XCTAssertEqual(update.hidden_activities.count, 1)
+        XCTAssertEqual(update.hidden_activities[0].name, "Hidden Game")
 
         let normalized = NormalizedPresence(update: update)
         XCTAssertEqual(normalized.userID, "user")
@@ -791,11 +899,58 @@ final class GatewayIncomingTests: XCTestCase {
         XCTAssertEqual(normalized.status, .online)
         XCTAssertEqual(normalized.clientStatus, update.client_status)
         XCTAssertEqual(normalized.activities.count, 2)
+        XCTAssertEqual(normalized.hiddenActivities, update.hidden_activities)
         XCTAssertEqual(normalized.processedAtTimestamp, 1_791_234_567_890)
 
         let encoded = try encodeObject(update)
         let activities = try XCTUnwrap(encoded["activities"] as? [[String: Any]])
         XCTAssertEqual(activities[1]["type"] as? Int, 99)
+        XCTAssertEqual(activities[0]["status_display_type"] as? Int, 27)
+        let hiddenActivities = try XCTUnwrap(encoded["hidden_activities"] as? [[String: Any]])
+        XCTAssertEqual(hiddenActivities.count, 1)
+    }
+
+    func testPresenceUpdateKeepsActivityWhenOptionalExtensionsChangeShape() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {
+          "op":0,
+          "s":54,
+          "t":"PRESENCE_UPDATE",
+          "d":{
+            "user":{"id":"user"},
+            "guild_id":"guild",
+            "status":"online",
+            "activities":[{
+              "name":"Future Rich Activity",
+              "type":0,
+              "created_at":"not-an-integer",
+              "timestamps":"not-an-object",
+              "emoji":{"name":42},
+              "party":{"size":["one",2]},
+              "flags":"not-an-integer",
+              "buttons":[{"label":"Join","url":"https://example.com"}]
+            }]
+          }
+        }
+        """)
+
+        guard case .presenceUpdate(let update) = incoming.data,
+              let activity = update.activities.first else {
+            XCTFail("Expected extension-safe presence activity, got \(incoming.data)")
+            return
+        }
+
+        XCTAssertEqual(activity.name, "Future Rich Activity")
+        XCTAssertEqual(activity.type, .game)
+        XCTAssertNil(activity.created_at)
+        XCTAssertNil(activity.timestamps)
+        XCTAssertNil(activity.emoji)
+        XCTAssertNil(activity.party)
+        XCTAssertNil(activity.flags)
+        XCTAssertNil(activity.buttons)
+
+        let encoded = try encodeObject(activity)
+        XCTAssertEqual(Set(encoded.keys), ["name", "type"])
     }
 
     func testReadySupplementalDefaultsMissingAndSkipsMalformedActivities() throws {
@@ -838,6 +993,7 @@ final class GatewayIncomingTests: XCTestCase {
         XCTAssertEqual(presence.activities[0].type, .game)
         XCTAssertNil(presence.activities[0].created_at)
         XCTAssertTrue(friendPresence.activities.isEmpty)
+        XCTAssertTrue(friendPresence.hidden_activities.isEmpty)
 
         let normalized = NormalizedPresence(supplemental: presence, scope: .guild("guild"))
         XCTAssertEqual(normalized.userID, "guild-user")

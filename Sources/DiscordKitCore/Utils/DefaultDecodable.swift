@@ -158,6 +158,7 @@ extension LossyOptionalDecodable: Encodable where Value: Encodable {
 }
 
 extension LossyOptionalDecodable: Equatable where Value: Equatable { }
+extension LossyOptionalDecodable: Hashable where Value: Hashable { }
 
 public extension KeyedDecodingContainer {
     func decode<Value>(
@@ -165,6 +166,15 @@ public extension KeyedDecodingContainer {
         forKey key: Key
     ) throws -> LossyOptionalDecodable<Value> {
         try decodeIfPresent(type, forKey: key) ?? .init()
+    }
+}
+
+public extension KeyedEncodingContainer {
+    mutating func encode<Value>(
+        _ value: LossyOptionalDecodable<Value>,
+        forKey key: Key
+    ) throws where Value: Encodable {
+        try encodeIfPresent(value.wrappedValue, forKey: key)
     }
 }
 

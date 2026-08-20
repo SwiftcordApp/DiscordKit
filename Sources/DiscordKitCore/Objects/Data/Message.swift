@@ -65,6 +65,26 @@ public extension MessageType {
             return false
         }
     }
+
+    /// Whether Discord permits this message type to be deleted.
+    var isDeletable: Bool {
+        guard !isRegular else { return true }
+
+        switch self {
+        case .recipientAdd, .recipientRemove, .call, .chNameChange, .chIconChange,
+             .threadStarterMsg:
+            return false
+        default:
+            return true
+        }
+    }
+
+    /// Whether the current user can delete this message type.
+    func canDelete(isFromCurrentUser: Bool, canManageMessages: Bool) -> Bool {
+        isDeletable && (
+            canManageMessages || (isFromCurrentUser && self != .autoModAct)
+        )
+    }
 }
 
 /// Represents a message sent in a channel within Discord

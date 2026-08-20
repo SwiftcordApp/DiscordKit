@@ -21,7 +21,8 @@ public struct ReadyEvt: Decodable, GatewayData {
     public let v: Int
     public let user: CurrentUser
     public let users: [User]
-    public let guilds: [DecodeThrowable<PreloadedGuild>]
+    @ReadyGuildsDecodable public var guilds: [DecodeThrowable<PreloadedGuild>]
+    public var unavailableGuilds: [GuildUnavailable] { _guilds.unavailableGuilds }
     public let session_id: String
     public let user_settings: UserSettings? // Depreciated, no longer sent
     /// Protobuf of user settings
@@ -45,6 +46,34 @@ public struct ReadyEvt: Decodable, GatewayData {
     public let auth_token: String?
 
     @DefaultResumeGatewayURLDecodable public var resume_gateway_url: URL
+}
+
+@propertyWrapper
+public struct ReadyGuildsDecodable: Decodable {
+    public let wrappedValue: [DecodeThrowable<PreloadedGuild>]
+    public let unavailableGuilds: [GuildUnavailable]
+
+    public init(from decoder: Decoder) throws {
+        var entries = try decoder.unkeyedContainer()
+        var guilds = [DecodeThrowable<PreloadedGuild>]()
+        var unavailableGuilds = [GuildUnavailable]()
+        guilds.reserveCapacity(entries.count ?? 0)
+
+        while !entries.isAtEnd {
+            let entryDecoder = try entries.superDecoder()
+            let guild = try DecodeThrowable<PreloadedGuild>(from: entryDecoder)
+            guilds.append(guild)
+
+            if case .failure = guild.result,
+               let unavailableGuild = try? GuildUnavailable(from: entryDecoder),
+               unavailableGuild.unavailable == true {
+                unavailableGuilds.append(unavailableGuild)
+            }
+        }
+
+        self.wrappedValue = guilds
+        self.unavailableGuilds = unavailableGuilds
+    }
 }
 
 /// The ready event payload for bot accounts

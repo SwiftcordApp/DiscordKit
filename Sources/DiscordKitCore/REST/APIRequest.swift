@@ -72,7 +72,8 @@ public extension DiscordREST {
         query: [URLQueryItem] = [],
         attachments: [URL] = [],
         body: Data? = nil,
-        method: RequestMethod = .get
+        method: RequestMethod = .get,
+        allowsNonSuccessfulResponse: Bool = false
     ) async throws -> (Data, HTTPURLResponse) {
         assert(token != nil, "Token should not be nil. Please set a token before using the REST API.")
         let token = token! // Force unwrapping is appropriete here
@@ -127,7 +128,7 @@ public extension DiscordREST {
               let httpResponse = response as? HTTPURLResponse else {
             throw RequestError.invalidResponse
         }
-        guard httpResponse.statusCode / 100 == 2 else { // Check if status code is 2**
+        guard allowsNonSuccessfulResponse || httpResponse.statusCode / 100 == 2 else {
             Self.log.error("Response status code not 2xx", metadata: ["res.statusCode": "\(httpResponse.statusCode)"])
             Self.log.debug("Raw response: \(String(decoding: data, as: UTF8.self))")
             throw RequestError.unexpectedResponseCode(httpResponse.statusCode)
