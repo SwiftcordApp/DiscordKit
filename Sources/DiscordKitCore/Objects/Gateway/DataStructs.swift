@@ -124,21 +124,6 @@ public struct GatewayStreamCreate: OutgoingGatewayData, GatewayData {
         self.channel_id = channel_id
         self.preferred_region = preferred_region
     }
-
-    private enum CodingKeys: String, CodingKey {
-        case type
-        case guild_id
-        case channel_id
-        case preferred_region
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(type, forKey: .type)
-        try container.encode(guild_id, forKey: .guild_id)
-        try container.encode(channel_id, forKey: .channel_id)
-        try container.encode(preferred_region, forKey: .preferred_region)
-    }
 }
 
 /// Requests delivery of a Go Live stream.

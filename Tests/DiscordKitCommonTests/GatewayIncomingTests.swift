@@ -950,7 +950,7 @@ final class GatewayIncomingTests: XCTestCase {
         XCTAssertEqual(createData["type"] as? String, "guild")
         XCTAssertEqual(createData["guild_id"] as? String, "guild")
         XCTAssertEqual(createData["channel_id"] as? String, "channel")
-        XCTAssertTrue(createData["preferred_region"] is NSNull)
+        XCTAssertNil(createData["preferred_region"])
 
         let delete = try encodePayloadObject(GatewayOutgoing(
             opcode: .streamDelete,
