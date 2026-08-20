@@ -1077,6 +1077,123 @@ final class GatewayIncomingTests: XCTestCase {
         XCTAssertEqual(data["channel_id"] as? String, "channel")
     }
 
+    func testStreamKeysRoundTrip() throws {
+        let guild = DiscordStreamKey(guildID: "guild", channelID: "channel", ownerID: "owner")
+        let call = DiscordStreamKey(callChannelID: "call-channel", ownerID: "owner")
+
+        XCTAssertEqual(guild.rawValue, "guild:guild:channel:owner")
+        XCTAssertEqual(DiscordStreamKey(rawValue: guild.rawValue), guild)
+        XCTAssertEqual(call.rawValue, "call:call-channel:owner")
+        XCTAssertEqual(DiscordStreamKey(rawValue: call.rawValue), call)
+        XCTAssertNil(DiscordStreamKey(rawValue: "guild:guild:channel"))
+        XCTAssertNil(DiscordStreamKey(rawValue: "call::owner"))
+        XCTAssertNil(DiscordStreamKey(rawValue: "unknown:channel:owner"))
+    }
+
+    func testStreamGatewayPayloadsEncode() throws {
+        let key = DiscordStreamKey(guildID: "guild", channelID: "channel", ownerID: "owner")
+        let create = try encodePayloadObject(GatewayOutgoing(
+            opcode: .streamCreate,
+            data: GatewayStreamCreate(
+                type: .guild,
+                guild_id: "guild",
+                channel_id: "channel",
+                preferred_region: nil
+            )
+        ))
+        let createData = try XCTUnwrap(create["d"] as? [String: Any])
+        XCTAssertEqual(create["op"] as? Int, 18)
+        XCTAssertEqual(createData["type"] as? String, "guild")
+        XCTAssertEqual(createData["guild_id"] as? String, "guild")
+        XCTAssertEqual(createData["channel_id"] as? String, "channel")
+        XCTAssertNil(createData["preferred_region"])
+
+        let delete = try encodePayloadObject(GatewayOutgoing(
+            opcode: .streamDelete,
+            data: GatewayStreamDelete(stream_key: key)
+        ))
+        XCTAssertEqual(delete["op"] as? Int, 19)
+        XCTAssertEqual((delete["d"] as? [String: Any])?["stream_key"] as? String, key.rawValue)
+
+        let watch = try encodePayloadObject(GatewayOutgoing(
+            opcode: .streamWatch,
+            data: GatewayStreamWatch(stream_key: key)
+        ))
+        XCTAssertEqual(watch["op"] as? Int, 20)
+        XCTAssertEqual((watch["d"] as? [String: Any])?["stream_key"] as? String, key.rawValue)
+
+        let ping = try encodePayloadObject(GatewayOutgoing(
+            opcode: .streamPing,
+            data: GatewayStreamPing(stream_key: key)
+        ))
+        XCTAssertEqual(ping["op"] as? Int, 21)
+
+        let pause = try encodePayloadObject(GatewayOutgoing(
+            opcode: .streamSetPaused,
+            data: GatewayStreamSetPaused(stream_key: key, paused: true)
+        ))
+        XCTAssertEqual(pause["op"] as? Int, 22)
+        XCTAssertEqual((pause["d"] as? [String: Any])?["paused"] as? Bool, true)
+    }
+
+    func testStreamDispatchesDecode() throws {
+        let key = "guild:guild:channel:owner"
+        let create = try decodeGatewayIncoming("""
+        {"op":0,"s":60,"t":"STREAM_CREATE","d":{
+          "stream_key":"\(key)","region":"singapore","viewer_ids":["viewer"],
+          "rtc_server_id":"server","rtc_channel_id":"rtc-channel","paused":false
+        }}
+        """)
+        guard case .streamCreate(let stream) = create.data else {
+            XCTFail("Expected stream create, got \(create.data)")
+            return
+        }
+        XCTAssertEqual(stream.stream_key.rawValue, key)
+        XCTAssertEqual(stream.region, "singapore")
+        XCTAssertEqual(stream.viewer_ids, ["viewer"])
+        XCTAssertEqual(stream.rtc_server_id, "server")
+        XCTAssertEqual(stream.rtc_channel_id, "rtc-channel")
+        XCTAssertEqual(stream.paused, false)
+
+        let server = try decodeGatewayIncoming("""
+        {"op":0,"s":61,"t":"STREAM_SERVER_UPDATE","d":{
+          "stream_key":"\(key)","endpoint":"stream.example.com","token":"stream-token"
+        }}
+        """)
+        guard case .streamServerUpdate(let update) = server.data else {
+            XCTFail("Expected stream server update, got \(server.data)")
+            return
+        }
+        XCTAssertEqual(update.stream_key.rawValue, key)
+        XCTAssertEqual(update.endpoint, "stream.example.com")
+        XCTAssertEqual(update.token, "stream-token")
+
+        let changed = try decodeGatewayIncoming("""
+        {"op":0,"s":62,"t":"STREAM_UPDATE","d":{
+          "stream_key":"\(key)","viewer_ids":[],"paused":true
+        }}
+        """)
+        guard case .streamUpdate(let update) = changed.data else {
+            XCTFail("Expected stream update, got \(changed.data)")
+            return
+        }
+        XCTAssertEqual(update.viewer_ids, [])
+        XCTAssertEqual(update.paused, true)
+
+        let deleted = try decodeGatewayIncoming("""
+        {"op":0,"s":63,"t":"STREAM_DELETE","d":{
+          "stream_key":"\(key)","unavailable":false,"reason":"user_requested"
+        }}
+        """)
+        guard case .streamDelete(let update) = deleted.data else {
+            XCTFail("Expected stream delete, got \(deleted.data)")
+            return
+        }
+        XCTAssertEqual(update.stream_key.rawValue, key)
+        XCTAssertEqual(update.unavailable, false)
+        XCTAssertEqual(update.reason, "user_requested")
+    }
+
     func testRingPrivateCallRequestOmitsAllRecipientSentinel() throws {
         let object = try encodeObject(RingPrivateCallRequest())
 
