@@ -283,14 +283,17 @@ public extension DiscordREST {
             body: body
         )
     }
-    /// Get Pinned Messages
+    /// Get a page of pinned messages, ordered by the server's pin timestamp.
     ///
-    /// > GET: `/channels/{channel.id}/pins`
-    func getPinnedMessages<T: Decodable>(
-        _ channelId: Snowflake
-    ) async throws -> T {
-        return try await getReq(
-            path: "channels/\(channelId)/pins"
+    /// > GET: `/channels/{channel.id}/messages/pins`
+    func getPinnedMessages(
+        channelID: Snowflake,
+        limit: Int = 25,
+        before: Date? = nil
+    ) async throws -> PinnedMessagesPage {
+        try await getReq(
+            path: "channels/\(channelID)/messages/pins",
+            query: PinnedMessagesQuery(limit: limit, before: before).queryItems()
         )
     }
     /// Pin Message
