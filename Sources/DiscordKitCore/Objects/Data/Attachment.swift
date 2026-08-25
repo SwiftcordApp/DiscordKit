@@ -7,6 +7,26 @@
 
 import Foundation
 
+public struct AttachmentFlags: OptionSet, Codable, Equatable, Hashable, Sendable {
+    public let rawValue: Int
+
+    public init(rawValue: Int) {
+        self.rawValue = rawValue
+    }
+
+    public init(from decoder: Decoder) throws {
+        rawValue = try decoder.singleValueContainer().decode(Int.self)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
+    }
+
+    /// This attachment is the thread's representative forum/media thumbnail.
+    public static let isThumbnail = Self(rawValue: 1 << 1)
+}
+
 public struct Attachment: Codable, Identifiable, Equatable, Hashable {
     public let id: Snowflake
     public let filename: String
@@ -22,4 +42,5 @@ public struct Attachment: Codable, Identifiable, Equatable, Hashable {
     public let placeholder: String?
     /// Version of the contents of ``placeholder``
     public let placeholder_version: Int?
+    public let flags: AttachmentFlags?
 }

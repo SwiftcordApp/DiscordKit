@@ -168,6 +168,7 @@ public struct PreloadedGuild: GatewayData, Identifiable, Equatable {
     public let roles: [DecodeThrowable<Role>]
     public let stickers: [DecodeThrowable<Sticker>]
     public let threads: [DecodeThrowable<Channel>]?
+    public let has_threads_subscription: Bool?
 
     /// Convenience init for creating DM channel
     public init(channels: [Channel], properties: Guild) {
@@ -186,6 +187,7 @@ public struct PreloadedGuild: GatewayData, Identifiable, Equatable {
         self.stickers = []
         self.members = nil
         self.threads = nil
+        self.has_threads_subscription = nil
     }
 }
 

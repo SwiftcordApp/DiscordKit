@@ -25,7 +25,8 @@ public enum ChannelType: Int, Codable {
     case privateThread = 12
     case stageVoice = 13
     case directory = 14 // Hubs
-    case forum = 15 // (still in development) a channel that can only contain threads
+    case forum = 15 // A channel that can only contain threads
+    case media = 16 // A forum-like channel focused on media posts
 
     case unknown = -1 // An unknown value
 
@@ -40,11 +41,62 @@ public enum ChannelType: Int, Codable {
         default: return false
         }
     }
+
+    public var isDiscussion: Bool {
+        self == .forum || self == .media
+    }
+}
+
+public struct ChannelFlags: OptionSet, Codable, Equatable, Sendable {
+    public let rawValue: Int
+
+    public init(rawValue: Int) {
+        self.rawValue = rawValue
+    }
+
+    public init(from decoder: Decoder) throws {
+        rawValue = try decoder.singleValueContainer().decode(Int.self)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
+    }
+
+    public static let pinned = Self(rawValue: 1 << 1)
+    public static let requireTag = Self(rawValue: 1 << 4)
+    public static let hideMediaDownloadOptions = Self(rawValue: 1 << 15)
+}
+
+public enum ForumSortOrder: Int, Codable, Equatable, Sendable {
+    case latestActivity = 0
+    case creationDate = 1
+}
+
+public struct ForumTag: Codable, Identifiable, Equatable, Sendable {
+    public let id: Snowflake
+    public let name: String
+    public let moderated: Bool
+    public let emoji_id: Snowflake?
+    public let emoji_name: String?
 }
 
 public struct Channel: Identifiable, Codable, GatewayData, Equatable {
     public static func == (lhs: Channel, rhs: Channel) -> Bool {
-        lhs.id == rhs.id && lhs.name == rhs.name && lhs.topic == rhs.topic && lhs.position == rhs.position && lhs.parent_id == rhs.parent_id && lhs.permission_overwrites == rhs.permission_overwrites
+        lhs.id == rhs.id
+            && lhs.name == rhs.name
+            && lhs.topic == rhs.topic
+            && lhs.position == rhs.position
+            && lhs.parent_id == rhs.parent_id
+            && lhs.permission_overwrites == rhs.permission_overwrites
+            && lhs.last_message_id == rhs.last_message_id
+            && lhs.message_count == rhs.message_count
+            && lhs.member_count == rhs.member_count
+            && lhs.thread_metadata == rhs.thread_metadata
+            && lhs.flags == rhs.flags
+            && lhs.applied_tags == rhs.applied_tags
+            && lhs.available_tags == rhs.available_tags
+            && lhs.default_sort_order == rhs.default_sort_order
     }
 
     public let id: Snowflake
@@ -74,6 +126,10 @@ public struct Channel: Identifiable, Codable, GatewayData, Equatable {
     public let member: ThreadMember? // Thread member object for the current user, if they have joined the thread, only included on certain API endpoints
     public let default_auto_archive_duration: Int? // Default duration that the clients (not the API) will use for newly created threads, in minutes, to automatically archive the thread after recent activity, can be set to: 60, 1440, 4320, 10080
     public let permissions: Permissions? // Computed permissions for the invoking user in the channel, including overwrites, only included when part of the resolved data received on a slash command interaction
+    public let flags: ChannelFlags?
+    public let applied_tags: [Snowflake]?
+    public let available_tags: [ForumTag]?
+    public let default_sort_order: ForumSortOrder?
 }
 
 /*
@@ -81,7 +137,7 @@ public struct Channel: Identifiable, Codable, GatewayData, Equatable {
  children of a channel, for small discussions and the like.
  */
 
-public struct ThreadMeta: Codable {
+public struct ThreadMeta: Codable, Equatable {
     public let archived: Bool
     public let auto_archive_duration: Int // Duration in minutes to automatically archive the thread after recent activity, can be set to: 60, 1440, 4320, 10080
     public let archive_timestamp: Date
@@ -95,5 +151,8 @@ public struct ThreadMember: Codable, GatewayData {
     public let user_id: Snowflake? // ID of user
     public let join_timestamp: Date // When user last joined thread
     public let flags: Int // Any user-thread settings, currently only used for notifications
+    @DefaultFalseDecodable public var muted: Bool
+    @LossyOptionalDecodable public var mute_config: UserGuildSettings.MuteConfig?
     public let guild_id: Snowflake?
+    public let member: Member?
 }

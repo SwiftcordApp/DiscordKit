@@ -3,6 +3,33 @@
 import Foundation
 
 public extension DiscordREST {
+    /// Create a post and its starter message in a forum or media channel.
+    ///
+    /// > POST: `/channels/{channel.id}/threads?use_nested_fields=true`
+    func createForumPost(
+        channelID: Snowflake,
+        request: CreateForumPostRequest
+    ) async throws -> Channel {
+        try await postReq(
+            path: "channels/\(channelID)/threads",
+            query: [URLQueryItem(name: "use_nested_fields", value: "true")],
+            body: request
+        )
+    }
+
+    /// Fetch compact starter and activity data for forum/media posts.
+    ///
+    /// > POST: `/channels/{channel.id}/post-data`
+    func getForumPostData(
+        channelID: Snowflake,
+        threadIDs: [Snowflake]
+    ) async throws -> ForumPostDataResponse {
+        try await postReq(
+            path: "channels/\(channelID)/post-data",
+            body: ForumPostDataRequest(threadIDs: threadIDs)
+        )
+    }
+
         /// Get Channel Messages
     ///
     /// > GET: `/channels/{channel.id}/messages`

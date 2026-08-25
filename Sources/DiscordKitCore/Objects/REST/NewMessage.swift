@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct NewAttachment: Codable {
+public struct NewAttachment: Codable, Sendable {
     public let id: String // Will not be a valid snowflake for new attachments
     public let filename: String
     public let uploaded_filename: String?

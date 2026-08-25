@@ -11,5 +11,6 @@ public struct ThreadListSync: Codable, GatewayData {
     public let guild_id: Snowflake
     public let channel_ids: [Snowflake]?
     public let threads: [Channel]
-    public let members: [ThreadMember]
+    public let members: [ThreadMember]?
+    public let most_recent_messages: [Message]?
 }

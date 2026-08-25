@@ -6,6 +6,82 @@ import XCTest
 @testable import DiscordKitCore
 
 final class GatewayIncomingTests: XCTestCase {
+    func testThreadListSyncDispatchDecodesPostPreviews() throws {
+        let incoming = try decodeGatewayIncoming("""
+        {
+          "op":0,
+          "s":40,
+          "t":"THREAD_LIST_SYNC",
+          "d":{
+            "guild_id":"guild",
+            "channel_ids":["forum"],
+            "threads":[
+              {"id":"thread","type":11,"guild_id":"guild","parent_id":"forum"}
+            ],
+            "members":[],
+            "most_recent_messages":[]
+          }
+        }
+        """)
+
+        guard case .threadListSync(let sync) = incoming.data else {
+            XCTFail("Expected thread list sync, got \(incoming.data)")
+            return
+        }
+        XCTAssertEqual(sync.guild_id, "guild")
+        XCTAssertEqual(sync.channel_ids, ["forum"])
+        XCTAssertEqual(sync.threads.first?.id, "thread")
+        XCTAssertEqual(sync.most_recent_messages?.count, 0)
+    }
+
+    func testThreadMemberDispatchesDecode() throws {
+        let memberUpdate = try decodeGatewayIncoming("""
+        {
+          "op":0,
+          "s":41,
+          "t":"THREAD_MEMBER_UPDATE",
+          "d":{
+            "id":"thread",
+            "user_id":"me",
+            "guild_id":"guild",
+            "join_timestamp":"2026-08-16T00:00:00Z",
+            "flags":0,
+            "muted":true,
+            "mute_config":{"end_time":"2026-08-17T00:00:00Z"}
+          }
+        }
+        """)
+        guard case .threadMemberUpdate(let member) = memberUpdate.data else {
+            XCTFail("Expected thread member update, got \(memberUpdate.data)")
+            return
+        }
+        XCTAssertEqual(member.id, "thread")
+        XCTAssertEqual(member.user_id, "me")
+        XCTAssertTrue(member.muted)
+        XCTAssertNotNil(member.mute_config?.end_time)
+
+        let membersUpdate = try decodeGatewayIncoming("""
+        {
+          "op":0,
+          "s":42,
+          "t":"THREAD_MEMBERS_UPDATE",
+          "d":{
+            "id":"thread",
+            "guild_id":"guild",
+            "member_count":1,
+            "added_members":[],
+            "removed_member_ids":["someone"]
+          }
+        }
+        """)
+        guard case .threadMembersUpdate(let members) = membersUpdate.data else {
+            XCTFail("Expected thread members update, got \(membersUpdate.data)")
+            return
+        }
+        XCTAssertEqual(members.id, "thread")
+        XCTAssertEqual(members.removed_member_ids, ["someone"])
+    }
+
     func testUnknownOpcodeDecodesEnvelope() throws {
         let incoming = try decodeGatewayIncoming("""
         {"op":123,"s":42,"t":null,"d":{"ignored":true}}
@@ -617,6 +693,7 @@ final class GatewayIncomingTests: XCTestCase {
                 "mute_config":{"end_time":"2026-07-24T10:00:00.000Z"},
                 "suppress_everyone":true,
                 "suppress_roles":true,
+                "hide_muted_channels":true,
                 "message_notifications":1,
                 "flags":2048,
                 "channel_overrides":[{
@@ -649,6 +726,7 @@ final class GatewayIncomingTests: XCTestCase {
         XCTAssertNotNil(entry.mute_config?.end_time)
         XCTAssertTrue(entry.suppress_everyone)
         XCTAssertTrue(entry.suppress_roles)
+        XCTAssertTrue(entry.hide_muted_channels)
         XCTAssertEqual(entry.message_notifications, .mentions)
         XCTAssertEqual(entry.flags, 2048)
         let override = try XCTUnwrap(entry.channel_overrides.first)

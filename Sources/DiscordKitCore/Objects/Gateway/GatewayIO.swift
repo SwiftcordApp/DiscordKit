@@ -126,6 +126,12 @@ public struct GatewayIncoming: Decodable {
         ///
         /// - Parameter channel: The thread that was deleted
         case threadDelete(Channel)
+        /// Active threads and optional post previews for a subscribed guild/channel scope.
+        case threadListSync(ThreadListSync)
+        /// Current user's membership in a thread changed.
+        case threadMemberUpdate(ThreadMember)
+        /// Membership for one thread changed.
+        case threadMembersUpdate(ThreadMembersUpdate)
 
         /// Channel pin update
         ///
@@ -308,13 +314,11 @@ public struct GatewayIncoming: Decodable {
         case .threadCreate: return .threadCreate(try values.decode(Channel.self, forKey: .data))
         case .threadUpdate: return .threadUpdate(try values.decode(Channel.self, forKey: .data))
         case .threadDelete: return .threadDelete(try values.decode(Channel.self, forKey: .data))
+        case .threadListSync: return .threadListSync(try values.decode(ThreadListSync.self, forKey: .data))
+        case .threadMemberUpdate: return .threadMemberUpdate(try values.decode(ThreadMember.self, forKey: .data))
+        case .threadMembersUpdate: return .threadMembersUpdate(try values.decode(ThreadMembersUpdate.self, forKey: .data))
 
         case .channelPinUpdate: return .channelPinUpdate(try values.decode(ChannelPinsUpdate.self, forKey: .data))
-    /*
-        case .threadListSync: return try values.decode(ThreadListSync.self, forKey: .data)
-        case .threadMemberUpdate: return try values.decode(ThreadMember.self, forKey: .data)
-        case .threadMembersUpdate: return try values.decode(ThreadMembersUpdate.self, forKey: .data)
-    */
         // MARK: Guilds
         case .guildCreate: return .guildCreate(try values.decode(PreloadedGuild.self, forKey: .data))
         case .guildUpdate: return .guildUpdate(try values.decode(Guild.self, forKey: .data))

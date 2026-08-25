@@ -69,6 +69,7 @@ public struct UserGuildSettings: Codable, GatewayData, DefaultInitializable {
         @LossyOptionalDecodable public var mute_config: MuteConfig?
         @DefaultFalseDecodable public var suppress_everyone: Bool
         @DefaultFalseDecodable public var suppress_roles: Bool
+        @DefaultFalseDecodable public var hide_muted_channels: Bool
         @LossyOptionalDecodable public var message_notifications: MessageNotifLevel?
         @DefaultZeroDecodable public var flags: Int
         @LossyArrayDecodable public var channel_overrides: [ChannelOverride]
@@ -80,6 +81,7 @@ public struct UserGuildSettings: Codable, GatewayData, DefaultInitializable {
             muteConfig: MuteConfig? = nil,
             suppressEveryone: Bool = false,
             suppressRoles: Bool = false,
+            hideMutedChannels: Bool = false,
             messageNotifications: MessageNotifLevel? = nil,
             flags: Int = 0,
             channelOverrides: [ChannelOverride] = [],
@@ -90,6 +92,7 @@ public struct UserGuildSettings: Codable, GatewayData, DefaultInitializable {
             _mute_config = LossyOptionalDecodable(wrappedValue: muteConfig)
             _suppress_everyone = DefaultFalseDecodable(wrappedValue: suppressEveryone)
             _suppress_roles = DefaultFalseDecodable(wrappedValue: suppressRoles)
+            _hide_muted_channels = DefaultFalseDecodable(wrappedValue: hideMutedChannels)
             _message_notifications = LossyOptionalDecodable(wrappedValue: messageNotifications)
             _flags = DefaultZeroDecodable(wrappedValue: flags)
             _channel_overrides = LossyArrayDecodable(wrappedValue: channelOverrides)

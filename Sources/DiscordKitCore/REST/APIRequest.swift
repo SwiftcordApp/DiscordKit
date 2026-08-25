@@ -164,12 +164,14 @@ public extension DiscordREST {
     /// Make a `POST` request to the Discord REST API
     func postReq<D: Decodable, B: Encodable>(
         path: String,
+        query: [URLQueryItem] = [],
         body: B? = nil,
         attachments: [URL] = []
     ) async throws -> D {
         let payload = body != nil ? try DiscordREST.encoder.encode(body) : nil
         let respData = try await makeRequest(
             path: path,
+            query: query,
             attachments: attachments,
             body: payload,
             method: .post
