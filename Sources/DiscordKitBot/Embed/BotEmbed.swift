@@ -40,8 +40,13 @@ public struct BotEmbed: Codable {
         case url
         case timestamp
         case color
-        case fields
         case footer
+        case image
+        case thumbnail
+        case video
+        case provider
+        case author
+        case fields
     }
 
     // Always rich as that's the only type supported
@@ -54,6 +59,11 @@ public struct BotEmbed: Codable {
     fileprivate(set) var timestamp: Date?
     fileprivate(set) var color: Int?
     fileprivate(set) var footer: EmbedFooter?
+    fileprivate(set) var image: EmbedMedia?
+    fileprivate(set) var thumbnail: EmbedMedia?
+    fileprivate(set) var video: EmbedMedia?
+    fileprivate(set) var provider: EmbedProvider?
+    fileprivate(set) var author: EmbedAuthor?
     private let fields: [Field]?
 
     public init(fields: [Field]? = nil) {
@@ -77,12 +87,6 @@ public extension BotEmbed {
         return embed
     }
 
-    func footer(_ text: String) -> Self {
-        var embed = self
-        embed.footer = .init(text: text)
-        return embed
-    }
-
     func url(_ url: URL?) -> Self {
         var embed = self
         embed.url = url
@@ -102,5 +106,82 @@ public extension BotEmbed {
         var embed = self
         embed.color = color
         return embed
+    }
+    
+    func footer(_ footer: EmbedFooter?) -> Self {
+        var embed = self
+        embed.footer = footer
+        return embed
+    }
+    
+    func footer(text: String, iconURL: String? = nil, proxyIconURL: String? = nil) -> Self {
+        return footer(.init(text: text, icon_url: iconURL, proxy_icon_url: proxyIconURL))
+    }
+    
+    func footer(_ text: String) -> Self {
+        return footer(text: text)
+    }
+    
+    func image(_ image: EmbedMedia?) -> Self {
+        var embed = self
+        embed.image = image
+        return embed
+    }
+    
+    // TODO: accept URL in addition to string
+    func image(url: String, proxyURL: String? = nil, height: Int? = nil, width: Int? = nil) -> Self {
+        return image(.init(url: url, proxy_url: proxyURL, height: height, width: width))
+    }
+    
+    func image(_ url: String) -> Self {
+        return image(url: url)
+    }
+    
+    func thumbnail(_ thumbnail: EmbedMedia?) -> Self {
+        var embed = self
+        embed.thumbnail = thumbnail
+        return embed
+    }
+    
+    func thumbnail(_ url: String) -> Self {
+        return thumbnail(url: url)
+    }
+    
+    func thumbnail(url: String, proxyURL: String? = nil, height: Int? = nil, width: Int? = nil) -> Self {
+        return thumbnail(.init(url: url, proxy_url: proxyURL, height: height, width: width))
+    }
+    
+    func video(_ video: EmbedMedia?) -> Self {
+        var embed = self
+        embed.video = video
+        return embed
+    }
+    
+    func video(url: String, proxyURL: String? = nil, height: Int? = nil, width: Int? = nil) -> Self {
+        return video(.init(url: url, proxy_url: proxyURL, height: height, width: width))
+    }
+    
+    func video(_ url: String) -> Self {
+        return video(url: url)
+    }
+    
+    func provider(_ provider: EmbedProvider?) -> Self {
+        var embed = self
+        embed.provider = provider
+        return embed
+    }
+    
+    func provider(name: String, url: String? = nil) -> Self {
+        return provider(.init(name: name, url: url))
+    }
+    
+    func author(_ author: EmbedAuthor?) -> Self {
+        var embed = self
+        embed.author = author
+        return embed
+    }
+    
+    func author(name: String, url: String? = nil, iconURL: String? = nil, proxyIconURL: String? = nil) -> Self {
+        return author(.init(name: name, url: url, icon_url: iconURL, proxy_icon_url: proxyIconURL))
     }
 }
