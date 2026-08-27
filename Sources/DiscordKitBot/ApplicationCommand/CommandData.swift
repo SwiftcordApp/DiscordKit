@@ -12,14 +12,21 @@ import DiscordKitCore
 public class CommandData {
     internal init(
         optionValues: [OptionData],
-        rest: DiscordREST, applicationID: String, interactionID: Snowflake, token: String
+        rest: DiscordREST,
+        applicationID: String,
+        guildID: Snowflake?,
+        interactionID: Snowflake,
+        token: String,
+        resolved: ResolvedData?
     ) {
         self.rest = rest
         self.token = token
+        self.guildID = guildID
         self.interactionID = interactionID
         self.applicationID = applicationID
 
         self.optionValues = Self.unwrapOptionDatas(optionValues)
+        self.resolved = resolved
     }
 
     /// A private reference to the active rest handler for handling actions
@@ -40,8 +47,13 @@ public class CommandData {
     // MARK: Parameters for executing callbacks
     /// The token to use when carrying out actions with this interaction
     let token: String
+
+    public let guildID: Snowflake?
+
     /// The ID of this interaction
     public let interactionID: Snowflake
+
+    public let resolved: ResolvedData?
 
     fileprivate static func unwrapOptionDatas(_ options: [OptionData]) -> [String: OptionData] {
         var optValues: [String: OptionData] = [:]
@@ -85,6 +97,24 @@ public extension CommandData {
 
     /// The wrapped value of an option
     typealias OptionData = Interaction.Data.AppCommandData.OptionData
+    typealias ResolvedData = Interaction.Data.AppCommandData.ResolvedData
+}
+
+public extension CommandData {
+    func subGroup(name: String) -> CommandData? {
+        guard let option = optionValues[name], option.type == .subCommandGroup else { return nil }
+        guard let options = option.options else { return nil }
+        guard let rest = self.rest else { return nil }
+        return CommandData(
+            optionValues: options,
+            rest: rest,
+            applicationID: self.applicationID,
+            guildID: self.guildID,
+            interactionID: self.interactionID,
+            token: self.token,
+            resolved: self.resolved
+        )
+    }
 }
 
 // MARK: - Callback APIs
