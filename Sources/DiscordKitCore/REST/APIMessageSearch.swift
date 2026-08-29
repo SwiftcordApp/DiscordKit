@@ -19,8 +19,34 @@ public extension DiscordREST {
         _ guildID: Snowflake,
         query: MessageSearchQuery
     ) async throws -> MessageSearchOutcome {
-        let (data, response) = try await makeRequestWithResponse(
+        try await searchMessages(
             path: "guilds/\(guildID)/messages/search",
+            query: query
+        )
+    }
+
+    /// Search Channel Messages
+    ///
+    /// > GET: `/channels/{channel.id}/messages/search`
+    ///
+    /// Single-shot: a `202 Accepted` indexing response is returned as
+    /// ``MessageSearchOutcome/indexing(retryAfter:)`` and the caller owns the retry loop.
+    func searchChannelMessages(
+        _ channelID: Snowflake,
+        query: MessageSearchQuery
+    ) async throws -> MessageSearchOutcome {
+        try await searchMessages(
+            path: "channels/\(channelID)/messages/search",
+            query: query
+        )
+    }
+
+    private func searchMessages(
+        path: String,
+        query: MessageSearchQuery
+    ) async throws -> MessageSearchOutcome {
+        let (data, response) = try await makeRequestWithResponse(
+            path: path,
             query: query.queryItems()
         )
         guard response.statusCode != 202 else {
