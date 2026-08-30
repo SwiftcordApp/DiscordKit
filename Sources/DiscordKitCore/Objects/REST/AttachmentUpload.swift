@@ -77,8 +77,19 @@ public struct ReservedAttachmentUpload: Decodable {
     }
 }
 
-public enum AttachmentUploadError: Error {
+public enum AttachmentUploadError: LocalizedError {
     case invalidUploadURL(String)
     case invalidUploadResponse
     case unexpectedResponseCode(Int)
+
+    public var errorDescription: String? {
+        switch self {
+        case .invalidUploadURL:
+            "Discord returned an invalid attachment upload URL."
+        case .invalidUploadResponse:
+            "Discord returned an invalid response while uploading the attachment."
+        case .unexpectedResponseCode(let statusCode):
+            "Discord couldn't upload the attachment (HTTP \(statusCode))."
+        }
+    }
 }

@@ -12,12 +12,100 @@ import FoundationNetworking
 
 /// Utility wrappers for easy request-making
 public extension DiscordREST {
-    enum RequestError: Error {
+    enum RequestError: LocalizedError {
         case unexpectedResponseCode(_ code: Int)
         case invalidResponse
         case superEncodeFailure
         case jsonDecodingError(error: Error) // This is not strongly typed because it was simpler to just use one catch
         case genericError(reason: String)
+        case networkError(error: Error)
+        case apiError(statusCode: Int, discordCode: Int?, message: String?, retryAfter: TimeInterval?)
+
+        public var errorDescription: String? {
+            switch self {
+            case .unexpectedResponseCode(let statusCode):
+                Self.description(for: statusCode)
+            case .invalidResponse:
+                "Discord returned an invalid response."
+            case .superEncodeFailure:
+                "The app couldn't prepare the request to Discord."
+            case .jsonDecodingError:
+                "Discord returned data the app couldn't understand."
+            case .genericError(let reason):
+                reason
+            case .networkError(let error):
+                Self.description(for: error)
+            case .apiError(let statusCode, _, let message, let retryAfter):
+                if statusCode == 429 {
+                    Self.rateLimitDescription(retryAfter: retryAfter)
+                } else if [401, 403].contains(statusCode) {
+                    Self.description(for: statusCode)
+                } else if let message = message?.trimmingCharacters(in: .whitespacesAndNewlines),
+                          !message.isEmpty {
+                    message.hasSuffix(".") ? message : "\(message)."
+                } else {
+                    Self.description(for: statusCode)
+                }
+            }
+        }
+
+        public var failureReason: String? {
+            switch self {
+            case .jsonDecodingError(let error), .networkError(let error):
+                error.localizedDescription
+            case .apiError(_, let discordCode?, _, _):
+                "Discord error code \(discordCode)."
+            default:
+                nil
+            }
+        }
+
+        private static func description(for statusCode: Int) -> String {
+            switch statusCode {
+            case 400:
+                "Discord rejected the request."
+            case 401:
+                "Your Discord session has expired. Sign in again and retry."
+            case 403:
+                "You don't have permission to perform this action."
+            case 404:
+                "The requested item no longer exists."
+            case 408:
+                "Discord took too long to respond. Try again."
+            case 429:
+                rateLimitDescription(retryAfter: nil)
+            case 500 ... 599:
+                "Discord is having trouble completing requests right now. Try again later."
+            default:
+                "Discord couldn't complete the request (HTTP \(statusCode))."
+            }
+        }
+
+        private static func description(for error: Error) -> String {
+            guard let urlError = error as? URLError else {
+                return "Couldn't connect to Discord."
+            }
+            switch urlError.code {
+            case .notConnectedToInternet:
+                return "You're offline. Check your internet connection and try again."
+            case .timedOut:
+                return "Discord took too long to respond. Try again."
+            case .cancelled:
+                return "The request was cancelled."
+            case .cannotFindHost, .cannotConnectToHost, .dnsLookupFailed, .networkConnectionLost:
+                return "Couldn't connect to Discord. Check your internet connection and try again."
+            default:
+                return "A network error prevented the request from reaching Discord."
+            }
+        }
+
+        private static func rateLimitDescription(retryAfter: TimeInterval?) -> String {
+            guard let retryAfter, retryAfter > 0 else {
+                return "You're doing that too quickly. Try again shortly."
+            }
+            let seconds = max(1, Int(retryAfter.rounded(.up)))
+            return "You're doing that too quickly. Try again in \(seconds) \(seconds == 1 ? "second" : "seconds")."
+        }
     }
 
     /// The few supported request methods
@@ -124,13 +212,27 @@ public extension DiscordREST {
         }
 
         // Make request
-        guard let (data, response) = try? await DiscordREST.session.data(for: req),
-              let httpResponse = response as? HTTPURLResponse else {
+        let data: Data
+        let response: URLResponse
+        do {
+            (data, response) = try await DiscordREST.session.data(for: req)
+        } catch {
+            throw RequestError.networkError(error: error)
+        }
+        guard let httpResponse = response as? HTTPURLResponse else {
             throw RequestError.invalidResponse
         }
         guard allowsNonSuccessfulResponse || httpResponse.statusCode / 100 == 2 else {
             Self.log.error("Response status code not 2xx", metadata: ["res.statusCode": "\(httpResponse.statusCode)"])
             Self.log.debug("Raw response: \(String(decoding: data, as: UTF8.self))")
+            if let response = try? Self.decoder.decode(DiscordAPIErrorResponse.self, from: data) {
+                throw RequestError.apiError(
+                    statusCode: httpResponse.statusCode,
+                    discordCode: response.code,
+                    message: response.message,
+                    retryAfter: response.retryAfter
+                )
+            }
             throw RequestError.unexpectedResponseCode(httpResponse.statusCode)
         }
 
@@ -280,5 +382,17 @@ public extension DiscordREST {
 
     func patchReq(path: String) async throws {
         _ = try await makeRequest(path: path, body: nil, method: .patch)
+    }
+}
+
+private struct DiscordAPIErrorResponse: Decodable {
+    let code: Int?
+    let message: String?
+    let retryAfter: TimeInterval?
+
+    private enum CodingKeys: String, CodingKey {
+        case code
+        case message
+        case retryAfter = "retry_after"
     }
 }
