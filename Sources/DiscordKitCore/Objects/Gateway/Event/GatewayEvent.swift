@@ -78,6 +78,8 @@ public enum GatewayEvent: String, Codable {
     case messageReactRemove = "MESSAGE_REACTION_REMOVE"
     case messageReactRemoveAll = "MESSAGE_REACTION_REMOVE_ALL"
     case messageReactRemoveEmoji = "MESSAGE_REACTION_REMOVE_EMOJI"
+    case messagePollVoteAdd = "MESSAGE_POLL_VOTE_ADD"
+    case messagePollVoteRemove = "MESSAGE_POLL_VOTE_REMOVE"
 
     // MARK: Presence Update
     case presenceUpdate = "PRESENCE_UPDATE"

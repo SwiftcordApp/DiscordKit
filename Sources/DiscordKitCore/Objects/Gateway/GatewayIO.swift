@@ -183,6 +183,10 @@ public struct GatewayIncoming: Decodable {
         case messageReactionRemoveAll(MessageReactionRemoveAll)
         /// Message reaction remove emoji event.
         case messageReactionRemoveEmoji(MessageReactionRemoveEmoji)
+        /// A vote was added to one poll answer.
+        case messagePollVoteAdd(MessagePollVote)
+        /// A vote was removed from one poll answer.
+        case messagePollVoteRemove(MessagePollVote)
 
         // MARK: - Users
 
@@ -355,6 +359,8 @@ public struct GatewayIncoming: Decodable {
         case .messageReactRemove: return .messageReactionRemove(try values.decode(MessageReactionRemove.self, forKey: .data))
         case .messageReactRemoveAll: return .messageReactionRemoveAll(try values.decode(MessageReactionRemoveAll.self, forKey: .data))
         case .messageReactRemoveEmoji: return .messageReactionRemoveEmoji(try values.decode(MessageReactionRemoveEmoji.self, forKey: .data))
+        case .messagePollVoteAdd: return .messagePollVoteAdd(try values.decode(MessagePollVote.self, forKey: .data))
+        case .messagePollVoteRemove: return .messagePollVoteRemove(try values.decode(MessagePollVote.self, forKey: .data))
 
         // MARK: Users
         case .userUpdate: return .userUpdate(try values.decode(CurrentUser.self, forKey: .data))

@@ -215,6 +215,25 @@ public extension DiscordREST {
             path: "channels/\(channelId)/messages/\(messageId)/reactions/\(emoji)"
         )
     }
+    /// Replace the current user's complete selection for a message poll.
+    ///
+    /// This official-client endpoint is only available to user accounts. Passing an empty
+    /// answer list removes the current user's vote.
+    ///
+    /// > PUT: `/channels/{channel.id}/polls/{message.id}/answers/@me`
+    func replaceOwnPollAnswers(
+        _ channelId: Snowflake,
+        _ messageId: Snowflake,
+        answerIDs: [Int]
+    ) async throws {
+        guard !DiscordKitConfig.default.isBot else {
+            throw RequestError.genericError(reason: "Bot accounts cannot vote in polls")
+        }
+        try await putReq(
+            path: "channels/\(channelId)/polls/\(messageId)/answers/@me",
+            body: ReplacePollAnswersRequest(answerIDs: answerIDs)
+        )
+    }
     /// Edit Message
     ///
     /// > PATCH: `/channels/{channel.id}/messages/{message.id}`

@@ -16,6 +16,7 @@ public enum EmbedType: String, Codable {
     case link = "link"
     case autoModAlert = "auto_moderation_message"
     case autoModNotif = "auto_moderation_notification"
+    case pollResult = "poll_result"
 }
 
 public struct Embed: Codable, Identifiable, Equatable, Hashable {

@@ -53,6 +53,9 @@ public enum MessageType: Int, Codable {
 
     /// A message detailing an action taken by automod
     case autoModAct = 24
+
+    /// Final result for a poll referenced by this message
+    case pollResult = 46
 }
 
 public extension MessageType {
@@ -114,7 +117,7 @@ public class Message: Codable, GatewayData, Identifiable, Equatable, Hashable {
         public static let ephemeral = Self(rawValue: 1 << 6)
     }
 
-    public init(id: Snowflake, channel_id: Snowflake, guild_id: Snowflake? = nil, author: User, member: Member? = nil, content: String, timestamp: Date, edited_timestamp: Date? = nil, nonce: Nonce? = nil, tts: Bool, mention_everyone: Bool, mentions: [User], mention_roles: [Snowflake], mention_channels: [ChannelMention]? = nil, attachments: [Attachment], embeds: [Embed], reactions: [Reaction]? = nil, pinned: Bool, webhook_id: Snowflake? = nil, type: MessageType, activity: MessageActivity? = nil, application: Application? = nil, application_id: Snowflake? = nil, message_reference: MessageReference? = nil, message_snapshots: [MessageSnapshot]? = nil, flags: Int? = nil, referenced_message: Message? = nil, interaction: MessageInteraction? = nil, thread: Channel? = nil, components: [MessageComponent]? = nil, sticker_items: [StickerItem]? = nil, call: CallMessageComponent? = nil) {
+    public init(id: Snowflake, channel_id: Snowflake, guild_id: Snowflake? = nil, author: User, member: Member? = nil, content: String, timestamp: Date, edited_timestamp: Date? = nil, nonce: Nonce? = nil, tts: Bool, mention_everyone: Bool, mentions: [User], mention_roles: [Snowflake], mention_channels: [ChannelMention]? = nil, attachments: [Attachment], embeds: [Embed], reactions: [Reaction]? = nil, pinned: Bool, webhook_id: Snowflake? = nil, type: MessageType, activity: MessageActivity? = nil, application: Application? = nil, application_id: Snowflake? = nil, message_reference: MessageReference? = nil, message_snapshots: [MessageSnapshot]? = nil, flags: Int? = nil, referenced_message: Message? = nil, interaction: MessageInteraction? = nil, thread: Channel? = nil, components: [MessageComponent]? = nil, sticker_items: [StickerItem]? = nil, call: CallMessageComponent? = nil, poll: Poll? = nil) {
         self.id = id
         self.channel_id = channel_id
         self.guild_id = guild_id
@@ -147,6 +150,7 @@ public class Message: Codable, GatewayData, Identifiable, Equatable, Hashable {
         self.components = components
         self.sticker_items = sticker_items
         self.call = call
+        self.poll = poll
     }
 
     /// ID of the message
@@ -273,6 +277,9 @@ public class Message: Codable, GatewayData, Identifiable, Equatable, Hashable {
     /// Present if the message is a call in DM
     public let call: CallMessageComponent?
 
+    /// Poll attached to this message
+    public let poll: Poll?
+
     /// Selective equality used by consumers to suppress unchanged message renders.
     ///
     /// Any newly rendered field that can change through `MESSAGE_UPDATE` must be
@@ -287,6 +294,7 @@ public class Message: Codable, GatewayData, Identifiable, Equatable, Hashable {
             && lhs.message_snapshots?.map(\.renderingSignature)
                 == rhs.message_snapshots?.map(\.renderingSignature)
             && lhs.call == rhs.call
+            && lhs.poll == rhs.poll
     }
 
     public func hash(into hasher: inout Hasher) {
@@ -297,6 +305,7 @@ public class Message: Codable, GatewayData, Identifiable, Equatable, Hashable {
         hasher.combine(message_reference?.type)
         hasher.combine(message_snapshots?.map(\.renderingSignature))
         hasher.combine(call)
+        hasher.combine(poll)
     }
 }
 
@@ -339,6 +348,7 @@ public struct PartialMessage: Codable, GatewayData {
     public let components: [MessageComponent]?
     public let sticker_items: [StickerItem]?
     public let call: CallMessageComponent?
+    public let poll: Poll?
 }
 
 public enum MessageActivityType: Int, Codable {

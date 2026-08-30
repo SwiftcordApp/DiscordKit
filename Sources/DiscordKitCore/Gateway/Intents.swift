@@ -68,8 +68,12 @@ public struct Intents: OptionSet, Encodable {
     static public let autoModCfg   = Self(rawValue: 1 << 20)
     /// Auto moderation execution
     static public let autoModExec  = Self(rawValue: 1 << 20)
+    /// Guild message polls
+    static public let guildMessagePolls = Self(rawValue: 1 << 24)
+    /// Direct message polls
+    static public let directMessagePolls = Self(rawValue: 1 << 25)
 
-    static public let unprivileged: Self = [.guilds, .guildBans, .emoteSticker, .integrations, .webhooks, .guildInvites, .voiceStates, .messages, .reactions, .msgTyping, .directMsgs, .dmReactions, .dmMsgTyping, .scheduledEvt, .autoModCfg, .autoModExec]
+    static public let unprivileged: Self = [.guilds, .guildBans, .emoteSticker, .integrations, .webhooks, .guildInvites, .voiceStates, .messages, .reactions, .msgTyping, .directMsgs, .dmReactions, .dmMsgTyping, .scheduledEvt, .autoModCfg, .autoModExec, .guildMessagePolls, .directMessagePolls]
     static public let privileged: Self = [.guildMembers, .presences, .messageContent]
     static public let all: Self = [.unprivileged, .privileged]
 }
