@@ -117,7 +117,7 @@ public class Message: Codable, GatewayData, Identifiable, Equatable, Hashable {
         public static let ephemeral = Self(rawValue: 1 << 6)
     }
 
-    public init(id: Snowflake, channel_id: Snowflake, guild_id: Snowflake? = nil, author: User, member: Member? = nil, content: String, timestamp: Date, edited_timestamp: Date? = nil, nonce: Nonce? = nil, tts: Bool, mention_everyone: Bool, mentions: [User], mention_roles: [Snowflake], mention_channels: [ChannelMention]? = nil, attachments: [Attachment], embeds: [Embed], reactions: [Reaction]? = nil, pinned: Bool, webhook_id: Snowflake? = nil, type: MessageType, activity: MessageActivity? = nil, application: Application? = nil, application_id: Snowflake? = nil, message_reference: MessageReference? = nil, message_snapshots: [MessageSnapshot]? = nil, flags: Int? = nil, referenced_message: Message? = nil, interaction: MessageInteraction? = nil, thread: Channel? = nil, components: [MessageComponent]? = nil, sticker_items: [StickerItem]? = nil, call: CallMessageComponent? = nil, poll: Poll? = nil) {
+    public init(id: Snowflake, channel_id: Snowflake, guild_id: Snowflake? = nil, author: User, member: Member? = nil, content: String, timestamp: Date, edited_timestamp: Date? = nil, nonce: Nonce? = nil, tts: Bool, mention_everyone: Bool, mentions: [User], mention_roles: [Snowflake], mention_channels: [ChannelMention]? = nil, attachments: [Attachment], embeds: [Embed], reactions: [Reaction]? = nil, pinned: Bool, webhook_id: Snowflake? = nil, type: MessageType, activity: MessageActivity? = nil, application: Application? = nil, application_id: Snowflake? = nil, message_reference: MessageReference? = nil, message_snapshots: [MessageSnapshot]? = nil, flags: Int? = nil, referenced_message: Message? = nil, interaction: MessageInteraction? = nil, thread: Channel? = nil, components: [MessageComponent]? = nil, sticker_items: [StickerItem]? = nil, stickers: [Sticker]? = nil, call: CallMessageComponent? = nil, poll: Poll? = nil) {
         self.id = id
         self.channel_id = channel_id
         self.guild_id = guild_id
@@ -149,6 +149,7 @@ public class Message: Codable, GatewayData, Identifiable, Equatable, Hashable {
         self.thread = thread
         self.components = components
         self.sticker_items = sticker_items
+        self.stickers = stickers
         self.call = call
         self.poll = poll
     }
@@ -273,6 +274,7 @@ public class Message: Codable, GatewayData, Identifiable, Equatable, Hashable {
 
     /// Present  if the message contains stickers
     public let sticker_items: [StickerItem]?
+    public let stickers: [Sticker]?
 
     /// Present if the message is a call in DM
     public let call: CallMessageComponent?
@@ -280,16 +282,21 @@ public class Message: Codable, GatewayData, Identifiable, Equatable, Hashable {
     /// Poll attached to this message
     public let poll: Poll?
 
+    /// Prefer compact sticker items, falling back to legacy messages with full sticker objects.
+    public var stickerItems: [StickerItem] {
+        if let sticker_items, !sticker_items.isEmpty { return sticker_items }
+        return stickers?.map(\.item) ?? []
+    }
+
     /// Selective equality used by consumers to suppress unchanged message renders.
-    ///
-    /// Any newly rendered field that can change through `MESSAGE_UPDATE` must be
-    /// included here and in ``hash(into:)``. Otherwise retained views can treat
-    /// the update as unchanged until they are recreated.
+    /// Include newly rendered `MESSAGE_UPDATE` fields here and in ``hash(into:)``
+    /// so retained message views do not miss an update.
     public static func == (lhs: Message, rhs: Message) -> Bool {
         lhs.id == rhs.id
             && lhs.content == rhs.content
             && lhs.attachments == rhs.attachments
             && lhs.embeds == rhs.embeds
+            && lhs.stickerItems == rhs.stickerItems
             && lhs.message_reference?.type == rhs.message_reference?.type
             && lhs.message_snapshots?.map(\.renderingSignature)
                 == rhs.message_snapshots?.map(\.renderingSignature)
@@ -302,6 +309,7 @@ public class Message: Codable, GatewayData, Identifiable, Equatable, Hashable {
         hasher.combine(content)
         hasher.combine(attachments)
         hasher.combine(embeds)
+        hasher.combine(stickerItems)
         hasher.combine(message_reference?.type)
         hasher.combine(message_snapshots?.map(\.renderingSignature))
         hasher.combine(call)
@@ -347,6 +355,7 @@ public struct PartialMessage: Codable, GatewayData {
     public let thread: Channel?
     public let components: [MessageComponent]?
     public let sticker_items: [StickerItem]?
+    public let stickers: [Sticker]?
     public let call: CallMessageComponent?
     public let poll: Poll?
 }

@@ -13,12 +13,16 @@ public enum GuildFeature: String, Codable {
     case banner = "BANNER"
     case commerce = "COMMERCE"
     case community = "COMMUNITY"
+    case creatorMonetizable = "CREATOR_MONETIZABLE"
+    case creatorMonetizableProvisional = "CREATOR_MONETIZABLE_PROVISIONAL"
+    case internalEmployeeOnly = "INTERNAL_EMPLOYEE_ONLY"
     case discoverable = "DISCOVERABLE"
     case featurable = "FEATURABLE"
     case inviteSplash = "INVITE_SPLASH"
     case membershipScreening = "MEMBER_VERIFICATION_GATE_ENABLED"
     case monetization = "MONETIZATION_ENABLED"
     case moreStickers = "MORE_STICKERS"
+    case roleSubscriptionsEnabled = "ROLE_SUBSCRIPTIONS_ENABLED"
     case news = "NEWS"
     case partnered = "PARTNERED"
     case previewEnabled = "PREVIEW_ENABLED"
@@ -136,6 +140,7 @@ public struct Guild: GatewayData, Equatable, Identifiable {
     public let welcome_screen: GuildWelcomeScreen?
     public let nsfw_level: NSFWLevel
     public var stage_instances: [StageInstance]?
+    public var max_stage_video_channel_users: Int?
     public var guild_scheduled_events: [GuildScheduledEvent]?
     public let premium_progress_bar_enabled: Bool
 }
@@ -152,7 +157,7 @@ public struct PreloadedGuild: GatewayData, Identifiable, Equatable {
     public let channels: [DecodeThrowable<Channel>]
     public let emojis: [DecodeThrowable<Emoji>]
     public let id: Snowflake
-    public let joined_at: Date
+    public let joined_at: Date?
     public let large: Bool
     public let lazy: Bool
     public let member_count: Int

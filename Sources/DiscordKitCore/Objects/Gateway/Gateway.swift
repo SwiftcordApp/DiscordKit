@@ -38,6 +38,7 @@ public enum GatewayOutgoingOpcodes: Int, Codable {
     case streamWatch = 20
     case streamPing = 21
     case streamSetPaused = 22
+    case requestSoundboardSounds = 31
     case updateGuildSubscriptions = 37
     case qosHeartbeat = 40
 }

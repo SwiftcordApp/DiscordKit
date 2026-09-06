@@ -99,6 +99,7 @@ public struct GatewayIncoming: Decodable {
 
         /// Guild emoji list update
         case guildEmojisUpdate(GuildEmojisUpdate)
+        case guildStickersUpdate(GuildStickersUpdate)
 
         // MARK: - Channels
 
@@ -225,6 +226,12 @@ public struct GatewayIncoming: Decodable {
         ///
         /// Contains the voice endpoint and token needed to connect to Discord voice.
         case voiceServerUpdate(VoiceServerUpdate)
+        case voiceChannelEffectSend(VoiceChannelEffect)
+        case soundboardSounds(GuildSoundboardSounds)
+        case guildSoundboardSoundsUpdate(GuildSoundboardSounds)
+        case guildSoundboardSoundCreate(SoundboardSound)
+        case guildSoundboardSoundUpdate(SoundboardSound)
+        case guildSoundboardSoundDelete(SoundboardSoundDelete)
 
         /// Call create event
         ///
@@ -333,6 +340,7 @@ public struct GatewayIncoming: Decodable {
         case .guildRoleUpdate: return .guildRoleUpdate(try values.decode(GuildRoleEvt.self, forKey: .data))
         case .guildRoleDelete: return .guildRoleDelete(try values.decode(GuildRoleDelete.self, forKey: .data))
         case .guildEmojisUpdate: return .guildEmojisUpdate(try values.decode(GuildEmojisUpdate.self, forKey: .data))
+        case .guildStickersUpdate: return .guildStickersUpdate(try values.decode(GuildStickersUpdate.self, forKey: .data))
     /*
         case .guildBanAdd, .guildBanRemove: return try values.decode(GuildBan.self, forKey: .data)
         case .guildStickersUpdate: return try values.decode(GuildStickersUpdate.self, forKey: .data)
@@ -371,6 +379,12 @@ public struct GatewayIncoming: Decodable {
         case .voiceStateUpdate: return .voiceStateUpdate(try values.decode(VoiceState.self, forKey: .data))
         case .voiceStateUpdateBatch: return .voiceStateUpdateBatch(try values.decode(VoiceStateUpdateBatch.self, forKey: .data))
         case .voiceServerUpdate: return .voiceServerUpdate(try values.decode(VoiceServerUpdate.self, forKey: .data))
+        case .voiceChannelEffectSend: return .voiceChannelEffectSend(try values.decode(VoiceChannelEffect.self, forKey: .data))
+        case .soundboardSounds: return .soundboardSounds(try values.decode(GuildSoundboardSounds.self, forKey: .data))
+        case .guildSoundboardSoundsUpdate: return .guildSoundboardSoundsUpdate(try values.decode(GuildSoundboardSounds.self, forKey: .data))
+        case .guildSoundboardSoundCreate: return .guildSoundboardSoundCreate(try values.decode(SoundboardSound.self, forKey: .data))
+        case .guildSoundboardSoundUpdate: return .guildSoundboardSoundUpdate(try values.decode(SoundboardSound.self, forKey: .data))
+        case .guildSoundboardSoundDelete: return .guildSoundboardSoundDelete(try values.decode(SoundboardSoundDelete.self, forKey: .data))
         case .callCreate: return .callCreate(try values.decode(CallCreate.self, forKey: .data))
         case .callUpdate: return .callUpdate(try values.decode(CallUpdate.self, forKey: .data))
         case .callDelete: return .callDelete(try values.decode(CallDelete.self, forKey: .data))

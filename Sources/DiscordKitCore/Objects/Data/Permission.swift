@@ -92,6 +92,18 @@ public struct Permissions: OptionSet, Codable {
     public static let useEmbeddedActivities = Permissions(rawValue: 1 << 39)
     /// Allows for timing out users to prevent them from sending or reacting to messages in chat and threads, and from speaking in voice and stage channels
     public static let moderateMembers = Permissions(rawValue: 1 << 40)
+    public static let useSoundboard = Permissions(rawValue: 1 << 42)
+    public static let createGuildExpressions = Permissions(rawValue: 1 << 43)
+    public static let createEvents = Permissions(rawValue: 1 << 44)
+    public static let useExternalSounds = Permissions(rawValue: 1 << 45)
+    public static let sendVoiceMessages = Permissions(rawValue: 1 << 46)
+    public static let setVoiceChannelStatus = Permissions(rawValue: 1 << 48)
+    public static let sendPolls = Permissions(rawValue: 1 << 49)
+    public static let useExternalApps = Permissions(rawValue: 1 << 50)
+    public static let pinMessages = Permissions(rawValue: 1 << 51)
+    public static let bypassSlowmode = Permissions(rawValue: 1 << 52)
+    public static let manageOfficialMessages = Permissions(rawValue: 1 << 53)
+    public static let manageGuildExpressions = manageEmojisAndStickers
 
     public init(rawValue: UInt64) {
         self.rawValue = rawValue
@@ -119,6 +131,13 @@ public struct PermOverwrite: Codable, Equatable {
     public let type: PermOverwriteType
     public let allow: Permissions
     public let deny: Permissions
+
+    public init(id: Snowflake, type: PermOverwriteType, allow: Permissions = [], deny: Permissions = []) {
+        self.id = id
+        self.type = type
+        self.allow = allow
+        self.deny = deny
+    }
 }
 
 /*
@@ -148,4 +167,29 @@ public struct RoleTags: Codable, Equatable {
     public let bot_id: Snowflake?
     public let integration_id: Snowflake?
     public let premium_subscriber: Bool?
+    public let subscription_listing_id: Snowflake?
+    /// Discord encodes this flag by the presence of a key with a null value.
+    public let available_for_purchase: Bool
+
+    private enum CodingKeys: String, CodingKey {
+        case bot_id, integration_id, premium_subscriber, subscription_listing_id, available_for_purchase
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        bot_id = try container.decodeIfPresent(Snowflake.self, forKey: .bot_id)
+        integration_id = try container.decodeIfPresent(Snowflake.self, forKey: .integration_id)
+        premium_subscriber = container.contains(.premium_subscriber) ? true : nil
+        subscription_listing_id = try container.decodeIfPresent(Snowflake.self, forKey: .subscription_listing_id)
+        available_for_purchase = container.contains(.available_for_purchase)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encodeIfPresent(bot_id, forKey: .bot_id)
+        try container.encodeIfPresent(integration_id, forKey: .integration_id)
+        try container.encodeIfPresent(subscription_listing_id, forKey: .subscription_listing_id)
+        if premium_subscriber == true { try container.encodeNil(forKey: .premium_subscriber) }
+        if available_for_purchase { try container.encodeNil(forKey: .available_for_purchase) }
+    }
 }

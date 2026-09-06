@@ -20,9 +20,10 @@ public extension DiscordREST {
     /// List Nitro Sticker Packs
     ///
     /// > GET: `/sticker-packs`
-    func listNitroStickerPacks() async throws -> [StickerPack] {
+    func listNitroStickerPacks(locale: String = "en-US") async throws -> [StickerPack] {
         let stickerPacks: StickerPacks = try await getReq(
-            path: "sticker-packs"
+            path: "sticker-packs",
+            query: [URLQueryItem(name: "locale", value: locale)]
         )
         return stickerPacks.sticker_packs
     }

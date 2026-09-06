@@ -48,6 +48,7 @@ extension MessageSnapshot {
         let content: String
         let attachments: [Attachment]
         let embeds: [Embed]
+        let stickers: [StickerItem]
         let flags: Int
         let mentions: [Mention]
 
@@ -56,6 +57,7 @@ extension MessageSnapshot {
             attachments = message.attachments
             embeds = message.embeds
             flags = message.flags
+            stickers = message.stickerItems
             mentions = message.mentions.map {
                 Mention(id: $0.id, username: $0.username, globalName: $0.global_name)
             }
@@ -105,6 +107,10 @@ public struct SnapshotMessage: Codable {
     @LossyArrayDecodable public var stickers: [Sticker]
     @LossyArrayDecodable public var sticker_items: [StickerItem]
     @LossyArrayDecodable public var components: [MessageComponent]
+
+    public var stickerItems: [StickerItem] {
+        sticker_items.isEmpty ? stickers.map(\.item) : sticker_items
+    }
 
     public var type: MessageType {
         decodedType ?? .defaultMsg

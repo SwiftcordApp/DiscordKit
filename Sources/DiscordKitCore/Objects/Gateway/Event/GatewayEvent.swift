@@ -101,6 +101,12 @@ public enum GatewayEvent: String, Codable {
     case voiceStateUpdate = "VOICE_STATE_UPDATE"
     case voiceStateUpdateBatch = "VOICE_STATE_UPDATE_BATCH"
     case voiceServerUpdate = "VOICE_SERVER_UPDATE"
+    case voiceChannelEffectSend = "VOICE_CHANNEL_EFFECT_SEND"
+    case soundboardSounds = "SOUNDBOARD_SOUNDS"
+    case guildSoundboardSoundsUpdate = "GUILD_SOUNDBOARD_SOUNDS_UPDATE"
+    case guildSoundboardSoundCreate = "GUILD_SOUNDBOARD_SOUND_CREATE"
+    case guildSoundboardSoundUpdate = "GUILD_SOUNDBOARD_SOUND_UPDATE"
+    case guildSoundboardSoundDelete = "GUILD_SOUNDBOARD_SOUND_DELETE"
     case webhooksUpdate = "WEBHOOKS_UPDATE"
 
     // MARK: Calls

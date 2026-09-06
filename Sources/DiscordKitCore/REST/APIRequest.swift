@@ -139,6 +139,8 @@ public extension DiscordREST {
         query: [URLQueryItem] = [],
         attachments: [URL] = [],
         body: Data? = nil,
+        contentType: String? = nil,
+        auditLogReason: String? = nil,
         method: RequestMethod = .get
     ) async throws -> Data {
         try await makeRequestWithResponse(
@@ -146,6 +148,8 @@ public extension DiscordREST {
             query: query,
             attachments: attachments,
             body: body,
+            contentType: contentType,
+            auditLogReason: auditLogReason,
             method: method
         ).0
     }
@@ -160,6 +164,8 @@ public extension DiscordREST {
         query: [URLQueryItem] = [],
         attachments: [URL] = [],
         body: Data? = nil,
+        contentType: String? = nil,
+        auditLogReason: String? = nil,
         method: RequestMethod = .get,
         allowsNonSuccessfulResponse: Bool = false
     ) async throws -> (Data, HTTPURLResponse) {
@@ -195,6 +201,10 @@ public extension DiscordREST {
 
         req.setValue(Locale.englishUS.rawValue, forHTTPHeaderField: "x-discord-locale")
         req.setValue("bugReporterEnabled", forHTTPHeaderField: "x-debug-options")
+        if let auditLogReason {
+            let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_.!~*'()"))
+            req.setValue(auditLogReason.addingPercentEncoding(withAllowedCharacters: allowed), forHTTPHeaderField: "x-audit-log-reason")
+        }
         guard let superEncoded = try? DiscordREST.encoder.encode(DiscordKitConfig.default.properties) else {
             assertionFailure("Couldn't encode super properties for request")
             throw RequestError.superEncodeFailure
@@ -207,7 +217,7 @@ public extension DiscordREST {
             req.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "content-type")
             req.httpBody = DiscordREST.createMultipartBody(with: body, boundary: boundary, attachments: attachments)
         } else if let body = body {
-            req.setValue("application/json", forHTTPHeaderField: "content-type")
+            req.setValue(contentType ?? "application/json", forHTTPHeaderField: "content-type")
             req.httpBody = body
         }
 

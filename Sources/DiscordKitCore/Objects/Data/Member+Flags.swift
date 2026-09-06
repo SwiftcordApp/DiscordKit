@@ -13,6 +13,8 @@ public extension Member {
             self.rawValue = rawValue
         }
 
+        public static let isGuest = Self(rawValue: 1 << 4)
+
         public static let automodQuarantinedUsernameOrGuildNickname = Self(rawValue: 1 << 7)
         public static let automodQuarantinedBio = Self(rawValue: 1 << 8)
         public static let automodQuarantinedServerTag = Self(rawValue: 1 << 10)
